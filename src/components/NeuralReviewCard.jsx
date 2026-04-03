@@ -1,13 +1,9 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
-const NeuralReviewCard = ({ review, position, isLeft }) => {
+const NeuralReviewCard = ({ review, position, isLeft, style }) => {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8, x: isLeft ? -20 : 20 }}
-      whileInView={{ opacity: 1, scale: 1, x: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: 0.2 }}
+    <div
+      style={style}
       className={`${position} z-30 w-full p-5 bg-white rounded-3xl border border-slate-100 shadow-[0_10px_40px_rgba(0,0,0,0.04)] group hover:shadow-[0_20px_50px_rgba(59,130,246,0.1)] transition-all border-l-4 ${isLeft ? 'border-l-blue-500' : 'border-l-amber-500'}`}
     >
       <div className="flex items-center gap-3 mb-4">
@@ -35,7 +31,7 @@ const NeuralReviewCard = ({ review, position, isLeft }) => {
       
       {/* Precision Synapse Point */}
       <div className={`absolute top-1/2 -translate-y-1/2 ${isLeft ? '-right-[5px]' : '-left-[5px]'} w-3 h-3 bg-blue-500 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.6)] z-50 border-2 border-white`} />
-    </motion.div>
+    </div>
   );
 };
 
