@@ -134,43 +134,7 @@ const Home = () => {
             </motion.div>
           </div>
 
-          {/* Floating Medical Icon */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="hidden lg:flex items-center justify-center"
-          >
-            <div className="relative">
-              <motion.div
-                animate={{ y: [0, -16, 0] }}
-                transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}
-                className="w-72 h-72 bg-gradient-to-br from-blue-500/20 to-white/5 rounded-full backdrop-blur-sm border border-white/10 flex items-center justify-center shadow-2xl"
-              >
-                <svg className="w-40 h-40 text-white/80" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="50" cy="50" r="45" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
-                  <circle cx="50" cy="50" r="30" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
-                  <path d="M50 20v60M20 50h60" strokeLinecap="round" strokeWidth="4" stroke="#f59e0b" />
-                  <circle cx="50" cy="50" r="8" fill="#f59e0b" fillOpacity="0.8" />
-                </svg>
-              </motion.div>
-              {/* Orbiting dots */}
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 10, ease: 'linear' }}
-                className="absolute inset-0"
-              >
-                <div className="absolute top-2 left-1/2 w-3 h-3 bg-amber-400 rounded-full -translate-x-1/2 shadow-lg shadow-amber-400/50" />
-              </motion.div>
-              <motion.div
-                animate={{ rotate: -360 }}
-                transition={{ repeat: Infinity, duration: 7, ease: 'linear' }}
-                className="absolute inset-4"
-              >
-                <div className="absolute bottom-0 left-1/2 w-2 h-2 bg-blue-400 rounded-full -translate-x-1/2" />
-              </motion.div>
-            </div>
-          </motion.div>
+          {/* Floating Medical Icon column removed */}
         </div>
 
         {/* --- MBBS TO ABROAD JOURNEY TRANSITION ------------------- */}

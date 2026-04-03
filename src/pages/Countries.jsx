@@ -5,6 +5,7 @@ import { getCountries, getUniversitiesByCountry } from '../firebase/firestore';
 import CountryCard from '../components/CountryCard';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import Globe3D from '../components/Globe3D';
+import RussiaDetailedGuide from '../components/RussiaDetailedGuide';
 
 const countryMeta = [
   { key: 'georgia', label: 'GEORGIA', slug: 'georgia', flag: '🇬🇪', pos: { top: '22%', left: '20%' } },
@@ -179,6 +180,8 @@ const Countries = () => {
                   </div>
                 ) : error ? (
                    <div className="p-8 bg-white rounded-3xl border border-red-50 text-red-500 italic">Information for {meta.label} is currently unavailable.</div>
+                ) : meta.slug === 'russia' ? (
+                   <RussiaDetailedGuide />
                 ) : country ? (
                   <CountryCard country={country} universities={universities} />
                 ) : (
