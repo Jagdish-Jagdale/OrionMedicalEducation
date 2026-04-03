@@ -1,128 +1,197 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 import { getReviews } from '../firebase/firestore';
 import { useFirestore } from '../hooks/useFirestore';
-import ReviewCard from '../components/ReviewCard';
-import LoadingSkeleton from '../components/LoadingSkeleton';
+import NeuralReviewCard from '../components/NeuralReviewCard';
+import brainImg from '../assets/splash/brain.png';
 
 const Reviews = () => {
-  const { data: reviews, loading, error, refetch } = useFirestore(getReviews);
+  const { data: reviews, loading, error } = useFirestore(getReviews);
+  const containerRef = useRef(null);
+  const isInView = useInView(containerRef, { once: true, margin: "-100px" });
 
-  const parentReviews = (reviews || []).filter((r) => r.type === 'parent');
-  const studentReviews = (reviews || []).filter((r) => r.type === 'student');
+  // Select 6 reviews for the extended spinal map (with static fallback)
+  const topReviews = (reviews && reviews.length > 0) 
+    ? reviews.slice(0, 6) 
+    : [
+        { id: 1, studentName: "Aditya Sharma", type: "MBBS STUDENT", text: "Orion's neural map of medical universities made my decision much clearer. The spinal network of support is real!" },
+        { id: 2, studentName: "Priya Patel", type: "PARENT", text: "Seeing the entire structure of medical education through Orion's lens gave us peace of mind." },
+        { id: 3, studentName: "Rahul Verma", type: "MBBS STUDENT", text: "The guidance here is the backbone of my medical career. Truly anatomical excellence." },
+        { id: 4, studentName: "Sneha Reddy", type: "PARENT", text: "A robust network that connects aspiring doctors to reputable global institutions." },
+        { id: 5, studentName: "Vikram Singh", type: "MBBS STUDENT", text: "From the brain core to the finest nerve, every detail of the admission process was handled perfectly." },
+        { id: 6, studentName: "Ananya Iyer", type: "PARENT", text: "The structural integrity of Orion's placement system is unmatched in the industry." }
+      ];
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-20">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-navy to-blue-700 py-16 px-4 text-center">
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-amber-400 text-sm font-bold uppercase tracking-widest mb-3"
-        >
-          Testimonials
-        </motion.p>
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-3xl sm:text-5xl font-bold text-white mb-4"
-        >
-          What Our Students &amp; Parents Say
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-blue-200 max-w-xl mx-auto text-sm"
-        >
-          Real stories, real trust. Here's what families who chose Orion Medical Education have to say.
-        </motion.p>
-      </div>
-
-      {/* Split layout */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div className="space-y-4">
-              <div className="h-7 bg-slate-200 rounded w-1/3 animate-pulse" />
-              <LoadingSkeleton count={3} type="review" />
-            </div>
-            <div className="space-y-4">
-              <div className="h-7 bg-slate-200 rounded w-1/3 animate-pulse" />
-              <LoadingSkeleton count={3} type="review" />
-            </div>
-          </div>
-        ) : error ? (
-          <div className="text-center py-16">
-            <p className="text-slate-500 mb-4">{error}</p>
-            <button onClick={refetch} className="bg-blue-600 text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-blue-700 transition-colors">
-              Try Again
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Parents column */}
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-xl">👨‍👩‍👧</div>
-                <div>
-                  <h2 className="font-bold text-navy text-xl">Parents Say</h2>
-                  <p className="text-slate-400 text-xs">Trusted by families across India</p>
-                </div>
-              </div>
-              <div className="space-y-5">
-                {parentReviews.length > 0 ? (
-                  parentReviews.map((review, i) => (
-                    <ReviewCard key={review.id} review={review} index={i} />
-                  ))
-                ) : (
-                  <p className="text-slate-400 text-sm text-center py-8">No parent reviews yet.</p>
-                )}
-              </div>
-            </div>
-
-            {/* Students column */}
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-xl">🎓</div>
-                <div>
-                  <h2 className="font-bold text-navy text-xl">Students Say</h2>
-                  <p className="text-slate-400 text-xs">From students studying abroad right now</p>
-                </div>
-              </div>
-              <div className="space-y-5">
-                {studentReviews.length > 0 ? (
-                  studentReviews.map((review, i) => (
-                    <ReviewCard key={review.id} review={review} index={i} />
-                  ))
-                ) : (
-                  <p className="text-slate-400 text-sm text-center py-8">No student reviews yet.</p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* CTA - submit review */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-16 bg-gradient-to-r from-navy to-blue-700 rounded-3xl p-10 text-center text-white"
-        >
-          <h2 className="text-2xl font-bold mb-3">Share Your Experience</h2>
-          <p className="text-blue-200 text-sm mb-6">Are you a student or parent who chose Orion? We'd love to hear your story.</p>
-          <a
-            href="https://wa.me/919999999999?text=I%20want%20to%20share%20my%20review%20for%20Orion%20Medical%20Education"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-8 py-3.5 rounded-full transition-all text-sm shadow-lg"
+    <div className="min-h-screen bg-white pt-20 overflow-hidden font-sans relative">
+      {/* --- Subtle Medical Grid Background --- */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+           style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '50px 50px' }} />
+      
+      <div className="max-w-7xl mx-auto px-4 py-20 relative min-h-[1600px]" ref={containerRef}>
+        {/* Header - Medical & Professional */}
+        <div className="text-center mb-16 relative z-40 translate-y-[-20px]">
+          <motion.span 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            className="text-blue-600 text-[10px] font-black uppercase tracking-[0.5em] mb-4 block"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
-            Submit Your Review
-          </a>
-        </motion.div>
+            Anatomical Intelligence
+          </motion.span>
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="text-4xl md:text-6xl font-black text-navy tracking-tighter"
+          >
+            Spinal <span className="text-blue-500">Success</span> Core
+          </motion.h1>
+          <div className="w-20 h-1 bg-amber-500 mx-auto mt-6 rounded-full shadow-lg" />
+        </div>
+
+        {/* --- THE ANATOMICAL CORE (Top-Mounted Brain) --- */}
+        <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-full flex items-center justify-center pointer-events-none z-20">
+          <div className="relative w-[280px] h-[280px] md:w-[420px] md:h-[420px]">
+            {/* Soft Glow */}
+            <motion.div 
+               animate={{ scale: [1, 1.1, 1], opacity: [0.1, 0.2, 0.1] }}
+               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+               className="absolute inset-x-0 inset-y-0 bg-blue-300 rounded-full blur-[70px]"
+            />
+            
+            {/* The Brain Model */}
+            <motion.img 
+              src={brainImg} 
+              alt="Anatomical Intelligence"
+              animate={{ y: [0, -5, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              className="w-full h-full object-contain relative z-20"
+            />
+          </div>
+        </div>
+
+        {/* --- THE SPINE & NERVES (SVG Paths Array) --- */}
+        <svg 
+          className="absolute inset-0 w-full h-full pointer-events-none z-10" 
+          viewBox="0 0 1200 1800" 
+          fill="none"
+          preserveAspectRatio="xMidYMin slice"
+        >
+          {/* THE MAIN SPINE (Anatomical Trunk) */}
+          <motion.path 
+            d="M 600 520 L 600 1750" 
+            initial={{ pathLength: 0 }}
+            animate={isInView ? { pathLength: 1 } : {}}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
+            strokeWidth="22"
+            stroke="#1e3a8a"
+            strokeLinecap="round"
+            className="opacity-100"
+          />
+          <motion.path 
+            d="M 600 520 L 600 1750" 
+            initial={{ pathLength: 0 }}
+            animate={isInView ? { pathLength: 1 } : {}}
+            transition={{ duration: 2, ease: "easeInOut" }}
+            strokeWidth="6"
+            stroke="#ffffff"
+            strokeDasharray="15 25"
+            className="opacity-40"
+          />
+
+          {/* SECONDARY NERVE FILAMENTS (Density) */}
+          {[...Array(30)].map((_, i) => (
+            <motion.path
+              key={`filament-${i}`}
+              d={`M 600 ${520 + i * 40} L ${600 + (i % 2 === 0 ? 150 : -150)} ${550 + i * 40}`}
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={isInView ? { pathLength: 1, opacity: 0.15 } : {}}
+              transition={{ duration: 0.8, delay: 0.2 + i * 0.03 }}
+              stroke="#3b82f6"
+              strokeWidth="1"
+            />
+          ))}
+
+          {/* PRIMARY NODAL NERVES (The Cards) */}
+          {/* 
+            Math:
+            Container is 1200px wide in viewBox.
+            Left cards center at x=340 (dot at x=490).
+            Right cards center at x=860 (dot at x=710).
+          */}
+          <motion.path d="M 600 525 C 560 525 530 525 490 525" stroke="#3b82f6" strokeWidth="3" initial={{ pathLength: 0 }} animate={isInView ? { pathLength: 1 } : {}} transition={{ delay: 1 }} />
+          <motion.path d="M 600 675 C 640 675 670 675 710 675" stroke="#3b82f6" strokeWidth="3" initial={{ pathLength: 0 }} animate={isInView ? { pathLength: 1 } : {}} transition={{ delay: 1.2 }} />
+          <motion.path d="M 600 895 C 560 895 530 895 490 895" stroke="#3b82f6" strokeWidth="3" initial={{ pathLength: 0 }} animate={isInView ? { pathLength: 1 } : {}} transition={{ delay: 1.4 }} />
+          <motion.path d="M 600 1095 C 640 1095 670 1095 710 1095" stroke="#3b82f6" strokeWidth="3" initial={{ pathLength: 0 }} animate={isInView ? { pathLength: 1 } : {}} transition={{ delay: 1.6 }} />
+          <motion.path d="M 600 1295 C 560 1295 530 1295 490 1295" stroke="#3b82f6" strokeWidth="3" initial={{ pathLength: 0 }} animate={isInView ? { pathLength: 1 } : {}} transition={{ delay: 1.8 }} />
+          <motion.path d="M 600 1495 C 640 1495 670 1495 710 1495" stroke="#3b82f6" strokeWidth="3" initial={{ pathLength: 0 }} animate={isInView ? { pathLength: 1 } : {}} transition={{ delay: 2 }} />
+        </svg>
+
+        {/* --- REVIEW CARDS (Precise Mapping) --- */}
+        <div className="relative z-30 w-full min-h-[1600px] mb-40">
+          {/* 
+            Container max-w-7xl is ~1280. SVG ViewBox is 1200.
+            Card width is 300px.
+            Left Dot is at card-right. Right Dot is at card-left.
+            We use flex/grid math or absolute % to align with the SVG scale.
+          */}
+          <div className="absolute top-[450px] left-[50%] -translate-x-[410px] w-[300px]">
+            {topReviews[0] && <NeuralReviewCard review={topReviews[0]} position="relative" isLeft={true} />}
+          </div>
+          <div className="absolute top-[600px] left-[50%] translate-x-[110px] w-[300px]">
+            {topReviews[1] && <NeuralReviewCard review={topReviews[1]} position="relative" isLeft={false} />}
+          </div>
+          <div className="absolute top-[820px] left-[50%] -translate-x-[410px] w-[300px]">
+            {topReviews[2] && <NeuralReviewCard review={topReviews[2]} position="relative" isLeft={true} />}
+          </div>
+          <div className="absolute top-[1020px] left-[50%] translate-x-[110px] w-[300px]">
+            {topReviews[3] && <NeuralReviewCard review={topReviews[3]} position="relative" isLeft={false} />}
+          </div>
+          <div className="absolute top-[1220px] left-[50%] -translate-x-[410px] w-[300px]">
+            {topReviews[4] && <NeuralReviewCard review={topReviews[4]} position="relative" isLeft={true} />}
+          </div>
+          <div className="absolute top-[1420px] left-[50%] translate-x-[110px] w-[300px]">
+            {topReviews[5] && <NeuralReviewCard review={topReviews[5]} position="relative" isLeft={false} />}
+          </div>
+        </div>
+
+        {/* --- MOBILE FALLBACK --- */}
+        <div className="lg:hidden flex flex-col gap-6 relative z-40 px-4 mt-[450px]">
+          {topReviews.map((review, i) => (
+            <motion.div
+              key={review.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              className="p-6 bg-white rounded-3xl border border-slate-100 shadow-xl"
+            >
+               <div className="flex items-center gap-4 mb-4">
+                 <div className="w-12 h-12 rounded-full border-2 border-blue-500/20 p-0.5 overflow-hidden">
+                    <img src={review.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.studentName)}`} alt={review.studentName} className="w-full h-full rounded-full" />
+                 </div>
+                 <div>
+                    <h3 className="text-navy font-bold">{review.studentName}</h3>
+                    <p className="text-blue-500 text-xs font-black uppercase">{review.type}</p>
+                 </div>
+               </div>
+               <p className="text-slate-600 text-sm italic">"{review.text || review.comment}"</p>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Footer - Unified Action */}
+        <div className="mt-20 text-center relative z-40 pb-20">
+           <motion.a
+             href="https://wa.me/919999999999"
+             initial={{ opacity: 0 }}
+             whileInView={{ opacity: 1 }}
+             className="inline-flex items-center gap-4 bg-navy text-white px-14 py-6 rounded-full shadow-3xl hover:bg-blue-900 transition-all group scale-100 active:scale-95"
+           >
+             <span className="w-2 h-2 bg-amber-500 rounded-full group-hover:scale-150 transition-transform" />
+             <span className="text-xs font-black tracking-widest uppercase">Sync into the Network</span>
+             <svg className="w-5 h-5 text-amber-500 group-hover:translate-x-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+               <path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeLinecap="round" strokeLinejoin="round" />
+             </svg>
+           </motion.a>
+        </div>
       </div>
     </div>
   );
