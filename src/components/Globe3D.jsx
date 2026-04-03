@@ -17,7 +17,7 @@ const Earth = () => {
 
   return (
     <mesh ref={earthRef}>
-      <sphereGeometry args={[2.5, 64, 64]} />
+      <sphereGeometry args={[2.8, 64, 64]} />
       <meshStandardMaterial 
         map={texture} 
         metalness={0} 

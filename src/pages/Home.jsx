@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import airplaneImg from '../assets/splash/airoplane.png';
+
 
 const fadeUp = {
   initial: { opacity: 0, y: 40 },
@@ -40,14 +42,14 @@ const focusCards = [
       </svg>
     ),
     title: 'Long-term Support',
-    desc: 'Our support continues even after you arrive abroad — hostel, mess, airport pickup, local team.',
+    desc: 'Our support continues even after you arrive abroad â€” hostel, mess, airport pickup, local team.',
   },
 ];
 
 const Home = () => {
   return (
     <div className="font-sans">
-      {/* ── Hero Section ────────────────────────────────── */}
+      {/* â”€â”€ Hero Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section className="relative min-h-screen flex items-center bg-gradient-to-br from-navy via-blue-900 to-blue-800 overflow-hidden">
         {/* Decorative circles */}
         <div className="absolute top-1/4 -right-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
@@ -171,6 +173,42 @@ const Home = () => {
           </motion.div>
         </div>
 
+        {/* --- MBBS TO ABROAD JOURNEY TRANSITION ------------------- */}
+        <div className="absolute bottom-4 left-0 right-0 px-6 sm:px-12 pointer-events-none hidden md:block z-20">
+          <div className="max-w-7xl mx-auto flex items-end justify-between gap-8 h-28 relative overflow-visible">
+            {/* Left: MBBS Label */}
+            <span className="text-white font-black text-3xl italic tracking-tighter opacity-90 select-none drop-shadow-md z-10">MBBS</span>
+
+            {/* High-Fidelity Continuous Flight (Aligned from Word to Word) */}
+            <motion.img
+              src={airplaneImg}
+              alt="Airplane"
+              initial={{ left: "0%", top: "20%", rotate: 0 }}
+              animate={{
+                // Shifted both points left for perfect word alignment
+                left: ["0%", "95%"],
+                top: ["20%", "-180%", "20%"],
+                // Synced Pitch: Nose-up for climb, Nose-down for decent, Level for landing
+                rotate: [0, -35, 0, 15, 0]
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: 10,
+                ease: "easeInOut",
+                repeatDelay: 2.5
+              }}
+              className="w-16 h-auto object-contain filter brightness-0 invert drop-shadow-[0_0_12px_rgba(255,255,255,0.8)] z-30"
+              style={{
+                position: 'absolute',
+                transform: 'translate(-50%, -50%)'
+              }}
+            />
+
+            {/* Right: ABROAD Label */}
+            <span className="text-white font-black text-3xl italic tracking-tighter opacity-90 select-none drop-shadow-md z-10">ABROAD</span>
+          </div>
+        </div>
+
         {/* Scroll indicator */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -189,7 +227,7 @@ const Home = () => {
         </motion.div>
       </section>
 
-      {/* ── About Section ────────────────────────────────── */}
+      {/* --- About Section --------------------------------- */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section header */}
@@ -201,7 +239,7 @@ const Home = () => {
           >
             <span className="inline-block text-blue-600 text-sm font-bold uppercase tracking-widest mb-3">About Us</span>
             <h2 className="text-3xl sm:text-4xl font-bold text-navy leading-tight">
-              We are not just consultants —{' '}
+              We are not just consultants â€”{' '}
               <span className="text-amber-500">we are Custodians</span> of your entire journey.
             </h2>
             <p className="mt-4 text-slate-500 leading-relaxed">
@@ -243,9 +281,9 @@ const Home = () => {
               </svg>
               <p className="text-xl sm:text-2xl font-bold leading-relaxed max-w-3xl mx-auto">
                 "To turn your dream of becoming a doctor into a{' '}
-                <span className="text-amber-300">successful reality</span> — with integrity, transparency, and unwavering support."
+                <span className="text-amber-300">successful reality</span> â€” with integrity, transparency, and unwavering support."
               </p>
-              <p className="mt-4 text-blue-200 text-sm font-medium">— Our Mission</p>
+              <p className="mt-4 text-blue-200 text-sm font-medium">â€” Our Mission</p>
             </div>
           </motion.div>
 
@@ -267,8 +305,8 @@ const Home = () => {
           </div>
         </div>
       </section>
-|
-      {/* ── Video Section ────────────────────────────────── */}
+      |
+      {/* â”€â”€ Video Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section className="py-24 bg-white relative overflow-hidden">
         {/* Subtle decorative elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
@@ -325,10 +363,10 @@ const Home = () => {
               >
                 {/* Video Player Container - Upscaled height from 16:9 to 4:3 */}
                 <div className="relative aspect-[4/3] bg-slate-900 group-hover:scale-[1.02] transition-transform duration-500">
-                  <video 
-                    className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" 
-                    muted 
-                    loop 
+                  <video
+                    className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                    muted
+                    loop
                     playsInline
                     onMouseOver={event => event.target.play()}
                     onMouseOut={event => event.target.pause()}
@@ -363,7 +401,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── CTA Banner ───────────────────────────────────── */}
+      {/* â”€â”€ CTA Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section className="py-16 bg-amber-50 border-y border-amber-100">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <motion.div

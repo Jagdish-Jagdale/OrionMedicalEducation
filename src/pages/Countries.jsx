@@ -7,10 +7,10 @@ import LoadingSkeleton from '../components/LoadingSkeleton';
 import Globe3D from '../components/Globe3D';
 
 const countryMeta = [
-  { key: 'georgia', label: 'MBBS in Georgia', slug: 'georgia', flag: '🇬🇪', pos: { top: '20%', left: '20%' } },
-  { key: 'russia', label: 'MBBS in Russia', slug: 'russia', flag: '🇷🇺', pos: { top: '20%', left: '80%' } },
-  { key: 'kyrgyzstan', label: 'MBBS in Kyrgyzstan', slug: 'kyrgyzstan', flag: '🇰🇬', pos: { top: '85%', left: '25%' } },
-  { key: 'uzbekistan', label: 'MBBS in Uzbekistan', slug: 'uzbekistan', flag: '🇺🇿', pos: { top: '85%', left: '75%' } },
+  { key: 'georgia', label: 'GEORGIA', slug: 'georgia', flag: '🇬🇪', pos: { top: '22%', left: '20%' } },
+  { key: 'russia', label: 'RUSSIA', slug: 'russia', flag: '🇷🇺', pos: { top: '22%', left: '80%' } },
+  { key: 'kyrgyzstan', label: 'KYRGYZSTAN', slug: 'kyrgyzstan', flag: '🇰🇬', pos: { top: '82%', left: '20%' } },
+  { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: '🇺🇿', pos: { top: '82%', left: '80%' } },
 ];
 
 const Countries = () => {
@@ -19,9 +19,7 @@ const Countries = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // New state for selected country - Defaults to first country (e.g. Russia)
   const [selectedCountry, setSelectedCountry] = useState('russia');
-  
   const location = useLocation();
 
   const fetchData = useCallback(async () => {
@@ -53,8 +51,6 @@ const Countries = () => {
 
   const handleCountrySelection = (slug) => {
     setSelectedCountry(slug);
-    
-    // Scroll specifically to the "In-Depth Guides" section header
     const el = document.getElementById('guides-section');
     if (el) {
       const navOffset = 100;
@@ -72,37 +68,44 @@ const Countries = () => {
     <div className="min-h-screen bg-white pt-20">
       {/* ── INTERACTIVE 3D GLOBE SECTION ─────────────────── */}
       <div className="relative h-[85vh] flex items-center justify-center overflow-hidden border-b border-slate-50 bg-[#fbfcfd]">
-        {/* Subtle architectural grid bg */}
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#1e3a5f 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
         <div className="relative w-full max-w-7xl h-full flex items-center justify-center">
           
-          {/* SVG Connecting Lines Layer */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none z-10 lg:block hidden">
+          {/* SVG Connecting Lines Layer - Perfectly Symmetrical elbow */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none z-10 lg:block hidden" viewBox="0 0 1000 1000" preserveAspectRatio="none">
             <defs>
               <linearGradient id="line-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.1" />
                 <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.4" />
               </linearGradient>
             </defs>
-            {countryMeta.map((country) => (
-              <motion.line
-                key={`line-${country.slug}`}
-                x1="50%"
-                y1="50%"
-                x2={country.pos.left}
-                y2={country.pos.top}
-                stroke={selectedCountry === country.slug ? '#2563eb' : 'url(#line-grad)'}
-                strokeWidth={selectedCountry === country.slug ? '2' : '1'}
-                strokeDasharray="4,4"
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration: 1.5, delay: 0.5 }}
-              />
-            ))}
+            {countryMeta.map((country) => {
+              const x1 = 500;
+              const y1 = 500;
+              const x2 = parseFloat(country.pos.left) * 10;
+              const y2 = parseFloat(country.pos.top) * 10;
+              
+              const isLeft = x2 < 500;
+              const d = `M ${x1} ${y1} L ${x2} ${y2}`;
+
+              return (
+                <motion.path
+                  key={`line-${country.slug}`}
+                  d={d}
+                  fill="none"
+                  stroke={selectedCountry === country.slug ? '#2563eb' : 'url(#line-grad)'}
+                  strokeWidth="2"
+                  strokeDasharray="6,4"
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={{ duration: 1.5, delay: 0.5 }}
+                />
+              );
+            })}
           </svg>
 
-          {/* --- Central 3D Revolving Globe --- */}
+          {/* --- Central 3D Globe --- */}
           <div className="relative z-20 w-full h-full flex items-center justify-center">
             <Suspense fallback={<div className="w-56 h-56 rounded-full bg-slate-50 animate-pulse" />}>
               <div className="w-full h-full max-h-[85vh]">
@@ -112,31 +115,34 @@ const Countries = () => {
           </div>
 
           {/* --- Orbital Country Navigation Labels --- */}
-          {countryMeta.map((meta, i) => (
-            <motion.button
-              key={meta.slug}
-              id={`node-${meta.slug}`}
-              onClick={() => handleCountrySelection(meta.slug)}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.8 + i * 0.15 }}
-              className="absolute z-40 -translate-x-1/2 -translate-y-1/2 group sm:block cursor-pointer active:scale-95 transition-all"
-              style={{ top: meta.pos.top, left: meta.pos.left }}
-            >
-              <div className={`bg-white/90 backdrop-blur-md px-5 py-3.5 rounded-2xl shadow-[0_10px_35px_rgba(0,0,0,0.08)] border transition-all duration-300 min-w-[200px] text-center relative group ${selectedCountry === meta.slug ? 'border-blue-600 shadow-blue-500/20' : 'border-white hover:border-blue-300'}`}>
-                <div className={`absolute top-1/2 -left-2.5 -translate-y-1/2 w-5 h-5 bg-white rounded-full border border-blue-100 flex items-center justify-center shadow-sm group-hover:scale-125 transition-all ${selectedCountry === meta.slug ? 'scale-125 border-blue-600' : ''}`}>
-                  <div className={`w-2 h-2 rounded-full ${selectedCountry === meta.slug ? 'bg-blue-600' : 'bg-blue-300 animate-pulse'}`} />
+          {countryMeta.map((meta, i) => {
+            const isLeft = parseFloat(meta.pos.left) < 50;
+            return (
+              <motion.div
+                key={meta.slug}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.8 + i * 0.15 }}
+                className="absolute z-40 group sm:block"
+                style={{ top: meta.pos.top, left: meta.pos.left }}
+              >
+                {/* Visual Pinpoint Dot - THE ANCHOR */}
+                <div className={`absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full border border-blue-200 flex items-center justify-center shadow-sm z-50`}>
+                  <div className={`w-2 h-2 rounded-full ${selectedCountry === meta.slug ? 'bg-blue-600 shadow-[0_0_8px_#3b82f6]' : 'bg-blue-300 animate-pulse'}`} />
                 </div>
-                <div className="text-xl mb-1">{meta.flag}</div>
-                <h3 className={`font-bold transition-colors uppercase tracking-widest text-[11px] mb-1 ${selectedCountry === meta.slug ? 'text-blue-600' : 'text-navy group-hover:text-blue-500'}`}>
-                  {meta.label}
-                </h3>
-                <div className="h-0.5 bg-slate-100 w-full rounded-full overflow-hidden mt-2">
-                   <motion.div initial={{ width: 0 }} animate={{ width: '100%' }} className={`h-full origin-left ${selectedCountry === meta.slug ? 'bg-blue-600' : 'bg-blue-200'}`} transition={{ duration: 1, delay: 1.2 + i * 0.1 }} />
-                </div>
-              </div>
-            </motion.button>
-          ))}
+
+                {/* The Card Button - Shifted next to the dot */}
+                <motion.button
+                  onClick={() => handleCountrySelection(meta.slug)}
+                  className={`absolute top-0 ${isLeft ? 'right-4' : 'left-4'} -translate-y-1/2 bg-white/90 backdrop-blur-md px-6 py-4 rounded-2xl shadow-[0_15px_45px_rgba(0,0,0,0.06)] border transition-all duration-300 min-w-[170px] text-center group active:scale-95 ${selectedCountry === meta.slug ? 'border-blue-600 shadow-blue-500/10' : 'border-white hover:border-blue-300'}`}
+                >
+                  <h3 className={`w-full font-black transition-colors uppercase tracking-[0.2em] text-[13px] ${selectedCountry === meta.slug ? 'text-blue-600' : 'text-navy group-hover:text-blue-500'}`}>
+                    {meta.label}
+                  </h3>
+                </motion.button>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
 
