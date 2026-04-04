@@ -65,18 +65,32 @@ const Footer = () => {
             <h4 className="font-semibold text-white mb-5 text-sm uppercase tracking-wider">Countries</h4>
             <ul className="space-y-2">
               {[
-                { label: '🇰🇬 Kyrgyzstan', anchor: 'kyrgyzstan' },
-                { label: '🇷🇺 Russia', anchor: 'russia' },
-                { label: '🇬🇪 Georgia', anchor: 'georgia' },
-                { label: '🇺🇿 Uzbekistan', anchor: 'uzbekistan' },
+                { label: 'Kyrgyzstan', anchor: 'kyrgyzstan' },
+                { label: 'Russia', anchor: 'russia' },
+                { label: 'Georgia', anchor: 'georgia' },
+                { label: 'Uzbekistan', anchor: 'uzbekistan' },
               ].map((c) => (
                 <li key={c.anchor}>
-                  <Link to={`/countries#${c.anchor}`} className="text-slate-400 hover:text-amber-400 text-sm transition-colors">
+                  <Link to={`/countries#${c.anchor}`} className="text-slate-400 hover:text-amber-400 text-sm transition-colors flex items-center gap-1.5">
+                    <span className="w-1 h-1 rounded-full bg-blue-500 flex-shrink-0" />
                     {c.label}
                   </Link>
                 </li>
               ))}
             </ul>
+            <div className="inline-block mt-4">
+              <hr className="border-white/10 mb-3" />
+              <Link
+                to="/admin/login"
+                className="text-slate-400 hover:text-amber-400 text-sm transition-colors flex items-center gap-1.5"
+              >
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                  <path d="M12 11c0-1.1.9-2 2-2s2 .9 2 2v1h1a1 1 0 011 1v4a1 1 0 01-1 1H8a1 1 0 01-1-1v-4a1 1 0 011-1h1v-1c0-1.1.9-2 2-2s2 .9 2 2v1h-2v-1z" strokeLinecap="round" strokeLinejoin="round"/>
+                  <rect x="5" y="13" width="14" height="8" rx="1" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Admin Login
+              </Link>
+            </div>
           </div>
 
           {/* Contact */}

@@ -15,6 +15,14 @@ const Reviews = lazy(() => import('./pages/Reviews'));
 const Observership = lazy(() => import('./pages/Observership'));
 const Contact = lazy(() => import('./pages/Contact'));
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const AdminHome = lazy(() => import('./pages/admin/AdminHome'));
+const AdminCountries = lazy(() => import('./pages/admin/AdminCountries'));
+const AdminTeam = lazy(() => import('./pages/admin/AdminTeam'));
+const AdminProcess = lazy(() => import('./pages/admin/AdminProcess'));
+const AdminReviews = lazy(() => import('./pages/admin/AdminReviews'));
+const AdminObservership = lazy(() => import('./pages/admin/AdminObservership'));
+const AdminContact = lazy(() => import('./pages/admin/AdminContact'));
 
 // Full-page loading fallback
 const PageLoader = () => (
@@ -85,8 +93,16 @@ const App = () => {
             <Route path="/observership" element={<Layout showSplash={showSplash}><Observership /></Layout>} />
             <Route path="/contact" element={<Layout showSplash={showSplash}><Contact /></Layout>} />
 
-            {/* Admin routes (minimal layout) */}
+            {/* Admin routes (minimal layout – sidebar built into each page) */}
             <Route path="/admin/login" element={<MinimalLayout><AdminLogin /></MinimalLayout>} />
+            <Route path="/admin/dashboard" element={<MinimalLayout><AdminDashboard /></MinimalLayout>} />
+            <Route path="/admin/home" element={<MinimalLayout><AdminHome /></MinimalLayout>} />
+            <Route path="/admin/countries" element={<MinimalLayout><AdminCountries /></MinimalLayout>} />
+            <Route path="/admin/team" element={<MinimalLayout><AdminTeam /></MinimalLayout>} />
+            <Route path="/admin/process" element={<MinimalLayout><AdminProcess /></MinimalLayout>} />
+            <Route path="/admin/reviews" element={<MinimalLayout><AdminReviews /></MinimalLayout>} />
+            <Route path="/admin/observership" element={<MinimalLayout><AdminObservership /></MinimalLayout>} />
+            <Route path="/admin/contact" element={<MinimalLayout><AdminContact /></MinimalLayout>} />
 
             {/* 404 fallback */}
             <Route path="*" element={
