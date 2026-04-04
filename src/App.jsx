@@ -66,15 +66,24 @@ const MinimalLayout = ({ children }) => (
 );
 
 const App = () => {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    // Check if splash has already been shown in this session
+    const hasShown = sessionStorage.getItem('splashShown');
+    // Check if we are on an admin route
+    const isAdmin = window.location.pathname.startsWith('/admin');
+    return !hasShown && !isAdmin;
+  });
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 5500); // 5.5 seconds splash
+    if (showSplash) {
+      const timer = setTimeout(() => {
+        setShowSplash(false);
+        sessionStorage.setItem('splashShown', 'true');
+      }, 5500); // 5.5 seconds splash
 
-    return () => clearTimeout(timer);
-  }, []);
+      return () => clearTimeout(timer);
+    }
+  }, [showSplash]);
 
   return (
     <>

@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import airplaneImg from '../assets/splash/airoplane.png';
-
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination, Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
 
 const fadeUp = {
   initial: { opacity: 0, y: 40 },
@@ -42,14 +46,99 @@ const focusCards = [
       </svg>
     ),
     title: 'Long-term Support',
-    desc: 'Our support continues even after you arrive abroad â€” hostel, mess, airport pickup, local team.',
+    desc: 'Our support continues even after you arrive abroad — hostel, mess, airport pickup, local team.',
   },
 ];
+
+const reviews = [
+  {
+    name: "Sneha Reddy",
+    university: "Georgia State Medical University",
+    country: "Georgia",
+    rating: 5,
+    text: "Clinical exposure here is world-class. The guidance I received during the university selection process was accurate and honest. Truly a custodian for medical aspirants. I highly recommend Orion Medical Education to anyone looking for abroad MBBS.",
+    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop"
+  },
+  {
+    name: "Rahul Verma",
+    university: "Samarkand State Medical University",
+    country: "Uzbekistan",
+    rating: 5,
+    text: "I was worried about the budget, but Orion helped me find the perfect university that offers quality medical education without hidden charges. Their local team support is vital throughout the journey from admission to hostel accommodation.",
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop"
+  },
+  {
+    name: "Anjali Gupta",
+    university: "Osh State University",
+    country: "Kyrgyzstan",
+    rating: 5,
+    text: "Best decision for my medical career. The constant support from the Orion team even after 2 years of being here is what makes them different from any other consultant. They treat you like family and ensure your well-being in a foreign land.",
+    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop"
+  },
+  {
+    name: "Aman Singh",
+    university: "Kazan Federal University",
+    country: "Russia",
+    rating: 5,
+    text: "The transition from India to Russia was absolutely seamless. Orion Medical Education handled every detail, from the visa process to hostel accommodation. I couldn't be happier with my choice of university and my consultant.",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop"
+  }
+];
+
+const ReviewCard = ({ rev }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 h-full relative group/card flex flex-col">
+      {/* Quote Icon in Top Right */}
+      <div className="absolute top-6 right-6 w-10 h-10 bg-amber-50 rounded-full flex items-center justify-center group-hover/card:bg-amber-100 transition-colors">
+        <svg className="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 32 32">
+          <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H6c0-2.2 1.8-4 4-4V8zm18 0c-3.3 0-6 2.7-6 6v10h10V14h-8c0-2.2 1.8-4 4-4V8z"/>
+        </svg>
+      </div>
+
+      {/* Profile Header */}
+      <div className="flex items-center gap-4 mb-5">
+        <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-slate-50 shadow-sm">
+          <img src={rev.image} alt={rev.name} className="w-full h-full object-cover" />
+        </div>
+        <div>
+          <h4 className="font-bold text-navy text-lg leading-tight">{rev.name}</h4>
+          <p className="text-slate-400 text-xs font-semibold">{rev.university}</p>
+        </div>
+      </div>
+
+      {/* Rating Stars */}
+      <div className="flex gap-1 text-amber-400 mb-4">
+        {[...Array(rev.rating)].map((_, i) => (
+          <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+          </svg>
+        ))}
+      </div>
+
+      {/* Testimonial Text */}
+      <div className="flex-grow">
+        <p className={`text-slate-600 italic text-base leading-relaxed ${!isExpanded ? "line-clamp-2" : ""}`}>
+          "{rev.text}"
+        </p>
+        {rev.text && rev.text.length > 80 && (
+          <button 
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="text-blue-600 text-xs font-bold mt-2 hover:text-blue-700 transition-colors uppercase tracking-wider text-left border-none bg-transparent p-0 cursor-pointer"
+          >
+            {isExpanded ? "Show Less" : "Show More"}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const Home = () => {
   return (
     <div className="font-sans">
-      {/* â”€â”€ Hero Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Hero Section ────────────────────────────────── */}
       <section className="relative min-h-screen flex items-center bg-gradient-to-br from-navy via-blue-900 to-blue-800 overflow-hidden">
         {/* Decorative circles */}
         <div className="absolute top-1/4 -right-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
@@ -133,26 +222,22 @@ const Home = () => {
               </a>
             </motion.div>
           </div>
-
-          {/* Floating Medical Icon column removed */}
         </div>
 
-        {/* --- MBBS TO ABROAD JOURNEY TRANSITION ------------------- */}
+        {/* --- MBBS TO ABROAD JOURNEY TRANSITION ─────────────────── */}
         <div className="absolute bottom-4 left-0 right-0 px-6 sm:px-12 pointer-events-none hidden md:block z-20">
           <div className="max-w-7xl mx-auto flex items-end justify-between gap-8 h-28 relative overflow-visible">
             {/* Left: MBBS Label */}
             <span className="text-white font-black text-3xl italic tracking-tighter opacity-90 select-none drop-shadow-md z-10">MBBS</span>
 
-            {/* High-Fidelity Continuous Flight (Aligned from Word to Word) */}
+            {/* High-Fidelity Continuous Flight */}
             <motion.img
               src={airplaneImg}
               alt="Airplane"
               initial={{ left: "0%", top: "20%", rotate: 0 }}
               animate={{
-                // Shifted both points left for perfect word alignment
                 left: ["0%", "95%"],
                 top: ["20%", "-180%", "20%"],
-                // Synced Pitch: Nose-up for climb, Nose-down for decent, Level for landing
                 rotate: [0, -35, 0, 15, 0]
               }}
               transition={{
@@ -194,7 +279,6 @@ const Home = () => {
       {/* --- About Section --------------------------------- */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Section header */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -203,7 +287,7 @@ const Home = () => {
           >
             <span className="inline-block text-blue-600 text-sm font-bold uppercase tracking-widest mb-3">About Us</span>
             <h2 className="text-3xl sm:text-4xl font-bold text-navy leading-tight">
-              We are not just consultants â€”{' '}
+              We are not just consultants —{' '}
               <span className="text-amber-500">we are Custodians</span> of your entire journey.
             </h2>
             <p className="mt-4 text-slate-500 leading-relaxed">
@@ -211,7 +295,6 @@ const Home = () => {
             </p>
           </motion.div>
 
-          {/* Focus cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
             {focusCards.map((card, i) => (
               <motion.div
@@ -231,7 +314,6 @@ const Home = () => {
             ))}
           </div>
 
-          {/* Mission statement */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -245,13 +327,12 @@ const Home = () => {
               </svg>
               <p className="text-xl sm:text-2xl font-bold leading-relaxed max-w-3xl mx-auto">
                 "To turn your dream of becoming a doctor into a{' '}
-                <span className="text-amber-300">successful reality</span> â€” with integrity, transparency, and unwavering support."
+                <span className="text-amber-300">successful reality</span> — with integrity, transparency, and unwavering support."
               </p>
-              <p className="mt-4 text-blue-200 text-sm font-medium">â€” Our Mission</p>
+              <p className="mt-4 text-blue-200 text-sm font-medium">— Our Mission</p>
             </div>
           </motion.div>
 
-          {/* Stats bar */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             {stats.map((stat, i) => (
               <motion.div
@@ -269,15 +350,13 @@ const Home = () => {
           </div>
         </div>
       </section>
-      |
-      {/* â”€â”€ Video Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+
+      {/* --- Video Section ────────────────────────────────── */}
       <section className="py-24 bg-white relative overflow-hidden">
-        {/* Subtle decorative elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Section Header */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -293,7 +372,6 @@ const Home = () => {
             </p>
           </motion.div>
 
-          {/* Video Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               {
@@ -325,7 +403,6 @@ const Home = () => {
                 transition={{ duration: 0.5, delay: i * 0.15 }}
                 className="group bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col"
               >
-                {/* Video Player Container - Upscaled height from 16:9 to 4:3 */}
                 <div className="relative aspect-[4/3] bg-slate-900 group-hover:scale-[1.02] transition-transform duration-500">
                   <video
                     className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
@@ -337,7 +414,6 @@ const Home = () => {
                   >
                     <source src={video.videoUrl} type="video/mp4" />
                   </video>
-                  {/* Play Button Overlay */}
                   <div className="absolute inset-0 flex items-center justify-center opacity-100 group-hover:opacity-0 transition-opacity">
                     <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30">
                       <svg className="w-6 h-6 text-white translate-x-0.5" fill="currentColor" viewBox="0 0 24 24">
@@ -346,8 +422,6 @@ const Home = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* Content Section */}
                 <div className="p-6 flex-grow">
                   <h3 className="font-bold text-navy text-lg mb-3 leading-tight group-hover:text-blue-600 transition-colors">
                     {video.title}
@@ -356,8 +430,6 @@ const Home = () => {
                     {video.synopsis}
                   </p>
                 </div>
-
-                {/* Bottom Border Accent */}
                 <div className="h-1.5 w-0 bg-blue-600 group-hover:w-full transition-all duration-500" />
               </motion.div>
             ))}
@@ -365,7 +437,73 @@ const Home = () => {
         </div>
       </section>
 
-      {/* â”€â”€ CTA Banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* --- Reviews Section (Slider) ─────────────────────── */}
+      <section className="py-24 bg-slate-50 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="text-center max-w-2xl mx-auto mb-16"
+          >
+            <span className="inline-block text-amber-600 bg-amber-50 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-4 border border-amber-100 shadow-sm">Real Testimonials</span>
+            <h2 className="text-4xl sm:text-5xl font-black text-navy leading-tight tracking-tight mb-4">
+              Voices of <span className="text-blue-600">Future Doctors</span>
+            </h2>
+            <p className="text-slate-500 text-lg">Hear from our satisfied students about their experience working with us.</p>
+          </motion.div>
+
+          <div className="relative group">
+            <Swiper
+              modules={[Autoplay, Pagination, Navigation]}
+              spaceBetween={30}
+              slidesPerView={1}
+              loop={true}
+              autoplay={{
+                delay: 5000,
+                disableOnInteraction: false,
+              }}
+              pagination={{
+                clickable: true,
+                dynamicBullets: true,
+              }}
+              navigation={{
+                prevEl: '.review-prev',
+                nextEl: '.review-next',
+              }}
+              breakpoints={{
+                640: { slidesPerView: 1 },
+                768: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 },
+              }}
+              className="pb-16 px-4"
+            >
+              {reviews.map((rev, i) => (
+                <SwiperSlide key={i}>
+                  <div className="h-full py-4">
+                    <ReviewCard rev={rev} />
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+
+            <div className="hidden lg:flex justify-between absolute top-1/2 -translate-y-1/2 -left-12 -right-12 pointer-events-none px-4">
+              <button className="review-prev pointer-events-auto w-12 h-12 rounded-2xl bg-white shadow-xl hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center text-slate-400 group/nav border border-slate-100">
+                <svg className="w-6 h-6 group-hover/nav:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                  <path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              <button className="review-next pointer-events-auto w-12 h-12 rounded-2xl bg-white shadow-xl hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center text-slate-400 group/nav border border-slate-100">
+                <svg className="w-6 h-6 group-hover/nav:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                  <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- CTA Banner ─────────────────────────────────── */}
       <section className="py-16 bg-amber-50 border-y border-amber-100">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <motion.div
@@ -404,7 +542,7 @@ const Home = () => {
         aria-label="WhatsApp"
       >
         <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.335-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
         </svg>
       </a>
     </div>

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { auth } from '../../firebase/config';
 import { signOut } from 'firebase/auth';
+import toast from 'react-hot-toast';
 
 const navItems = [
   {
@@ -9,8 +10,8 @@ const navItems = [
     to: '/admin/dashboard',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-        <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
-        <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
+        <rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" />
       </svg>
     ),
   },
@@ -40,7 +41,6 @@ const navItems = [
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
         <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
         <circle cx="9" cy="7" r="4" />
-        <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   },
@@ -49,7 +49,7 @@ const navItems = [
     to: '/admin/process',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
@@ -84,78 +84,64 @@ const navItems = [
   },
 ];
 
-const AdminSidebar = ({ collapsed, setCollapsed }) => {
+const AdminSidebar = ({ isMobileOpen, setMobileOpen, collapsed, setCollapsed }) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await signOut(auth);
-    navigate('/admin/login');
+    try {
+      await signOut(auth);
+      toast.success('Logged out successfully');
+      navigate('/admin/login');
+    } catch (err) {
+      toast.error('Logout failed');
+    }
   };
 
-  return (
-    <aside
-      className={`flex flex-col h-screen bg-[#0f172a] border-r border-white/5 transition-all duration-300 ${
-        collapsed ? 'w-[72px]' : 'w-64'
-      } fixed left-0 top-0 z-40`}
-    >
-      {/* Logo */}
-      <div className={`flex items-center gap-3 px-4 py-5 border-b border-white/5 ${collapsed ? 'justify-center' : ''}`}>
-        <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
-          <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  const SidebarContent = (
+    <div className="flex flex-col h-full bg-white border-r border-slate-200">
+      {/* Brand */}
+      <div className="flex items-center gap-3 px-6 py-8">
+        <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200 flex-shrink-0">
+          <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <circle cx="12" cy="12" r="10" /><path d="M12 8v8M8 12h8" strokeLinecap="round" />
           </svg>
         </div>
         {!collapsed && (
-          <div className="overflow-hidden">
-            <div className="text-white font-bold text-sm leading-tight">Orion Medical</div>
-            <div className="text-amber-400 text-xs">Admin Panel</div>
+          <div>
+            <div className="font-bold text-slate-900 text-base leading-tight">Orion Medical</div>
+            <div className="text-blue-600 text-[10px] font-bold uppercase tracking-wider">Admin Panel</div>
           </div>
         )}
       </div>
 
-      {/* Toggle button */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-[72px] w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center shadow-lg border border-white/10 hover:bg-blue-500 transition-colors z-50"
-      >
-        <svg
-          className={`w-3 h-3 text-white transition-transform duration-300 ${collapsed ? '' : 'rotate-180'}`}
-          fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"
-        >
-          <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-
-      {/* Nav items */}
-      <nav className="flex-1 py-4 overflow-y-auto overflow-x-hidden">
-        <ul className="space-y-1 px-2">
-          {navItems.map((item) => (
-            <li key={item.to}>
-              <NavLink
-                to={item.to}
-                title={collapsed ? item.label : ''}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group
-                  ${isActive
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/30'
-                    : 'text-slate-400 hover:bg-white/5 hover:text-white'
-                  } ${collapsed ? 'justify-center' : ''}`
-                }
-              >
-                <span className="flex-shrink-0">{item.icon}</span>
-                {!collapsed && <span className="truncate">{item.label}</span>}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
+      {/* Nav */}
+      <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto custom-scrollbar">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            onClick={() => isMobileOpen && setMobileOpen(false)}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all group duration-200
+              ${isActive 
+                ? 'bg-blue-600 text-white shadow-xl shadow-blue-200' 
+                : 'text-slate-500 hover:bg-blue-50 hover:text-blue-600'
+              } ${collapsed ? 'justify-center px-0' : ''}`
+            }
+            title={collapsed ? item.label : ''}
+          >
+            <span className="flex-shrink-0">{item.icon}</span>
+            {!collapsed && <span>{item.label}</span>}
+          </NavLink>
+        ))}
       </nav>
 
-      {/* Logout */}
-      <div className="p-3 border-t border-white/5">
+      {/* Footer */}
+      <div className="p-4 border-t border-slate-100 mb-2">
         <button
           onClick={handleLogout}
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all ${collapsed ? 'justify-center px-0' : ''}`}
           title={collapsed ? 'Logout' : ''}
-          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-150 ${collapsed ? 'justify-center' : ''}`}
         >
           <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
             <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round" />
@@ -163,7 +149,36 @@ const AdminSidebar = ({ collapsed, setCollapsed }) => {
           {!collapsed && <span>Logout</span>}
         </button>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className={`hidden lg:block fixed left-0 top-0 h-screen transition-all duration-300 z-50 ${collapsed ? 'w-20' : 'w-72'}`}>
+        {SidebarContent}
+        {/* Collapse toggle (Desktop only) */}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="absolute -right-3 top-20 w-7 h-7 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm z-50"
+        >
+          <svg
+            className={`w-4 h-4 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}
+            fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"
+          >
+            <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      </aside>
+
+      {/* Mobile Drawer */}
+      <div className={`lg:hidden fixed inset-0 z-[60] transition-opacity duration-300 ${isMobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+        <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
+        <aside className={`absolute left-0 top-0 h-full w-72 bg-white transition-transform duration-300 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          {SidebarContent}
+        </aside>
+      </div>
+    </>
   );
 };
 

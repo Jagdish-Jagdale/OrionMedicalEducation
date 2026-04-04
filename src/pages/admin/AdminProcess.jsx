@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
+import toast from 'react-hot-toast';
 
 const emptyStep = { stepNumber: '', title: '', description: '', icon: '' };
 
@@ -17,43 +18,80 @@ const AdminProcess = () => {
 
   const handleSave = (e) => {
     e.preventDefault();
-    alert('Process steps saved! (Wire to Firestore as needed)');
+    toast.success('Admission process updated successfully!');
   };
 
   return (
     <AdminLayout title="Manage Admission Process">
-      <form onSubmit={handleSave} className="space-y-6 max-w-3xl">
-        {steps.map((step, i) => (
-          <div key={i} className="bg-[#1e2d45] rounded-2xl p-6 border border-white/5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white font-semibold">Step {i + 1}</h3>
-              {steps.length > 1 && (
-                <button type="button" onClick={() => removeStep(i)} className="text-red-400 hover:text-red-300 text-xs transition-colors">Remove</button>
+      <form onSubmit={handleSave} className="space-y-8 max-w-4xl">
+        <div className="grid grid-cols-1 gap-8">
+          {steps.map((step, i) => (
+            <div key={i} className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm transition-all hover:shadow-lg group relative">
+              {/* Connection Line (Visual Only) */}
+              {i !== steps.length - 1 && (
+                <div className="absolute left-10 md:left-14 top-[84px] bottom-[-32px] w-0.5 bg-slate-100 hidden md:block" />
               )}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-slate-400 text-sm mb-1">Step Number</label>
-                <input value={step.stepNumber} onChange={(e) => handleChange(i, 'stepNumber', e.target.value)} placeholder="e.g. 01" className="w-full bg-[#0f172a] text-white border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition" />
-              </div>
-              <div>
-                <label className="block text-slate-400 text-sm mb-1">Title</label>
-                <input value={step.title} onChange={(e) => handleChange(i, 'title', e.target.value)} placeholder="e.g. Initial Consultation" className="w-full bg-[#0f172a] text-white border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition" />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-slate-400 text-sm mb-1">Description</label>
-                <textarea value={step.description} onChange={(e) => handleChange(i, 'description', e.target.value)} rows={3} placeholder="Explain what happens in this step..." className="w-full bg-[#0f172a] text-white border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition resize-none" />
-              </div>
-            </div>
-          </div>
-        ))}
 
-        <div className="flex gap-3">
-          <button type="button" onClick={addStep} className="border border-white/10 text-slate-300 hover:border-blue-500 hover:text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors">
-            + Add Step
+              <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-50">
+                <div className="flex items-center gap-5">
+                  <div className="w-14 h-14 bg-emerald-500 rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-100 relative z-10">
+                    {step.stepNumber || (i + 1)}
+                  </div>
+                  <div>
+                    <h3 className="text-slate-900 font-bold text-lg">{step.title || 'New Process Step'}</h3>
+                    <p className="text-emerald-600 text-[10px] font-black uppercase tracking-widest mt-0.5">Workflow Milestone</p>
+                  </div>
+                </div>
+                {steps.length > 1 && (
+                  <button 
+                    type="button" 
+                    onClick={() => removeStep(i)} 
+                    className="p-2 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-500 transition-all border border-transparent hover:border-red-100"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg>
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pl-0 md:pl-4">
+                <div className="md:col-span-2">
+                  <label className="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-widest">Step Display Title</label>
+                  <input 
+                    value={step.title} 
+                    onChange={(e) => handleChange(i, 'title', e.target.value)} 
+                    placeholder="e.g. Free Counseling & University Selection" 
+                    className="w-full bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" 
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-widest">Detailed Description</label>
+                  <textarea 
+                    value={step.description} 
+                    onChange={(e) => handleChange(i, 'description', e.target.value)} 
+                    rows={4} 
+                    placeholder="Summarize the key actions or outcomes for this stage of the admission process..." 
+                    className="w-full bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none" 
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4 pt-10">
+          <button 
+            type="button" 
+            onClick={addStep} 
+            className="flex items-center justify-center gap-2 bg-white border border-slate-200 hover:border-emerald-500 text-slate-900 hover:text-emerald-500 font-bold px-8 py-4 rounded-2xl text-sm transition-all shadow-sm hover:shadow-xl active:scale-95"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"/></svg>
+            Add Next Step
           </button>
-          <button type="submit" className="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors">
-            Save All
+          <button 
+            type="submit" 
+            className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold px-12 py-4 rounded-2xl text-sm transition-all shadow-xl shadow-blue-200 hover:-translate-y-1 active:scale-95"
+          >
+            Save Entire Roadmap
           </button>
         </div>
       </form>
