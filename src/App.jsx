@@ -76,67 +76,6 @@ const App = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Aggressive DevTools / Inspect protection
-  useEffect(() => {
-    // 1. Disable Right Click
-    const handleContextMenu = (e) => e.preventDefault();
-
-    // 2. Disable Keyboard Shortcuts (F12, Ctrl+Shift+I/J/C/U/S, etc.)
-    const handleKeyDown = (e) => {
-      if (
-        e.keyCode === 123 || // F12
-        (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || // I, J, C
-        (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83)) // U, S
-      ) {
-        e.preventDefault();
-      }
-    };
-
-    window.addEventListener('contextmenu', handleContextMenu);
-    window.addEventListener('keydown', handleKeyDown);
-
-    // 3. Aggressive DevTools Detection & Action
-    const devToolsAction = () => {
-      // Clear the page & Redirect if tools are opened
-      document.body.innerHTML = '<div style="height:100vh;display:flex;align-items:center;justify-center:center;background:#0d1424;color:#ef4444;font-family:sans-serif;font-weight:bold;text-align:center;padding:20px;">Security Alert: Developer Tools are not allowed on this site.</div>';
-      setTimeout(() => {
-          window.location.replace("about:blank");
-      }, 2000);
-    };
-
-    // Continuous debugger loop (freezes window if tools are open)
-    const checkLoop = setInterval(() => {
-      (function() {
-        const startTime = performance.now();
-        debugger;
-        const endTime = performance.now();
-        if (endTime - startTime > 100) {
-          devToolsAction();
-        }
-      })();
-    }, 500);
-
-    // Detection via console element tricks
-    const element = new Image();
-    Object.defineProperty(element, 'id', {
-      get: () => {
-        devToolsAction();
-      }
-    });
-    
-    const detector = setInterval(() => {
-      console.log(element);
-      console.clear();
-    }, 1000);
-
-    return () => {
-      window.removeEventListener('contextmenu', handleContextMenu);
-      window.removeEventListener('keydown', handleKeyDown);
-      clearInterval(checkLoop);
-      clearInterval(detector);
-    };
-  }, []);
-
   return (
     <>
       <AnimatePresence mode="wait">
