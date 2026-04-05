@@ -503,7 +503,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* --- CTA Banner ─────────────────────────────────── */}
+      {/* ---- CTA Banner ─────────────────────────────────── */}
       <section className="py-16 bg-amber-50 border-y border-amber-100">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <motion.div
