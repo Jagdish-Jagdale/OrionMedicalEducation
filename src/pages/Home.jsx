@@ -93,7 +93,7 @@ const ReviewCard = ({ rev }) => {
       {/* Quote Icon in Top Right */}
       <div className="absolute top-6 right-6 w-10 h-10 bg-amber-50 rounded-full flex items-center justify-center group-hover/card:bg-amber-100 transition-colors">
         <svg className="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 32 32">
-          <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H6c0-2.2 1.8-4 4-4V8zm18 0c-3.3 0-6 2.7-6 6v10h10V14h-8c0-2.2 1.8-4 4-4V8z"/>
+          <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H6c0-2.2 1.8-4 4-4V8zm18 0c-3.3 0-6 2.7-6 6v10h10V14h-8c0-2.2 1.8-4 4-4V8z" />
         </svg>
       </div>
 
@@ -112,7 +112,7 @@ const ReviewCard = ({ rev }) => {
       <div className="flex gap-1 text-amber-400 mb-4">
         {[...Array(rev.rating)].map((_, i) => (
           <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
           </svg>
         ))}
       </div>
@@ -123,7 +123,7 @@ const ReviewCard = ({ rev }) => {
           "{rev.text}"
         </p>
         {rev.text && rev.text.length > 80 && (
-          <button 
+          <button
             onClick={() => setIsExpanded(!isExpanded)}
             className="text-blue-600 text-xs font-bold mt-2 hover:text-blue-700 transition-colors uppercase tracking-wider text-left border-none bg-transparent p-0 cursor-pointer"
           >
@@ -533,7 +533,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* WhatsApp Floating Button */}
+      {/* WhatsApp Floating Buttons */}
       <a
         href="https://wa.me/919999999999"
         target="_blank"
