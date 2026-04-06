@@ -1,5 +1,5 @@
 import React, { useRef, useCallback, useLayoutEffect, useState } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { getReviews } from '../firebase/firestore';
 import { useFirestore } from '../hooks/useFirestore';
 import NeuralReviewCard from '../components/NeuralReviewCard';
@@ -17,24 +17,37 @@ const Reviews = () => {
   /* ── Dynamically-computed SVG path strings ── */
   const [pathDefs, setPathDefs] = useState(Array(6).fill(''));
 
-  /* ── Scroll progress ── */
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ['start end', 'end end'],
+    offset: ['start 0.9', 'end 0.1'],
   });
 
-  const row1Progress = useTransform(scrollYProgress, [0.08, 0.25], [0, 1]);
-  const row2Progress = useTransform(scrollYProgress, [0.30, 0.47], [0, 1]);
-  const row3Progress = useTransform(scrollYProgress, [0.52, 0.69], [0, 1]);
+  // Smooth out the scroll progress for a premium feel
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
 
-  const row1Scale = useTransform(row1Progress, [0, 1], [0.88, 1]);
-  const row2Scale = useTransform(row2Progress, [0, 1], [0.88, 1]);
-  const row3Scale = useTransform(row3Progress, [0, 1], [0.88, 1]);
+  // Thresholds optimized for "Bottom 20%" trigger (80% top margin)
+  const row1NerveProgress = useTransform(smoothProgress, [0, 0.12], [0, 1]);
+  const row1CardProgress  = useTransform(smoothProgress, [0.06, 0.18], [0, 1]);
+
+  const row2NerveProgress = useTransform(smoothProgress, [0.22, 0.34], [0, 1]);
+  const row2CardProgress  = useTransform(smoothProgress, [0.28, 0.40], [0, 1]);
+
+  const row3NerveProgress = useTransform(smoothProgress, [0.44, 0.56], [0, 1]);
+  const row3CardProgress  = useTransform(smoothProgress, [0.50, 0.62], [0, 1]);
+
+  // Use the card progress for scaling as well
+  const row1Scale = useTransform(row1CardProgress, [0, 1], [0.95, 1]);
+  const row2Scale = useTransform(row2CardProgress, [0, 1], [0.95, 1]);
+  const row3Scale = useTransform(row3CardProgress, [0, 1], [0.95, 1]);
 
   const progressByIndex = [
-    row1Progress, row1Progress,
-    row2Progress, row2Progress,
-    row3Progress, row3Progress,
+    row1NerveProgress, row1NerveProgress,
+    row2NerveProgress, row2NerveProgress,
+    row3NerveProgress, row3NerveProgress,
   ];
   const isLeftCard = [true, false, true, false, true, false];
 
@@ -108,7 +121,7 @@ const Reviews = () => {
         style={{ backgroundImage: 'linear-gradient(#000 1px,transparent 1px),linear-gradient(90deg,#000 1px,transparent 1px)', backgroundSize: '50px 50px' }}
       />
 
-      <div className="max-w-7xl mx-auto px-4 py-20 relative" ref={containerRef}>
+      <div className="max-w-7xl mx-auto px-4 py-20 relative overflow-visible" ref={containerRef}>
 
         {/* ═══ HEADER ═══ */}
         <div className="text-center mb-8 md:mb-16 relative z-40">
@@ -163,9 +176,14 @@ const Reviews = () => {
                   key={i}
                   d={d}
                   stroke="#3b82f6"
-                  strokeWidth="3.5"
+                  strokeWidth="5.0"
                   strokeLinecap="round"
-                  style={{ pathLength: progressByIndex[i] }}
+                  initial={{ opacity: 0, pathLength: 0 }}
+                  style={{ 
+                    pathLength: progressByIndex[i], 
+                    opacity: progressByIndex[i],
+                    filter: 'drop-shadow(0 0 8px rgba(59, 130, 246, 0.4))'
+                  }}
                 />
               ) : null
             )}
@@ -179,7 +197,10 @@ const Reviews = () => {
               ref={setCardRef(0)}
               className="absolute top-[450px] left-[50%] -translate-x-[460px] w-[300px] -translate-y-1/2"
             >
-              <motion.div style={{ opacity: row1Progress, scale: row1Scale }}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                style={{ opacity: row1CardProgress, scale: row1Scale }}
+              >
                 {topReviews[0] && <NeuralReviewCard review={topReviews[0]} position="relative" isLeft={true} />}
               </motion.div>
             </div>
@@ -187,7 +208,10 @@ const Reviews = () => {
               ref={setCardRef(1)}
               className="absolute top-[450px] left-[50%] translate-x-[160px] w-[300px] -translate-y-1/2"
             >
-              <motion.div style={{ opacity: row1Progress, scale: row1Scale }}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                style={{ opacity: row1CardProgress, scale: row1Scale }}
+              >
                 {topReviews[1] && <NeuralReviewCard review={topReviews[1]} position="relative" isLeft={false} />}
               </motion.div>
             </div>
@@ -197,7 +221,10 @@ const Reviews = () => {
               ref={setCardRef(2)}
               className="absolute top-[700px] left-[50%] -translate-x-[460px] w-[300px] -translate-y-1/2"
             >
-              <motion.div style={{ opacity: row2Progress, scale: row2Scale }}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                style={{ opacity: row2CardProgress, scale: row2Scale }}
+              >
                 {topReviews[2] && <NeuralReviewCard review={topReviews[2]} position="relative" isLeft={true} />}
               </motion.div>
             </div>
@@ -205,7 +232,10 @@ const Reviews = () => {
               ref={setCardRef(3)}
               className="absolute top-[700px] left-[50%] translate-x-[160px] w-[300px] -translate-y-1/2"
             >
-              <motion.div style={{ opacity: row2Progress, scale: row2Scale }}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                style={{ opacity: row2CardProgress, scale: row2Scale }}
+              >
                 {topReviews[3] && <NeuralReviewCard review={topReviews[3]} position="relative" isLeft={false} />}
               </motion.div>
             </div>
@@ -215,7 +245,10 @@ const Reviews = () => {
               ref={setCardRef(4)}
               className="absolute top-[1000px] left-[50%] -translate-x-[460px] w-[300px] -translate-y-1/2"
             >
-              <motion.div style={{ opacity: row3Progress, scale: row3Scale }}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                style={{ opacity: row3CardProgress, scale: row3Scale }}
+              >
                 {topReviews[4] && <NeuralReviewCard review={topReviews[4]} position="relative" isLeft={true} />}
               </motion.div>
             </div>
@@ -223,7 +256,10 @@ const Reviews = () => {
               ref={setCardRef(5)}
               className="absolute top-[1000px] left-[50%] translate-x-[160px] w-[300px] -translate-y-1/2"
             >
-              <motion.div style={{ opacity: row3Progress, scale: row3Scale }}>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                style={{ opacity: row3CardProgress, scale: row3Scale }}
+              >
                 {topReviews[5] && <NeuralReviewCard review={topReviews[5]} position="relative" isLeft={false} />}
               </motion.div>
             </div>
