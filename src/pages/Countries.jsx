@@ -8,10 +8,10 @@ import Globe3D from '../components/Globe3D';
 import RussiaDetailedGuide from '../components/RussiaDetailedGuide';
 
 const countryMeta = [
-  { key: 'georgia', label: 'GEORGIA', slug: 'georgia', flag: '🇬🇪', pos: { top: '18%', left: '32%', dtTop: '22%', dtLeft: '20%' } },
-  { key: 'russia', label: 'RUSSIA', slug: 'russia', flag: '🇷🇺', pos: { top: '18%', left: '68%', dtTop: '22%', dtLeft: '80%' } },
-  { key: 'kyrgyzstan', label: 'KYRGYZSTAN', slug: 'kyrgyzstan', flag: '🇰🇬', pos: { top: '82%', left: '32%', dtTop: '82%', dtLeft: '20%' } },
-  { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: '🇺🇿', pos: { top: '82%', left: '68%', dtTop: '82%', dtLeft: '80%' } },
+  { key: 'georgia', label: 'GEORGIA', slug: 'georgia', flag: '🇬🇪', pos: { top: '26%', left: '32%', dtTop: '25%', dtLeft: '20%' } },
+  { key: 'russia', label: 'RUSSIA', slug: 'russia', flag: '🇷🇺', pos: { top: '26%', left: '68%', dtTop: '25%', dtLeft: '80%' } },
+  { key: 'kyrgyzstan', label: 'KYRGYZSTAN', slug: 'kyrgyzstan', flag: '🇰🇬', pos: { top: '74%', left: '32%', dtTop: '75%', dtLeft: '20%' } },
+  { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: '🇺🇿', pos: { top: '74%', left: '68%', dtTop: '75%', dtLeft: '80%' } },
 ];
 
 const Countries = () => {
@@ -19,12 +19,13 @@ const Countries = () => {
   const [universitiesMap, setUniversitiesMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   const [selectedCountry, setSelectedCountry] = useState('russia');
+  const [isGlobeLoaded, setIsGlobeLoaded] = useState(false);
   const location = useLocation();
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024); // Use 1024 for tablet/mobile spread
-  
+
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
     window.addEventListener('resize', handleResize);
@@ -74,13 +75,13 @@ const Countries = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white pt-20">
+    <div className="min-h-screen bg-white pt-15 sm:pt-20">
       {/* ── INTERACTIVE 3D GLOBE SECTION ─────────────────── */}
-      <div className="relative h-[75vh] sm:h-[85vh] flex items-center justify-center overflow-hidden border-b border-slate-50 bg-[#fbfcfd]">
+      <div className="relative h-[50vh] sm:h-[85vh] flex items-center justify-center overflow-hidden border-b border-slate-50 bg-[#fbfcfd]">
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#1e3a5f 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
         <div className="relative w-full max-w-7xl h-full flex items-center justify-center">
-          
+
           {/* SVG Connecting Lines Layer - Precision 100x100 Grid */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
@@ -92,20 +93,20 @@ const Countries = () => {
             {countryMeta.map((country) => {
               const x1 = 50;
               const y1 = 50;
-              
+
               // Correctly sync with responsive positioning logic
               const finalLeft = isMobile ? country.pos.left : country.pos.dtLeft;
               const finalTop = isMobile ? country.pos.top : country.pos.dtTop;
-              
+
               const x2_raw = parseFloat(finalLeft);
               const y2_raw = parseFloat(finalTop);
-              
+
               // "Lines Cross" effect: Penetrate slightly through the center of the dot
               const angle = Math.atan2(y2_raw - 50, x2_raw - 50);
               const extension = 1.2; // Penetrate 1.2% through the dot
               const x2 = x2_raw + Math.cos(angle) * extension;
               const y2 = y2_raw + Math.sin(angle) * extension;
-              
+
               const d = `M ${x1} ${y1} L ${x2} ${y2}`;
 
               return (
@@ -117,19 +118,18 @@ const Countries = () => {
                   strokeWidth={isMobile ? 0.35 : 0.45}
                   strokeDasharray="none"
                   strokeLinecap="round"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 1.5, delay: 0.5 }}
+                  animate={isGlobeLoaded ? { pathLength: 1, opacity: 1 } : { pathLength: 0, opacity: 0 }}
+                  transition={{ duration: 1.5, delay: 0.2 }}
                 />
               );
             })}
           </svg>
 
           {/* --- Central 3D Globe --- */}
-          <div className="relative z-20 w-80 h-80 sm:w-full sm:h-full flex items-center justify-center">
+          <div className="relative z-20 w-64 h-64 sm:w-full sm:h-full flex items-center justify-center">
             <Suspense fallback={<div className="w-40 h-40 rounded-full bg-slate-50 animate-pulse" />}>
               <div className="w-full h-full max-h-[85vh]">
-                <Globe3D />
+                <Globe3D onLoad={() => setIsGlobeLoaded(true)} />
               </div>
             </Suspense>
           </div>
@@ -138,16 +138,16 @@ const Countries = () => {
           {countryMeta.map((meta, i) => {
             const isLeft = parseFloat(meta.pos.left) < 50;
             const isTop = parseFloat(meta.pos.top) < 50;
-            
+
             return (
               <motion.div
                 key={meta.slug}
                 initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.8 + i * 0.15 }}
+                animate={isGlobeLoaded ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.6, delay: 0.5 + i * 0.15 }}
                 className="absolute z-40"
-                style={{ 
-                  top: isMobile ? meta.pos.top : meta.pos.dtTop, 
+                style={{
+                  top: isMobile ? meta.pos.top : meta.pos.dtTop,
                   left: isMobile ? meta.pos.left : meta.pos.dtLeft,
                 }}
               >
@@ -155,33 +155,41 @@ const Countries = () => {
                   Wrapper centered on the dot: 
                   The center of this absolute container is the exact target point for the SVG line.
                 */}
-                <div className="relative w-0 h-0 flex items-center justify-center">
-                  
-                  {/* Visual Pinpoint Dot - THE ANCHOR (Center aligned to the coordinate) */}
-                  <div className="absolute w-4 h-4 sm:w-6 sm:h-6 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full border-2 border-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.4)] z-50">
-                    <div className="absolute inset-[-4px] rounded-full border border-blue-200/50 animate-ping opacity-20" />
-                    <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${selectedCountry === meta.slug ? 'bg-blue-600 shadow-[0_0_12px_rgba(37,99,235,0.6)]' : 'bg-blue-300'}`} />
-                  </div>
-
-                  {/* The Card Button - Deeply fused into the dot anchor */}
-                  <div 
-                    className="absolute top-1/2 flex items-center pointer-events-none"
-                    style={{ 
-                      [isLeft ? 'right' : 'left']: '0',
-                      transform: `translate(${isLeft ? '6px' : '-6px'}, -50%)`,
-                      width: isMobile ? '115px' : '280px'
-                    }}
+                {/* 
+                  Wrapper centered on the dot: 
+                  The center of this absolute container is (0,0), the target for the SVG line.
+                */}
+                <div className="relative w-0 h-0">
+                  {/* Unified Fusion Container - Forces Dot and Card onto the same vertical axis */}
+                  <div
+                    className={`absolute top-0 flex items-center pointer-events-none -translate-y-1/2 ${isLeft ? 'flex-row-reverse right-0' : 'flex-row left-0'}`}
+                    style={{ zIndex: 50 }}
                   >
-                    <motion.button
-                      onClick={() => handleCountrySelection(meta.slug)}
-                      className={`relative w-full pointer-events-auto
-                        bg-white/95 backdrop-blur-md px-3 sm:px-6 py-2 sm:py-4 rounded-xl sm:rounded-2xl shadow-[0_15px_45px_rgba(0,0,0,0.18)] border transition-all duration-300 group active:scale-95 whitespace-nowrap
-                        ${selectedCountry === meta.slug ? 'border-blue-600 shadow-blue-500/25 scale-105' : 'border-slate-100 hover:border-blue-400'}`}
+                    {/* Visual Pinpoint Dot - THE ANCHOR */}
+                    <div className="relative w-4 h-4 sm:w-6 sm:h-6 bg-white rounded-full border-2 sm:border-[3px] border-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.4)] flex-shrink-0 z-50">
+                      <div className="absolute inset-[-4px] rounded-full border border-blue-200/50 animate-ping opacity-20" />
+                      <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${selectedCountry === meta.slug ? 'bg-blue-600 shadow-[0_0_12px_rgba(37,99,235,0.6)]' : 'bg-blue-300'}`} />
+                    </div>
+
+                    {/* The Card Button - Fused directly with zero gap using negative horizontal offset */}
+                    <div
+                      className="relative pointer-events-none"
+                      style={{
+                        width: isMobile ? '115px' : '280px',
+                        [isLeft ? 'marginRight' : 'marginLeft']: isMobile ? '-8px' : '-12px'
+                      }}
                     >
-                      <h3 className={`w-full font-black transition-colors uppercase text-center tracking-[0.1em] sm:tracking-[0.2em] text-[8px] sm:text-[14px] ${selectedCountry === meta.slug ? 'text-blue-600' : 'text-navy group-hover:text-blue-600'}`}>
-                        {meta.label}
-                      </h3>
-                    </motion.button>
+                      <motion.button
+                        onClick={() => handleCountrySelection(meta.slug)}
+                        className={`relative w-full pointer-events-auto
+                          bg-white/95 backdrop-blur-md px-3 sm:px-6 py-2 sm:py-4 rounded-xl sm:rounded-2xl shadow-[0_15px_45px_rgba(0,0,0,0.18)] border transition-all duration-300 group active:scale-95 whitespace-nowrap
+                          ${selectedCountry === meta.slug ? 'border-blue-600 shadow-blue-500/25 scale-105' : 'border-slate-100 hover:border-blue-400'}`}
+                      >
+                        <h3 className={`w-full font-black transition-colors uppercase text-center tracking-[0.1em] sm:tracking-[0.2em] text-[8px] sm:text-[14px] ${selectedCountry === meta.slug ? 'text-blue-600' : 'text-navy group-hover:text-blue-600'}`}>
+                          {meta.label}
+                        </h3>
+                      </motion.button>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -191,30 +199,30 @@ const Countries = () => {
       </div>
 
       {/* ── COUNTRY INFORMATION PORTAL (Filtered) ──────────── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 bg-slate-50/50 min-h-[80vh]">
-        <motion.div 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 sm:py-20 bg-slate-50/50 min-h-[80vh]">
+        <motion.div
           id="guides-section"
-          initial={{ opacity: 0, y: 30 }} 
-          whileInView={{ opacity: 1, y: 0 }} 
-          viewport={{ once: true }} 
-          className="text-center mb-16 scroll-mt-32"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-8 sm:mb-16 scroll-mt-32"
         >
           <span className="text-blue-600 text-sm font-bold uppercase tracking-widest">Selected Destination Portal</span>
           <h2 className="text-3xl font-bold text-navy mt-2">Detailed Destination Guides</h2>
         </motion.div>
 
-        <div className="space-y-10">
+        <div className="space-y-6 sm:space-y-10">
           {countryMeta.filter(m => m.slug === selectedCountry).map((meta) => {
             const country = countries.find(c => c.slug === meta.slug || (c.name && c.name.toLowerCase() === meta.slug));
             const universities = country ? universitiesMap[country.id] || [] : [];
-            
+
             return (
-              <motion.section 
-                 key={meta.slug} 
-                 id={meta.slug} 
-                 initial={{ opacity: 0, x: 20 }}
-                 animate={{ opacity: 1, x: 0 }}
-                 className="min-h-[500px]"
+              <motion.section
+                key={meta.slug}
+                id={meta.slug}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="min-h-[500px]"
               >
                 {loading ? (
                   <div className="space-y-6">
@@ -222,13 +230,13 @@ const Countries = () => {
                     <LoadingSkeleton count={3} type="card" />
                   </div>
                 ) : error ? (
-                   <div className="p-8 bg-white rounded-3xl border border-red-50 text-red-500 italic">Information for {meta.label} is currently unavailable.</div>
+                  <div className="p-8 bg-white rounded-3xl border border-red-50 text-red-500 italic">Information for {meta.label} is currently unavailable.</div>
                 ) : meta.slug === 'russia' ? (
-                   <RussiaDetailedGuide />
+                  <RussiaDetailedGuide />
                 ) : country ? (
                   <CountryCard country={country} universities={universities} />
                 ) : (
-                   <div className="p-8 bg-white rounded-3xl border border-blue-50 text-slate-400 italic">Synchronizing world data for {meta.label}...</div>
+                  <div className="p-8 bg-white rounded-3xl border border-blue-50 text-slate-400 italic">Synchronizing world data for {meta.label}...</div>
                 )}
               </motion.section>
             );

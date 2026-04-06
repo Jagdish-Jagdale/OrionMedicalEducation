@@ -31,7 +31,14 @@ const Earth = () => {
   );
 };
 
-const Globe3D = () => {
+const LoadMonitor = ({ onLoad }) => {
+  React.useEffect(() => {
+    if (onLoad) onLoad();
+  }, [onLoad]);
+  return null;
+};
+
+const Globe3D = ({ onLoad }) => {
   return (
     <div className="w-full h-full cursor-grab active:cursor-grabbing">
       <Canvas dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
@@ -45,6 +52,7 @@ const Globe3D = () => {
 
         <React.Suspense fallback={null}>
           <Earth />
+          <LoadMonitor onLoad={onLoad} />
         </React.Suspense>
 
         <OrbitControls 
