@@ -18,11 +18,11 @@ const Team = () => {
   return (
     <div className="min-h-screen bg-slate-50 pt-20">
       {/* Header */}
-      <div className="bg-gradient-to-r from-navy to-blue-700 py-16 px-4 text-center">
+      <div className="bg-gradient-to-r from-navy to-blue-700 py-12 sm:py-16 px-6 text-center">
         <motion.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-amber-400 text-sm font-bold uppercase tracking-widest mb-3"
+          className="text-amber-400 text-xs sm:text-sm font-bold uppercase tracking-widest mb-3"
         >
           The People Behind Your Success
         </motion.p>
@@ -30,15 +30,15 @@ const Team = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-3xl sm:text-5xl font-bold text-white mb-4"
+          className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white mb-4"
         >
-          Meet the Experts Behind Your Success
+          Meet the Experts
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-blue-200 max-w-xl mx-auto text-sm"
+          className="text-blue-200 max-w-xl mx-auto text-xs sm:text-sm"
         >
           Our team brings together years of experience, passion, and deep knowledge of international medical education.
         </motion.p>
@@ -82,18 +82,18 @@ const Team = () => {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-20 text-center bg-gradient-to-r from-navy to-blue-700 rounded-3xl p-12 text-white relative overflow-hidden"
+          className="mt-16 sm:mt-20 text-center bg-gradient-to-r from-navy to-blue-700 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden"
         >
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.8) 1px, transparent 0)', backgroundSize: '30px 30px' }} />
           <div className="relative z-10">
-            <svg className="w-10 h-10 text-amber-400 mx-auto mb-6" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 sm:w-10 sm:h-10 text-amber-400 mx-auto mb-6" fill="currentColor" viewBox="0 0 24 24">
               <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
             </svg>
-            <p className="text-2xl sm:text-3xl font-bold leading-relaxed">
+            <p className="text-xl sm:text-2xl lg:text-3xl font-bold leading-relaxed">
               "Your dream is our{' '}
               <span className="text-amber-300">responsibility</span>."
             </p>
-            <p className="mt-4 text-blue-200 text-sm">— Team Orion Medical Education</p>
+            <p className="mt-4 text-blue-200 text-xs sm:text-sm">— Team Orion Medical Education</p>
           </div>
         </motion.div>
       </div>

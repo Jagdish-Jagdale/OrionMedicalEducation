@@ -8,10 +8,10 @@ import Globe3D from '../components/Globe3D';
 import RussiaDetailedGuide from '../components/RussiaDetailedGuide';
 
 const countryMeta = [
-  { key: 'georgia', label: 'GEORGIA', slug: 'georgia', flag: '🇬🇪', pos: { top: '22%', left: '20%' } },
-  { key: 'russia', label: 'RUSSIA', slug: 'russia', flag: '🇷🇺', pos: { top: '22%', left: '80%' } },
-  { key: 'kyrgyzstan', label: 'KYRGYZSTAN', slug: 'kyrgyzstan', flag: '🇰🇬', pos: { top: '82%', left: '20%' } },
-  { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: '🇺🇿', pos: { top: '82%', left: '80%' } },
+  { key: 'georgia', label: 'GEORGIA', slug: 'georgia', flag: '🇬🇪', pos: { top: '18%', left: '32%', dtTop: '22%', dtLeft: '20%' } },
+  { key: 'russia', label: 'RUSSIA', slug: 'russia', flag: '🇷🇺', pos: { top: '18%', left: '68%', dtTop: '22%', dtLeft: '80%' } },
+  { key: 'kyrgyzstan', label: 'KYRGYZSTAN', slug: 'kyrgyzstan', flag: '🇰🇬', pos: { top: '82%', left: '32%', dtTop: '82%', dtLeft: '20%' } },
+  { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: '🇺🇿', pos: { top: '82%', left: '68%', dtTop: '82%', dtLeft: '80%' } },
 ];
 
 const Countries = () => {
@@ -22,6 +22,14 @@ const Countries = () => {
   
   const [selectedCountry, setSelectedCountry] = useState('russia');
   const location = useLocation();
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024); // Use 1024 for tablet/mobile spread
+  
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
@@ -68,26 +76,36 @@ const Countries = () => {
   return (
     <div className="min-h-screen bg-white pt-20">
       {/* ── INTERACTIVE 3D GLOBE SECTION ─────────────────── */}
-      <div className="relative h-[85vh] flex items-center justify-center overflow-hidden border-b border-slate-50 bg-[#fbfcfd]">
+      <div className="relative h-[75vh] sm:h-[85vh] flex items-center justify-center overflow-hidden border-b border-slate-50 bg-[#fbfcfd]">
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#1e3a5f 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
         <div className="relative w-full max-w-7xl h-full flex items-center justify-center">
           
-          {/* SVG Connecting Lines Layer - Perfectly Symmetrical elbow */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none z-10 lg:block hidden" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+          {/* SVG Connecting Lines Layer - Precision 100x100 Grid */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
               <linearGradient id="line-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.1" />
-                <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.4" />
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.9" />
               </linearGradient>
             </defs>
             {countryMeta.map((country) => {
-              const x1 = 500;
-              const y1 = 500;
-              const x2 = parseFloat(country.pos.left) * 10;
-              const y2 = parseFloat(country.pos.top) * 10;
+              const x1 = 50;
+              const y1 = 50;
               
-              const isLeft = x2 < 500;
+              // Correctly sync with responsive positioning logic
+              const finalLeft = isMobile ? country.pos.left : country.pos.dtLeft;
+              const finalTop = isMobile ? country.pos.top : country.pos.dtTop;
+              
+              const x2_raw = parseFloat(finalLeft);
+              const y2_raw = parseFloat(finalTop);
+              
+              // "Lines Cross" effect: Penetrate slightly through the center of the dot
+              const angle = Math.atan2(y2_raw - 50, x2_raw - 50);
+              const extension = 1.2; // Penetrate 1.2% through the dot
+              const x2 = x2_raw + Math.cos(angle) * extension;
+              const y2 = y2_raw + Math.sin(angle) * extension;
+              
               const d = `M ${x1} ${y1} L ${x2} ${y2}`;
 
               return (
@@ -96,8 +114,9 @@ const Countries = () => {
                   d={d}
                   fill="none"
                   stroke={selectedCountry === country.slug ? '#2563eb' : 'url(#line-grad)'}
-                  strokeWidth="2"
-                  strokeDasharray="6,4"
+                  strokeWidth={isMobile ? 0.35 : 0.45}
+                  strokeDasharray="none"
+                  strokeLinecap="round"
                   initial={{ pathLength: 0, opacity: 0 }}
                   animate={{ pathLength: 1, opacity: 1 }}
                   transition={{ duration: 1.5, delay: 0.5 }}
@@ -107,8 +126,8 @@ const Countries = () => {
           </svg>
 
           {/* --- Central 3D Globe --- */}
-          <div className="relative z-20 w-full h-full flex items-center justify-center">
-            <Suspense fallback={<div className="w-56 h-56 rounded-full bg-slate-50 animate-pulse" />}>
+          <div className="relative z-20 w-80 h-80 sm:w-full sm:h-full flex items-center justify-center">
+            <Suspense fallback={<div className="w-40 h-40 rounded-full bg-slate-50 animate-pulse" />}>
               <div className="w-full h-full max-h-[85vh]">
                 <Globe3D />
               </div>
@@ -118,29 +137,53 @@ const Countries = () => {
           {/* --- Orbital Country Navigation Labels --- */}
           {countryMeta.map((meta, i) => {
             const isLeft = parseFloat(meta.pos.left) < 50;
+            const isTop = parseFloat(meta.pos.top) < 50;
+            
             return (
               <motion.div
                 key={meta.slug}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.8 + i * 0.15 }}
-                className="absolute z-40 group sm:block"
-                style={{ top: meta.pos.top, left: meta.pos.left }}
+                className="absolute z-40"
+                style={{ 
+                  top: isMobile ? meta.pos.top : meta.pos.dtTop, 
+                  left: isMobile ? meta.pos.left : meta.pos.dtLeft,
+                }}
               >
-                {/* Visual Pinpoint Dot - THE ANCHOR */}
-                <div className={`absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full border border-blue-200 flex items-center justify-center shadow-sm z-50`}>
-                  <div className={`w-2 h-2 rounded-full ${selectedCountry === meta.slug ? 'bg-blue-600 shadow-[0_0_8px_#3b82f6]' : 'bg-blue-300 animate-pulse'}`} />
-                </div>
+                {/* 
+                  Wrapper centered on the dot: 
+                  The center of this absolute container is the exact target point for the SVG line.
+                */}
+                <div className="relative w-0 h-0 flex items-center justify-center">
+                  
+                  {/* Visual Pinpoint Dot - THE ANCHOR (Center aligned to the coordinate) */}
+                  <div className="absolute w-4 h-4 sm:w-6 sm:h-6 -translate-x-1/2 -translate-y-1/2 bg-white rounded-full border-2 border-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.4)] z-50">
+                    <div className="absolute inset-[-4px] rounded-full border border-blue-200/50 animate-ping opacity-20" />
+                    <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${selectedCountry === meta.slug ? 'bg-blue-600 shadow-[0_0_12px_rgba(37,99,235,0.6)]' : 'bg-blue-300'}`} />
+                  </div>
 
-                {/* The Card Button - Shifted next to the dot */}
-                <motion.button
-                  onClick={() => handleCountrySelection(meta.slug)}
-                  className={`absolute top-0 ${isLeft ? 'right-4' : 'left-4'} -translate-y-1/2 bg-white/90 backdrop-blur-md px-6 py-4 rounded-2xl shadow-[0_15px_45px_rgba(0,0,0,0.06)] border transition-all duration-300 min-w-[170px] text-center group active:scale-95 ${selectedCountry === meta.slug ? 'border-blue-600 shadow-blue-500/10' : 'border-white hover:border-blue-300'}`}
-                >
-                  <h3 className={`w-full font-black transition-colors uppercase tracking-[0.2em] text-[13px] ${selectedCountry === meta.slug ? 'text-blue-600' : 'text-navy group-hover:text-blue-500'}`}>
-                    {meta.label}
-                  </h3>
-                </motion.button>
+                  {/* The Card Button - Deeply fused into the dot anchor */}
+                  <div 
+                    className="absolute top-1/2 flex items-center pointer-events-none"
+                    style={{ 
+                      [isLeft ? 'right' : 'left']: '0',
+                      transform: `translate(${isLeft ? '6px' : '-6px'}, -50%)`,
+                      width: isMobile ? '115px' : '280px'
+                    }}
+                  >
+                    <motion.button
+                      onClick={() => handleCountrySelection(meta.slug)}
+                      className={`relative w-full pointer-events-auto
+                        bg-white/95 backdrop-blur-md px-3 sm:px-6 py-2 sm:py-4 rounded-xl sm:rounded-2xl shadow-[0_15px_45px_rgba(0,0,0,0.18)] border transition-all duration-300 group active:scale-95 whitespace-nowrap
+                        ${selectedCountry === meta.slug ? 'border-blue-600 shadow-blue-500/25 scale-105' : 'border-slate-100 hover:border-blue-400'}`}
+                    >
+                      <h3 className={`w-full font-black transition-colors uppercase text-center tracking-[0.1em] sm:tracking-[0.2em] text-[8px] sm:text-[14px] ${selectedCountry === meta.slug ? 'text-blue-600' : 'text-navy group-hover:text-blue-600'}`}>
+                        {meta.label}
+                      </h3>
+                    </motion.button>
+                  </div>
+                </div>
               </motion.div>
             );
           })}

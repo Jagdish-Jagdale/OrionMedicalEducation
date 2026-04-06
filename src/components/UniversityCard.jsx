@@ -18,7 +18,7 @@ const UniversityCard = ({ university }) => {
       className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100"
     >
       {/* Image */}
-      <div className="relative h-44 bg-gradient-to-br from-blue-100 to-blue-200 overflow-hidden">
+      <div className="relative h-32 sm:h-44 bg-gradient-to-br from-blue-100 to-blue-200 overflow-hidden">
         {university.imageUrl ? (
           <img
             src={university.imageUrl}
@@ -35,14 +35,14 @@ const UniversityCard = ({ university }) => {
           </div>
         )}
         {/* Country badge */}
-        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-navy text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
+        <div className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-white/90 backdrop-blur-sm text-navy text-[10px] sm:text-xs font-semibold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full shadow-sm">
           {university.countryName}
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-5">
-        <h3 className="font-bold text-navy text-base leading-snug mb-2 group-hover:text-blue-700 transition-colors line-clamp-2">
+      <div className="p-4 sm:p-5">
+        <h3 className="font-bold text-navy text-sm sm:text-base leading-snug mb-2 group-hover:text-blue-700 transition-colors line-clamp-2">
           {university.name}
         </h3>
 

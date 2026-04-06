@@ -16,23 +16,23 @@ const CountryCard = ({ country, universities = [] }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
-      className="bg-white rounded-3xl shadow-lg overflow-hidden border border-slate-100"
+      className="bg-white rounded-2xl sm:rounded-3xl shadow-lg overflow-hidden border border-slate-100"
     >
       {/* Country Header */}
-      <div className="relative bg-gradient-to-r from-navy to-blue-800 p-6 text-white overflow-hidden">
+      <div className="relative bg-gradient-to-r from-navy to-blue-800 p-5 sm:p-6 text-white overflow-hidden">
         <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/5 rounded-full" />
         <div className="absolute -right-2 -bottom-8 w-20 h-20 bg-white/5 rounded-full" />
         <div className="relative z-10 flex items-center gap-4">
-          <span className="text-5xl">{flagMap[country.name] || '🌍'}</span>
+          <span className="text-4xl sm:text-5xl">{flagMap[country.name] || '🌍'}</span>
           <div>
-            <h3 className="text-2xl font-bold">{country.name}</h3>
-            <p className="text-blue-200 text-sm mt-0.5">{universities.length} Universities</p>
+            <h3 className="text-xl sm:text-2xl font-bold">{country.name}</h3>
+            <p className="text-blue-200 text-xs sm:text-sm mt-0.5">{universities.length} Universities</p>
           </div>
         </div>
       </div>
 
       {/* Description */}
-      <div className="p-6">
+      <div className="p-5 sm:p-6">
         <p className="text-slate-600 text-sm leading-relaxed mb-5">{country.description}</p>
 
         {/* Benefits */}

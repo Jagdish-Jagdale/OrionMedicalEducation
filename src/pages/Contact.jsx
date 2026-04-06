@@ -89,21 +89,21 @@ const Contact = () => {
    return (
       <div className="min-h-screen bg-slate-50 pt-20">
          {/* Header */}
-         <div className="bg-gradient-to-r from-navy to-blue-700 py-16 px-4 text-center">
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-amber-400 text-sm font-bold uppercase tracking-widest mb-3">
+         <div className="bg-gradient-to-r from-navy to-blue-700 py-12 sm:py-16 px-6 text-center">
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-amber-400 text-xs sm:text-sm font-bold uppercase tracking-widest mb-3">
                Contact Us
             </motion.p>
-            <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-3xl sm:text-5xl font-bold text-white mb-4">
+            <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
                Get in Touch With Us
             </motion.h1>
-            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-blue-200 max-w-xl mx-auto text-sm">
+            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-blue-200 max-w-xl mx-auto text-xs sm:text-sm">
                Our expert counselors are ready to guide you through every step of your MBBS abroad journey.
             </motion.p>
          </div>
 
          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-12">
             {/* Contact info cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
                {contactInfo.map((info, i) => (
                   <motion.div
                      key={i}
@@ -111,59 +111,129 @@ const Contact = () => {
                      whileInView={{ opacity: 1, y: 0 }}
                      viewport={{ once: true }}
                      transition={{ delay: i * 0.1 }}
-                     className="bg-white rounded-2xl p-6 shadow-md border border-slate-100 hover:shadow-lg transition-shadow"
+                     className="bg-white rounded-xl sm:rounded-2xl p-5 sm:p-6 shadow-md border border-slate-100 hover:shadow-lg transition-shadow"
                   >
-                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${info.color}`}>
+                     <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center mb-4 ${info.color}`}>
                         {info.icon}
                      </div>
-                     <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">{info.label}</p>
+                     <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">{info.label}</p>
                      {info.href ? (
-                        <a href={info.href} className="font-bold text-navy hover:text-blue-600 transition-colors text-sm block">{info.value}</a>
+                        <a href={info.href} className="font-bold text-navy hover:text-blue-600 transition-colors text-xs sm:text-sm block">{info.value}</a>
                      ) : (
-                        <p className="font-bold text-navy text-sm">{info.value}</p>
+                        <p className="font-bold text-navy text-xs sm:text-sm">{info.value}</p>
                      )}
-                     <p className="text-slate-400 text-xs mt-1">{info.sub}</p>
+                     <p className="text-slate-400 text-[10px] sm:text-xs mt-1">{info.sub}</p>
                   </motion.div>
                ))}
             </div>
 
-            {/* Social media */}
-            <div>
-               <h2 className="text-2xl font-bold text-navy text-center mb-8">Follow Us on Social Media</h2>
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {socialLinks.map((s, i) => (
-                     <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: i * 0.1 }}
-                        className={`rounded-2xl border p-6 ${s.color} flex flex-col items-center text-center gap-3`}
-                     >
-                        <div className="text-inherit">{s.icon}</div>
-                        <div>
-                           <p className="font-bold text-navy">{s.platform}</p>
-                           <p className="text-xs text-slate-500 mt-0.5">{s.handle}</p>
+            {/* Contact Form & Side Info */}
+            <div className="grid lg:grid-cols-3 gap-12 items-start">
+               {/* Form */}
+               <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  className="lg:col-span-2 bg-white rounded-3xl p-8 sm:p-12 shadow-2xl border border-slate-100 relative overflow-hidden"
+               >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl -mr-16 -mt-16 opacity-50" />
+                  
+                  <h2 className="text-2xl sm:text-3xl font-bold text-navy mb-2 relative z-10">Send us a Message</h2>
+                  <p className="text-slate-500 text-sm mb-10 relative z-10">Fill out the form below and our counselor will call you within 24 hours.</p>
+
+                  <form className="space-y-6 relative z-10">
+                     <div className="grid sm:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                           <label className="text-xs font-black text-navy uppercase tracking-widest ml-1">Full Name</label>
+                           <input 
+                              type="text" 
+                              placeholder="e.g. John Doe"
+                              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all"
+                           />
                         </div>
-                        {/* QR placeholder */}
-                        <div className="w-24 h-24 bg-white rounded-xl border border-current/20 flex flex-col items-center justify-center gap-1 opacity-60">
-                           <div className="grid grid-cols-5 gap-0.5 p-2">
-                              {Array.from({ length: 25 }).map((_, j) => (
-                                 <div key={j} className={`w-2 h-2 rounded-[1px] ${Math.random() > 0.5 ? 'bg-slate-700' : 'bg-transparent'}`} />
-                              ))}
-                           </div>
-                           <p className="text-[9px] text-slate-500">Scan QR</p>
+                        <div className="space-y-2">
+                           <label className="text-xs font-black text-navy uppercase tracking-widest ml-1">Phone Number</label>
+                           <input 
+                              type="tel" 
+                              placeholder="+91 00000 00000"
+                              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all"
+                           />
                         </div>
-                        <a
+                     </div>
+
+                     <div className="space-y-2">
+                        <label className="text-xs font-black text-navy uppercase tracking-widest ml-1">Email Address</label>
+                        <input 
+                           type="email" 
+                           placeholder="john@example.com"
+                           className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all"
+                        />
+                     </div>
+
+                     <div className="space-y-2">
+                        <label className="text-xs font-black text-navy uppercase tracking-widest ml-1">Preferred Country</label>
+                        <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all appearance-none cursor-pointer">
+                           <option>Select Country</option>
+                           <option>Georgia</option>
+                           <option>Russia</option>
+                           <option>Uzbekistan</option>
+                           <option>Kyrgyzstan</option>
+                           <option>Other</option>
+                        </select>
+                     </div>
+
+                     <div className="space-y-2">
+                        <label className="text-xs font-black text-navy uppercase tracking-widest ml-1">Your Message</label>
+                        <textarea 
+                           rows="4"
+                           placeholder="Tell us about your academic background or any questions you have..."
+                           className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all resize-none"
+                        ></textarea>
+                     </div>
+
+                     <button className="w-full bg-gradient-to-r from-blue-600 to-navy text-white font-bold py-5 rounded-2xl shadow-xl shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+                        Submit Application
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
+                     </button>
+                  </form>
+               </motion.div>
+
+               {/* Social Side */}
+               <div className="space-y-8">
+                  <h2 className="text-2xl font-bold text-navy px-2">Social Network</h2>
+                  <div className="flex flex-col gap-4">
+                     {socialLinks.map((s, i) => (
+                        <motion.a
+                           key={i}
                            href={s.link}
                            target="_blank"
                            rel="noopener noreferrer"
-                           className={`${s.btnColor} text-white text-xs font-bold px-5 py-2 rounded-full transition-colors`}
+                           initial={{ opacity: 0, x: 20 }}
+                           whileInView={{ opacity: 1, x: 0 }}
+                           viewport={{ once: true }}
+                           transition={{ delay: i * 0.1 }}
+                           className={`rounded-3xl border p-5 ${s.color} flex items-center gap-4 group transition-all hover:shadow-lg`}
                         >
-                           Follow Now
-                        </a>
-                     </motion.div>
-                  ))}
+                           <div className="p-3 bg-white rounded-2xl shadow-sm text-inherit group-hover:scale-110 transition-transform">{s.icon}</div>
+                           <div className="flex-1">
+                              <p className="font-bold text-navy text-sm">{s.platform}</p>
+                              <p className="text-[10px] text-slate-500 uppercase tracking-widest">{s.handle}</p>
+                           </div>
+                           <div className="w-8 h-8 rounded-full bg-white/50 flex items-center justify-center group-hover:bg-white transition-colors">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" /></svg>
+                           </div>
+                        </motion.a>
+                     ))}
+                  </div>
+                  
+                  {/* Trust Badge */}
+                  <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-xl">
+                     <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mb-4">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg>
+                     </div>
+                     <h4 className="font-bold text-navy mb-2">100% Authorized Partner</h4>
+                     <p className="text-slate-500 text-xs leading-relaxed">We are official authorized representatives for all universities listed on our portal. Zero commission, direct admissions.</p>
+                  </div>
                </div>
             </div>
 

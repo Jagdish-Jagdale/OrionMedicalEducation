@@ -10,7 +10,7 @@ const RussiaDetailedGuide = () => {
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="bg-white rounded-[2rem] p-8 sm:p-12 shadow-xl border border-slate-100 overflow-hidden relative"
+        className="bg-white rounded-2xl sm:rounded-[2rem] p-6 sm:p-12 shadow-xl border border-slate-100 overflow-hidden relative"
       >
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/50 rounded-full blur-3xl -mr-32 -mt-32" />
         
@@ -23,7 +23,7 @@ const RussiaDetailedGuide = () => {
             </div>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="space-y-6">
               <p className="text-slate-600 leading-relaxed text-lg italic">
                 "Russia offers globally-recognized medical degrees with an emphasis on clinical research and advanced technology."
@@ -45,7 +45,7 @@ const RussiaDetailedGuide = () => {
               </div>
             </div>
             
-            <div className="bg-gradient-to-br from-navy to-blue-900 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden">
+            <div className="bg-gradient-to-br from-navy to-blue-900 rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden">
                <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
                <h3 className="text-xl font-bold mb-4 relative z-10">Global Recognition</h3>
                <p className="text-blue-100 text-sm leading-relaxed mb-6 relative z-10">
@@ -63,9 +63,9 @@ const RussiaDetailedGuide = () => {
 
       {/* --- Universities Section --- */}
       <div>
-        <div className="flex flex-col items-center mb-12">
-          <h2 className="text-3xl font-black text-navy text-center mb-2 tracking-tight">Top Medical Institutions</h2>
-          <div className="w-20 h-1.5 bg-amber-500 rounded-full" />
+        <div className="flex flex-col items-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl font-black text-navy text-center mb-2 tracking-tight">Top Medical Institutions</h2>
+          <div className="w-16 sm:w-20 h-1 sm:h-1.5 bg-amber-500 rounded-full" />
         </div>
 
         <div className="space-y-12">
@@ -79,8 +79,8 @@ const RussiaDetailedGuide = () => {
             >
               {/* Image Side */}
               <div className="lg:w-1/3 relative group">
-                <div className="absolute inset-0 bg-blue-600 rounded-[2.5rem] rotate-3 scale-[1.02] -z-10 opacity-10 group-hover:rotate-1 transition-transform duration-500" />
-                <div className="h-full min-h-[300px] rounded-[2rem] overflow-hidden shadow-2xl relative">
+                <div className="absolute inset-0 bg-blue-600 rounded-2xl sm:rounded-[2.5rem] rotate-3 scale-[1.02] -z-10 opacity-10 group-hover:rotate-1 transition-transform duration-500" />
+                <div className="h-full min-h-[250px] sm:min-h-[300px] rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-2xl relative">
                   <img 
                     src={uni.image} 
                     alt={uni.name} 
@@ -93,7 +93,7 @@ const RussiaDetailedGuide = () => {
 
               {/* Content Side */}
               <div className="lg:w-2/3 flex flex-col justify-center">
-                <div className="bg-white rounded-[2rem] p-8 md:p-10 shadow-lg border border-slate-50 flex flex-col h-full relative overflow-hidden group hover:border-blue-200 hover:shadow-blue-500/5 transition-all">
+                <div className="bg-white rounded-2xl sm:rounded-[2rem] p-6 sm:p-8 md:p-10 shadow-lg border border-slate-50 flex flex-col h-full relative overflow-hidden group hover:border-blue-200 hover:shadow-blue-500/5 transition-all">
                   <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                     <svg className="w-24 h-24 text-blue-900" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 14l9-5-9-5-9 5 9 5z" />

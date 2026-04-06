@@ -41,11 +41,11 @@ const Process = () => {
   return (
     <div className="min-h-screen bg-slate-50 pt-20">
       {/* Header */}
-      <div className="bg-gradient-to-r from-navy to-blue-700 py-16 px-4 text-center">
+      <div className="bg-gradient-to-r from-navy to-blue-700 py-12 sm:py-16 px-6 text-center">
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-amber-400 text-sm font-bold uppercase tracking-widest mb-3"
+          className="text-amber-400 text-xs sm:text-sm font-bold uppercase tracking-widest mb-3"
         >
           Step by Step
         </motion.p>
@@ -53,7 +53,7 @@ const Process = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-3xl sm:text-5xl font-bold text-white mb-4"
+          className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white mb-4"
         >
           Simple &amp; Transparent Admission Process
         </motion.h1>
@@ -61,7 +61,7 @@ const Process = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-blue-200 max-w-xl mx-auto text-sm"
+          className="text-blue-200 max-w-xl mx-auto text-xs sm:text-sm"
         >
           8 clear steps from your first call to arriving at your university campus abroad.
         </motion.p>

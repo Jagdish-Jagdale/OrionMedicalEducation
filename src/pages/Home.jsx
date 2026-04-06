@@ -146,14 +146,14 @@ const Home = () => {
         {/* Grid pattern */}
         <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.5) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 grid lg:grid-cols-2 gap-16 items-center">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-24 sm:py-32 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Text */}
-          <div>
+          <div className="text-center lg:text-left">
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-amber-300 text-xs font-bold px-4 py-2 rounded-full border border-white/20 mb-6"
+              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-amber-300 text-[10px] sm:text-xs font-bold px-4 py-2 rounded-full border border-white/20 mb-6"
             >
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
               Trusted MBBS Abroad Consultancy Since 2017
@@ -164,7 +164,7 @@ const Home = () => {
               initial="initial"
               animate="animate"
               transition={{ duration: 0.7, delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight"
+              className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight"
             >
               Your Trusted{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-amber-500">
@@ -178,7 +178,7 @@ const Home = () => {
               initial="initial"
               animate="animate"
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="mt-4 text-xl font-semibold text-blue-200"
+              className="mt-4 text-lg sm:text-xl font-semibold text-blue-200"
             >
               Orion Medical Education
             </motion.p>
@@ -188,9 +188,9 @@ const Home = () => {
               initial="initial"
               animate="animate"
               transition={{ duration: 0.7, delay: 0.3 }}
-              className="mt-4 text-slate-300 text-base leading-relaxed max-w-lg"
+              className="mt-6 text-slate-300 text-sm sm:text-base leading-relaxed max-w-lg mx-auto lg:mx-0"
             >
-              With over 7+ years of experience, we have helped 500+ students secure admissions to top NMC & WHO-approved medical universities across Kyrgyzstan, Russia, Georgia, and Uzbekistan.
+              With over 7+ years of clinical expertise, we have helped 500+ students secure admissions to world-class NMC & WHO-approved medical universities.
             </motion.p>
 
             <motion.div
@@ -198,7 +198,7 @@ const Home = () => {
               initial="initial"
               animate="animate"
               transition={{ duration: 0.7, delay: 0.4 }}
-              className="mt-8 flex flex-col sm:flex-row gap-4"
+              className="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
             >
               <Link
                 to="/countries"
@@ -225,28 +225,28 @@ const Home = () => {
         </div>
 
         {/* --- MBBS TO ABROAD JOURNEY TRANSITION ─────────────────── */}
-        <div className="absolute bottom-4 left-0 right-0 px-6 sm:px-12 pointer-events-none hidden md:block z-20">
-          <div className="max-w-7xl mx-auto flex items-end justify-between gap-8 h-28 relative overflow-visible">
+        <div className="absolute bottom-8 sm:bottom-12 left-0 right-0 px-6 sm:px-12 pointer-events-none z-20">
+          <div className="max-w-7xl mx-auto flex items-end justify-between gap-4 sm:gap-8 h-20 sm:h-28 relative overflow-visible">
             {/* Left: MBBS Label */}
-            <span className="text-white font-black text-3xl italic tracking-tighter opacity-90 select-none drop-shadow-md z-10">MBBS</span>
+            <span className="text-white font-black text-xl sm:text-3xl italic tracking-tighter opacity-80 select-none drop-shadow-md z-10">MBBS</span>
 
-            {/* High-Fidelity Continuous Flight */}
+            {/* High-Fidelity Continuous Flight - Responsive scaling */}
             <motion.img
               src={airplaneImg}
               alt="Airplane"
               initial={{ left: "0%", top: "20%", rotate: 0 }}
               animate={{
                 left: ["0%", "95%"],
-                top: ["20%", "-180%", "20%"],
+                top: ["20%", "-150%", "20%"],
                 rotate: [0, -35, 0, 15, 0]
               }}
               transition={{
                 repeat: Infinity,
-                duration: 10,
+                duration: 12,
                 ease: "easeInOut",
-                repeatDelay: 2.5
+                repeatDelay: 3
               }}
-              className="w-16 h-auto object-contain filter brightness-0 invert drop-shadow-[0_0_12px_rgba(255,255,255,0.8)] z-30"
+              className="w-10 sm:w-16 h-auto object-contain filter brightness-0 invert drop-shadow-[0_0_12px_rgba(255,255,255,0.8)] z-30"
               style={{
                 position: 'absolute',
                 transform: 'translate(-50%, -50%)'
@@ -254,7 +254,7 @@ const Home = () => {
             />
 
             {/* Right: ABROAD Label */}
-            <span className="text-white font-black text-3xl italic tracking-tighter opacity-90 select-none drop-shadow-md z-10">ABROAD</span>
+            <span className="text-white font-black text-xl sm:text-3xl italic tracking-tighter opacity-80 select-none drop-shadow-md z-10">ABROAD</span>
           </div>
         </div>
 
@@ -283,10 +283,10 @@ const Home = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center max-w-3xl mx-auto mb-16"
+            className="text-center max-w-3xl mx-auto mb-12 sm:mb-16"
           >
-            <span className="inline-block text-blue-600 text-sm font-bold uppercase tracking-widest mb-3">About Us</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-navy leading-tight">
+            <span className="inline-block text-blue-600 text-xs sm:text-sm font-bold uppercase tracking-widest mb-3">About Us</span>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-navy leading-tight">
               We are not just consultants —{' '}
               <span className="text-amber-500">we are Custodians</span> of your entire journey.
             </h2>
@@ -318,7 +318,7 @@ const Home = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center bg-gradient-to-r from-navy to-blue-700 rounded-3xl p-12 text-white mb-20 relative overflow-hidden"
+            className="text-center bg-gradient-to-r from-navy to-blue-700 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-white mb-16 sm:mb-20 relative overflow-hidden"
           >
             <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.8) 1px, transparent 0)', backgroundSize: '30px 30px' }} />
             <div className="relative z-10">
@@ -361,10 +361,10 @@ const Home = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center max-w-3xl mx-auto mb-16"
+            className="text-center max-w-3xl mx-auto mb-12 sm:mb-16"
           >
-            <span className="inline-block text-blue-600 text-sm font-bold uppercase tracking-widest mb-3">Life at the University</span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-navy leading-tight">
+            <span className="inline-block text-blue-600 text-xs sm:text-sm font-bold uppercase tracking-widest mb-3">Life at the University</span>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-navy leading-tight">
               Explore Our <span className="text-amber-500">Student Journey</span>
             </h2>
             <p className="mt-4 text-slate-500 leading-relaxed">
