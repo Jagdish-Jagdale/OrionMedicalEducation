@@ -16,6 +16,7 @@ const Reviews = () => {
 
   /* ── Dynamically-computed SVG path strings ── */
   const [pathDefs, setPathDefs] = useState(Array(6).fill(''));
+  const [isMobile, setIsMobile] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -29,26 +30,21 @@ const Reviews = () => {
     restDelta: 0.001
   });
 
-  // Thresholds optimized for "Bottom 20%" trigger (80% top margin)
-  const row1NerveProgress = useTransform(smoothProgress, [0, 0.12], [0, 1]);
-  const row1CardProgress  = useTransform(smoothProgress, [0.06, 0.18], [0, 1]);
+  // Responsive Nerve & Card progress (6 sequential stages)
+  // Row-based Responsive Nerve & Card progress (3 stages)
+  const row1NerveProg = useTransform(smoothProgress, [0, 0.12], [0, 1]);
+  const row1CardProg  = useTransform(smoothProgress, [0.06, 0.18], [0, 1]);
+  
+  const row2NerveProg = useTransform(smoothProgress, [0.22, 0.34], [0, 1]);
+  const row2CardProg  = useTransform(smoothProgress, [0.28, 0.40], [0, 1]);
+  
+  const row3NerveProg = useTransform(smoothProgress, [0.44, 0.56], [0, 1]);
+  const row3CardProg  = useTransform(smoothProgress, [0.50, 0.62], [0, 1]);
+ 
+  const progressByIndex = [row1NerveProg, row1NerveProg, row2NerveProg, row2NerveProg, row3NerveProg, row3NerveProg];
+  const cardProgressByIndex = [row1CardProg, row1CardProg, row2CardProg, row2CardProg, row3CardProg, row3CardProg];
+  const scaleByIndex = cardProgressByIndex.map(p => useTransform(p, [0, 1], [0.95, 1]));
 
-  const row2NerveProgress = useTransform(smoothProgress, [0.22, 0.34], [0, 1]);
-  const row2CardProgress  = useTransform(smoothProgress, [0.28, 0.40], [0, 1]);
-
-  const row3NerveProgress = useTransform(smoothProgress, [0.44, 0.56], [0, 1]);
-  const row3CardProgress  = useTransform(smoothProgress, [0.50, 0.62], [0, 1]);
-
-  // Use the card progress for scaling as well
-  const row1Scale = useTransform(row1CardProgress, [0, 1], [0.95, 1]);
-  const row2Scale = useTransform(row2CardProgress, [0, 1], [0.95, 1]);
-  const row3Scale = useTransform(row3CardProgress, [0, 1], [0.95, 1]);
-
-  const progressByIndex = [
-    row1NerveProgress, row1NerveProgress,
-    row2NerveProgress, row2NerveProgress,
-    row3NerveProgress, row3NerveProgress,
-  ];
   const isLeftCard = [true, false, true, false, true, false];
 
   /* ──────────────────────────────────────────────────────────
@@ -84,12 +80,18 @@ const Reviews = () => {
 
   useLayoutEffect(() => {
     measurePaths();
-    const ro = new ResizeObserver(measurePaths);
+    const handleResize = () => {
+      measurePaths();
+      setIsMobile(window.innerWidth < 1024);
+    };
+    handleResize(); // initial check
+
+    const ro = new ResizeObserver(handleResize);
     if (containerRef.current) ro.observe(containerRef.current);
-    window.addEventListener('resize', measurePaths);
+    window.addEventListener('resize', handleResize);
     return () => {
       ro.disconnect();
-      window.removeEventListener('resize', measurePaths);
+      window.removeEventListener('resize', handleResize);
     };
   }, [measurePaths]);
 
@@ -140,16 +142,16 @@ const Reviews = () => {
           <div className="w-20 h-1 bg-amber-500 mx-auto mt-6 rounded-full shadow-lg" />
         </div>
 
-        {/* ═══ DESKTOP: Neural Map (lg+) ═══ */}
-        <div className="hidden lg:block relative mt-10 min-h-[1500px]">
-
+        {/* ═══ ANIMATED NEURAL MAP (Responsive) ═══ */}
+        <div className="relative mt-0 md:mt-10 min-h-[1200px] lg:min-h-[1500px]">
+ 
           {/* ── Brain ── */}
-          <div className="absolute top-[-40px] left-1/2 -translate-x-1/2 w-full flex items-center justify-center pointer-events-none z-20">
-            <div className="relative w-[530px] h-[530px]">
+          <div className="absolute top-[-20px] lg:top-[-40px] left-1/2 -translate-x-1/2 w-full flex items-center justify-center pointer-events-none z-20">
+            <div className="relative w-[180px] h-[180px] lg:w-[530px] lg:h-[530px]">
               <motion.div
                 animate={{ scale: [1, 1.1, 1], opacity: [0.15, 0.35, 0.15] }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute inset-0 bg-blue-300 rounded-full blur-[100px]"
+                className="absolute inset-0 bg-blue-300 rounded-full blur-[40px] lg:blur-[100px]"
               />
               <motion.img
                 ref={brainRef}
@@ -176,7 +178,7 @@ const Reviews = () => {
                   key={i}
                   d={d}
                   stroke="#3b82f6"
-                  strokeWidth="5.0"
+                  strokeWidth={isMobile ? "2.5" : "5.0"}
                   strokeLinecap="round"
                   initial={{ opacity: 0, pathLength: 0 }}
                   style={{ 
@@ -190,127 +192,85 @@ const Reviews = () => {
           </svg>
 
           {/* ── Cards ── */}
-          <div className="relative z-30 w-full min-h-[1500px]">
-
-            {/* Row 1 */}
+          <div className="relative z-30 w-full">
+ 
+            {/* Card 0 (Row 1 Left) */}
             <div
               ref={setCardRef(0)}
-              className="absolute top-[450px] left-[50%] -translate-x-[460px] w-[300px] -translate-y-1/2"
+              className="absolute top-[350px] lg:top-[620px] left-1/2 -translate-x-[calc(100%+20px)] lg:-translate-x-[530px] w-[155px] lg:w-[300px] -translate-y-1/2"
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
-                style={{ opacity: row1CardProgress, scale: row1Scale }}
+                style={{ opacity: cardProgressByIndex[0], scale: scaleByIndex[0] }}
               >
                 {topReviews[0] && <NeuralReviewCard review={topReviews[0]} position="relative" isLeft={true} />}
               </motion.div>
             </div>
+ 
+            {/* Card 1 (Row 1 Right) */}
             <div
               ref={setCardRef(1)}
-              className="absolute top-[450px] left-[50%] translate-x-[160px] w-[300px] -translate-y-1/2"
+              className="absolute top-[350px] lg:top-[620px] left-1/2 translate-x-[20px] lg:translate-x-[230px] w-[155px] lg:w-[300px] -translate-y-1/2"
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
-                style={{ opacity: row1CardProgress, scale: row1Scale }}
+                style={{ opacity: cardProgressByIndex[1], scale: scaleByIndex[1] }}
               >
                 {topReviews[1] && <NeuralReviewCard review={topReviews[1]} position="relative" isLeft={false} />}
               </motion.div>
             </div>
-
-            {/* Row 2 */}
+ 
+            {/* Card 2 (Row 2 Left) */}
             <div
               ref={setCardRef(2)}
-              className="absolute top-[700px] left-[50%] -translate-x-[460px] w-[300px] -translate-y-1/2"
+              className="absolute top-[550px] lg:top-[870px] left-1/2 -translate-x-[calc(100%+20px)] lg:-translate-x-[530px] w-[155px] lg:w-[300px] -translate-y-1/2"
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
-                style={{ opacity: row2CardProgress, scale: row2Scale }}
+                style={{ opacity: cardProgressByIndex[2], scale: scaleByIndex[2] }}
               >
                 {topReviews[2] && <NeuralReviewCard review={topReviews[2]} position="relative" isLeft={true} />}
               </motion.div>
             </div>
+ 
+            {/* Card 3 (Row 2 Right) */}
             <div
               ref={setCardRef(3)}
-              className="absolute top-[700px] left-[50%] translate-x-[160px] w-[300px] -translate-y-1/2"
+              className="absolute top-[550px] lg:top-[870px] left-1/2 translate-x-[20px] lg:translate-x-[230px] w-[155px] lg:w-[300px] -translate-y-1/2"
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
-                style={{ opacity: row2CardProgress, scale: row2Scale }}
+                style={{ opacity: cardProgressByIndex[3], scale: scaleByIndex[3] }}
               >
                 {topReviews[3] && <NeuralReviewCard review={topReviews[3]} position="relative" isLeft={false} />}
               </motion.div>
             </div>
-
-            {/* Row 3 */}
+ 
+            {/* Card 4 (Row 3 Left) */}
             <div
               ref={setCardRef(4)}
-              className="absolute top-[1000px] left-[50%] -translate-x-[460px] w-[300px] -translate-y-1/2"
+              className="absolute top-[750px] lg:top-[1120px] left-1/2 -translate-x-[calc(100%+20px)] lg:-translate-x-[530px] w-[155px] lg:w-[300px] -translate-y-1/2"
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
-                style={{ opacity: row3CardProgress, scale: row3Scale }}
+                style={{ opacity: cardProgressByIndex[4], scale: scaleByIndex[4] }}
               >
                 {topReviews[4] && <NeuralReviewCard review={topReviews[4]} position="relative" isLeft={true} />}
               </motion.div>
             </div>
+ 
+            {/* Card 5 (Row 3 Right) */}
             <div
               ref={setCardRef(5)}
-              className="absolute top-[1000px] left-[50%] translate-x-[160px] w-[300px] -translate-y-1/2"
+              className="absolute top-[750px] lg:top-[1120px] left-1/2 translate-x-[20px] lg:translate-x-[230px] w-[155px] lg:w-[300px] -translate-y-1/2"
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
-                style={{ opacity: row3CardProgress, scale: row3Scale }}
+                style={{ opacity: cardProgressByIndex[5], scale: scaleByIndex[5] }}
               >
                 {topReviews[5] && <NeuralReviewCard review={topReviews[5]} position="relative" isLeft={false} />}
               </motion.div>
             </div>
-
-          </div>
-        </div>
-
-        {/* ═══ MOBILE / TABLET: Stacked list ═══ */}
-        <div className="lg:hidden relative mt-6">
-          {/* Mini brain */}
-          <div className="flex justify-center mb-8">
-            <div className="relative w-[200px] h-[200px]">
-              <motion.div
-                animate={{ scale: [1, 1.1, 1], opacity: [0.2, 0.4, 0.2] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute inset-0 bg-blue-300 rounded-full blur-[60px]"
-              />
-              <motion.img
-                src={brainImg} alt="Anatomical Intelligence"
-                animate={{ y: [0, -5, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-                className="w-full h-full object-contain relative z-10"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-5 px-2">
-            {topReviews.map((review, i) => (
-              <motion.div
-                key={review.id}
-                initial={{ opacity: 0, y: 28 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false, margin: '-50px' }}
-                transition={{ duration: 0.5, delay: i * 0.06 }}
-                className={`relative p-5 bg-white rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.06)] border-l-4 ${i % 2 === 0 ? 'border-l-blue-500' : 'border-l-amber-500'}`}
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full border-2 border-slate-100 p-0.5 overflow-hidden flex-shrink-0 shadow-sm">
-                    <img
-                      src={review.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.studentName)}&background=random`}
-                      alt={review.studentName} className="w-full h-full rounded-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h4 className="text-navy font-bold text-sm uppercase tracking-wider">{review.studentName}</h4>
-                    <p className="text-slate-400 text-[10px] uppercase font-black tracking-widest">{review.type}</p>
-                  </div>
-                </div>
-                <p className="text-slate-600 text-[13px] leading-relaxed italic">"{review.text || review.comment}"</p>
-              </motion.div>
-            ))}
           </div>
         </div>
 
