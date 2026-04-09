@@ -55,7 +55,7 @@ const Navbar = ({ showSplash }) => {
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo - Synchronized Handoff */}
           <Link to="/" className="flex items-center gap-2 group">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: logoVisible ? 1 : 0 }}
               transition={{ duration: 0.4 }}

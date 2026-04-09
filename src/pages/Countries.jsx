@@ -7,11 +7,17 @@ import LoadingSkeleton from '../components/LoadingSkeleton';
 import Globe3D from '../components/Globe3D';
 import RussiaDetailedGuide from '../components/RussiaDetailedGuide';
 
+// Import Flag Images
+import georgiaFlag from '../assets/flags/georgiaflag.png';
+import russiaFlag from '../assets/flags/russiaflag.png';
+import kyrgyzstanFlag from '../assets/flags/kyrgyzstanflag.png';
+import uzbekistanFlag from '../assets/flags/uzbekistanflag.png';
+
 const countryMeta = [
-  { key: 'georgia', label: 'GEORGIA', slug: 'georgia', flag: '🇬🇪', pos: { top: '26%', left: '32%', dtTop: '25%', dtLeft: '20%' } },
-  { key: 'russia', label: 'RUSSIA', slug: 'russia', flag: '🇷🇺', pos: { top: '26%', left: '68%', dtTop: '25%', dtLeft: '80%' } },
-  { key: 'kyrgyzstan', label: 'KYRGYZSTAN', slug: 'kyrgyzstan', flag: '🇰🇬', pos: { top: '74%', left: '32%', dtTop: '75%', dtLeft: '20%' } },
-  { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: '🇺🇿', pos: { top: '74%', left: '68%', dtTop: '75%', dtLeft: '80%' } },
+  { key: 'georgia', label: 'GEORGIA', slug: 'georgia', flag: georgiaFlag, pos: { top: '22%', left: '32%', dtTop: '18%', dtLeft: '18%' } },
+  { key: 'russia', label: 'RUSSIA', slug: 'russia', flag: russiaFlag, pos: { top: '22%', left: '68%', dtTop: '18%', dtLeft: '82%' } },
+  { key: 'kyrgyzstan', label: 'KYRGYZSTAN', slug: 'kyrgyzstan', flag: kyrgyzstanFlag, pos: { top: '78%', left: '32%', dtTop: '82%', dtLeft: '18%' } },
+  { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: uzbekistanFlag, pos: { top: '78%', left: '68%', dtTop: '82%', dtLeft: '82%' } },
 ];
 
 const Countries = () => {
@@ -77,56 +83,98 @@ const Countries = () => {
   return (
     <div className="min-h-screen bg-white pt-15 sm:pt-20">
       {/* ── INTERACTIVE 3D GLOBE SECTION ─────────────────── */}
-      <div className="relative h-[50vh] sm:h-[85vh] flex items-center justify-center overflow-hidden border-b border-slate-50 bg-[#fbfcfd]">
+      <div className="relative h-[50vh] sm:h-[85vh] pt-10 sm:pt-0 flex items-center justify-center overflow-hidden border-b border-slate-50 bg-[#fbfcfd]">
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#1e3a5f 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
         <div className="relative w-full max-w-7xl h-full flex items-center justify-center">
 
           {/* SVG Connecting Lines Layer - Precision 100x100 Grid */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <svg className="absolute inset-0 w-full h-full pointer-events-none z-30" viewBox="0 0 100 100" preserveAspectRatio={isMobile ? "xMidYMid meet" : "none"}>
             <defs>
               <linearGradient id="line-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
                 <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.9" />
               </linearGradient>
+              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="0.08" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
             </defs>
-            {countryMeta.map((country) => {
-              const x1 = 50;
-              const y1 = 50;
-
-              // Correctly sync with responsive positioning logic
+            {countryMeta.map((country, i) => {
               const finalLeft = isMobile ? country.pos.left : country.pos.dtLeft;
               const finalTop = isMobile ? country.pos.top : country.pos.dtTop;
 
               const x2_raw = parseFloat(finalLeft);
               const y2_raw = parseFloat(finalTop);
 
-              // "Lines Cross" effect: Penetrate slightly through the center of the dot
-              const angle = Math.atan2(y2_raw - 50, x2_raw - 50);
-              const extension = 1.2; // Penetrate 1.2% through the dot
-              const x2 = x2_raw + Math.cos(angle) * extension;
-              const y2 = y2_raw + Math.sin(angle) * extension;
+              // REFINED GEOMETRY: Calculate exact starting point on globe surface
+              const globe_radius = isMobile ? 18.5 : 24.5;
+              const x_offset_raw = isMobile ? 6 : 14;
 
-              const d = `M ${x1} ${y1} L ${x2} ${y2}`;
+              const isLeft = x2_raw < 50;
+              const isTop = y2_raw < 50;
+
+              const x_start = isLeft ? 50 - x_offset_raw : 50 + x_offset_raw;
+
+              // Circle equation: y = 50 +/- sqrt(radius^2 - (x - 50)^2)
+              const dx_anchor = x_start - 50;
+              const dy_anchor = Math.sqrt(Math.pow(globe_radius, 2) - Math.pow(dx_anchor, 2));
+              const y_start = isTop ? 50 - dy_anchor : 50 + dy_anchor;
+
+              // 2-SEGMENT 45-DEGREE LOGIC: Diagonal from globe -> Horizontal to card
+              const dy_total = y2_raw - y_start;
+              const dx_45 = (x2_raw < x_start ? -1 : 1) * Math.abs(dy_total);
+              const x_mid = x_start + dx_45;
+
+              const x2 = x2_raw;
+              const y2 = y2_raw;
+
+              // Path: M globe -> Diagonal to (x_mid, y2) -> Horizontal to card
+              const d = `M ${x_start} ${y_start} L ${x_mid} ${y2} L ${x2} ${y2}`;
 
               return (
-                <motion.path
-                  key={`line-${country.slug}`}
-                  d={d}
-                  fill="none"
-                  stroke={selectedCountry === country.slug ? '#2563eb' : 'url(#line-grad)'}
-                  strokeWidth={isMobile ? 0.35 : 0.45}
-                  strokeDasharray="none"
-                  strokeLinecap="round"
-                  animate={isGlobeLoaded ? { pathLength: 1, opacity: 1 } : { pathLength: 0, opacity: 0 }}
-                  transition={{ duration: 1.5, delay: 0.2 }}
-                />
+                <g key={`line-group-${country.slug}`}>
+                  {/* Anchor Point on Globe */}
+                  <motion.circle
+                    cx={x_start}
+                    cy={y_start}
+                    r={0.18}
+                    fill="#3b82f6"
+                    initial={{ scale: 0 }}
+                    animate={isGlobeLoaded ? { scale: 1 } : { scale: 0 }}
+                    transition={{ delay: 0.5 + i * 0.1 }}
+                  />
+
+                  {/* Connection Line */}
+                  <motion.path
+                    d={d}
+                    fill="none"
+                    stroke={selectedCountry === country.slug ? '#2563eb' : 'url(#line-grad)'}
+                    strokeWidth={isMobile ? 0.12 : 0.22}
+                    strokeLinecap="round"
+                    filter="url(#glow)"
+                    animate={isGlobeLoaded ? { pathLength: 1, opacity: 1 } : { pathLength: 0, opacity: 0 }}
+                    transition={{ duration: 1.2, delay: 0.2 + i * 0.1 }}
+                  />
+
+                  {/* Corner Node: After 45 deg diagonal, starting horizontal */}
+                  <motion.circle
+                    cx={x_mid}
+                    cy={y2}
+                    r={0.12}
+                    fill="#3b82f6"
+                    opacity={0.6}
+                    initial={{ scale: 0 }}
+                    animate={isGlobeLoaded ? { scale: 1 } : { scale: 0 }}
+                    transition={{ delay: 0.8 + i * 0.1 }}
+                  />
+                </g>
               );
             })}
           </svg>
 
           {/* --- Central 3D Globe --- */}
-          <div className="relative z-20 w-64 h-64 sm:w-full sm:h-full flex items-center justify-center">
+          <div className="relative z-20 w-[52%] sm:w-[54%] aspect-square flex items-center justify-center">
             <Suspense fallback={<div className="w-40 h-40 rounded-full bg-slate-50 animate-pulse" />}>
               <div className="w-full h-full max-h-[85vh]">
                 <Globe3D onLoad={() => setIsGlobeLoaded(true)} />
@@ -175,8 +223,8 @@ const Countries = () => {
                     <div
                       className="relative pointer-events-none"
                       style={{
-                        width: isMobile ? '115px' : '280px',
-                        [isLeft ? 'marginRight' : 'marginLeft']: isMobile ? '-8px' : '-12px'
+                        width: isMobile ? '100px' : '210px',
+                        [isLeft ? 'marginRight' : 'marginLeft']: isMobile ? '-2px' : '-12px'
                       }}
                     >
                       <motion.button
@@ -185,7 +233,10 @@ const Countries = () => {
                           bg-white/95 backdrop-blur-md px-3 sm:px-6 py-2 sm:py-4 rounded-xl sm:rounded-2xl shadow-[0_15px_45px_rgba(0,0,0,0.18)] border transition-all duration-300 group active:scale-95 whitespace-nowrap
                           ${selectedCountry === meta.slug ? 'border-blue-600 shadow-blue-500/25 scale-105' : 'border-slate-100 hover:border-blue-400'}`}
                       >
-                        <h3 className={`w-full font-black transition-colors uppercase text-center tracking-[0.1em] sm:tracking-[0.2em] text-[8px] sm:text-[14px] ${selectedCountry === meta.slug ? 'text-blue-600' : 'text-navy group-hover:text-blue-600'}`}>
+                        <h3 className={`w-full font-black transition-colors uppercase flex items-center justify-center gap-1.5 sm:gap-3 tracking-[0.1em] sm:tracking-[0.2em] text-[8px] sm:text-[14px] ${selectedCountry === meta.slug ? 'text-blue-600' : 'text-navy group-hover:text-blue-600'}`}>
+                          <div className="w-6 h-4 sm:w-10 sm:h-6 rounded-sm overflow-hidden border border-slate-100 flex-shrink-0 shadow-sm">
+                            <img src={meta.flag} alt={meta.label} className="w-full h-full object-cover" />
+                          </div>
                           {meta.label}
                         </h3>
                       </motion.button>
