@@ -137,7 +137,7 @@ const Contact = () => {
                   className="lg:col-span-2 bg-white rounded-3xl p-8 sm:p-12 shadow-2xl border border-slate-100 relative overflow-hidden"
                >
                   <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl -mr-16 -mt-16 opacity-50" />
-                  
+
                   <h2 className="text-2xl sm:text-3xl font-bold text-navy mb-2 relative z-10">Send us a Message</h2>
                   <p className="text-slate-500 text-sm mb-10 relative z-10">Fill out the form below and our counselor will call you within 24 hours.</p>
 
@@ -145,16 +145,16 @@ const Contact = () => {
                      <div className="grid sm:grid-cols-2 gap-6">
                         <div className="space-y-2">
                            <label className="text-xs font-black text-navy uppercase tracking-widest ml-1">Full Name</label>
-                           <input 
-                              type="text" 
+                           <input
+                              type="text"
                               placeholder="e.g. John Doe"
                               className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all"
                            />
                         </div>
                         <div className="space-y-2">
                            <label className="text-xs font-black text-navy uppercase tracking-widest ml-1">Phone Number</label>
-                           <input 
-                              type="tel" 
+                           <input
+                              type="tel"
                               placeholder="+91 00000 00000"
                               className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all"
                            />
@@ -163,8 +163,8 @@ const Contact = () => {
 
                      <div className="space-y-2">
                         <label className="text-xs font-black text-navy uppercase tracking-widest ml-1">Email Address</label>
-                        <input 
-                           type="email" 
+                        <input
+                           type="email"
                            placeholder="john@example.com"
                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all"
                         />
@@ -184,7 +184,7 @@ const Contact = () => {
 
                      <div className="space-y-2">
                         <label className="text-xs font-black text-navy uppercase tracking-widest ml-1">Your Message</label>
-                        <textarea 
+                        <textarea
                            rows="4"
                            placeholder="Tell us about your academic background or any questions you have..."
                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all resize-none"
@@ -225,11 +225,11 @@ const Contact = () => {
                         </motion.a>
                      ))}
                   </div>
-                  
+
                   {/* Trust Badge */}
                   <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-xl">
                      <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mb-4">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg>
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
                      </div>
                      <h4 className="font-bold text-navy mb-2">100% Authorized Partner</h4>
                      <p className="text-slate-500 text-xs leading-relaxed">We are official authorized representatives for all universities listed on our portal. Zero commission, direct admissions.</p>

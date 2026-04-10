@@ -355,7 +355,7 @@ const reviews = [
   {
     name: 'Mrs. Sunita Patel',
     type: 'parent',
-    message: 'We were very anxious about sending our daughter abroad for MBBS. Orion Medical Education guided us at every step — from choosing the right university to visa processing and even airport pickup. They truly are custodians of our children\'s future. Highly recommend!',
+    message: 'We were very anxious about sending our daughter abroad for MBBS. OrionMedicle guided us at every step — from choosing the right university to visa processing and even airport pickup. They truly are custodians of our children\'s future. Highly recommend!',
     rating: 5,
     university: 'IEU, Kyrgyzstan',
   },
@@ -414,7 +414,7 @@ const reviews = [
 // ── OBSERVERSHIP ──────────────────────────────────────────
 const observership = {
   title: 'Clinical Observership Program',
-  description: 'The Orion Medical Education Clinical Observership Program is a prestigious initiative designed to give MBBS students and graduates a firsthand experience of advanced medical practice in India\'s top hospitals. This program bridges the gap between theoretical knowledge and real-world clinical practice, offering participants exposure to cutting-edge medical technologies and techniques under the mentorship of renowned specialists.',
+  description: 'The OrionMedicle Clinical Observership Program is a prestigious initiative designed to give MBBS students and graduates a firsthand experience of advanced medical practice in India\'s top hospitals. This program bridges the gap between theoretical knowledge and real-world clinical practice, offering participants exposure to cutting-edge medical technologies and techniques under the mentorship of renowned specialists.',
   duration: '4 weeks – 3 months (flexible batches)',
   highlights: [
     'Elite clinical exposure at top-tier hospitals',

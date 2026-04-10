@@ -1,12 +1,13 @@
 import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import SplashScreen from './components/SplashScreen';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
+import orionLogo from './assets/orionlogo.png';
 
 // Lazy-loaded pages
 const Home = lazy(() => import('./pages/Home'));
@@ -29,25 +30,62 @@ const AdminContact = lazy(() => import('./pages/admin/AdminContact'));
 
 // Full-page loading fallback
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-slate-50">
-    <div className="flex flex-col items-center gap-4">
-      <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-navy rounded-2xl flex items-center justify-center shadow-xl animate-pulse">
-        <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 8v8M8 12h8" strokeLinecap="round" />
-        </svg>
+  <motion.div 
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="min-h-screen flex items-center justify-center bg-white"
+  >
+    <div className="flex flex-col items-center gap-6">
+      {/* Circular Loader */}
+      <div className="flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ 
+            duration: 1,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="text-blue-600 w-16 h-16"
+        >
+          <svg viewBox="0 0 24 24" fill="none" className="w-full h-full" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M12 2a10 10 0 0 1 10 10" opacity="0.1" />
+            <path d="M12 2a10 10 0 0 1 10 10" />
+          </svg>
+        </motion.div>
       </div>
-      <div className="flex gap-1.5">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
-            style={{ animationDelay: `${i * 0.15}s` }}
-          />
-        ))}
+
+      {/* Brand Text */}
+      <div className="text-center px-4">
+        <motion.h2 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-xl font-bold text-[#1e3a5f] tracking-tight"
+        >
+          Orion Medical
+        </motion.h2>
+        <div className="flex justify-center gap-1.5 mt-3">
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
+              animate={{ 
+                scale: [1, 1.5, 1],
+                opacity: [0.3, 1, 0.3]
+              }}
+              transition={{ 
+                duration: 1.5, 
+                repeat: Infinity, 
+                delay: i * 0.2,
+                ease: "easeInOut"
+              }}
+              className="w-1.5 h-1.5 bg-blue-500 rounded-full"
+            />
+          ))}
+        </div>
       </div>
     </div>
-  </div>
+  </motion.div>
 );
 
 // Layout with Navbar + Footer
