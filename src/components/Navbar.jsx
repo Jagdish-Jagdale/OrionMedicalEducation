@@ -14,10 +14,10 @@ const navLinks = [
   { label: 'Contact', to: '/contact' },
 ];
 
-const Navbar = ({ showSplash }) => {
+const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [logoVisible, setLogoVisible] = useState(false);
+  const [logoVisible, setLogoVisible] = useState(true);
   const location = useLocation();
 
   useEffect(() => {
@@ -30,18 +30,6 @@ const Navbar = ({ showSplash }) => {
     setIsOpen(false);
   }, [location]);
 
-  // Sync logo visibility with Splash Screen exit (Phase 1 Arcs + Phase 2 Logo flight)
-  useEffect(() => {
-    if (!showSplash) {
-      // 2000ms starts the fade in just slightly before the splash unmounts for a seamless overlap
-      const timer = setTimeout(() => {
-        setLogoVisible(true);
-      }, 2000);
-      return () => clearTimeout(timer);
-    } else {
-      setLogoVisible(false);
-    }
-  }, [showSplash]);
 
   const isHomePage = location.pathname === '/';
   const shouldShowSolid = !isHomePage || scrolled;

@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import SplashScreen from './components/SplashScreen';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
 import orionLogo from './assets/orionlogo.png';
@@ -30,7 +29,7 @@ const AdminContact = lazy(() => import('./pages/admin/AdminContact'));
 
 // Full-page loading fallback
 const PageLoader = () => (
-  <motion.div 
+  <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
@@ -41,7 +40,7 @@ const PageLoader = () => (
       <div className="flex items-center justify-center">
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ 
+          transition={{
             duration: 1,
             repeat: Infinity,
             ease: "linear"
@@ -57,7 +56,7 @@ const PageLoader = () => (
 
       {/* Brand Text */}
       <div className="text-center px-4">
-        <motion.h2 
+        <motion.h2
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -69,13 +68,13 @@ const PageLoader = () => (
           {[0, 1, 2].map((i) => (
             <motion.div
               key={i}
-              animate={{ 
+              animate={{
                 scale: [1, 1.5, 1],
                 opacity: [0.3, 1, 0.3]
               }}
-              transition={{ 
-                duration: 1.5, 
-                repeat: Infinity, 
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
                 delay: i * 0.2,
                 ease: "easeInOut"
               }}
@@ -89,9 +88,9 @@ const PageLoader = () => (
 );
 
 // Layout with Navbar + Footer
-const Layout = ({ children, showSplash }) => (
+const Layout = ({ children }) => (
   <>
-    <Navbar showSplash={showSplash} />
+    <Navbar />
     <main>{children}</main>
     <Footer />
   </>
@@ -105,44 +104,22 @@ const MinimalLayout = ({ children }) => (
 );
 
 const App = () => {
-  const [showSplash, setShowSplash] = useState(() => {
-    // Check if splash has already been shown in this session
-    const hasShown = sessionStorage.getItem('splashShown');
-    // Check if we are on an admin route
-    const isAdmin = window.location.pathname.startsWith('/admin');
-    return !hasShown && !isAdmin;
-  });
-
-  useEffect(() => {
-    if (showSplash) {
-      const timer = setTimeout(() => {
-        setShowSplash(false);
-        sessionStorage.setItem('splashShown', 'true');
-      }, 5500); // 5.5 seconds splash
-
-      return () => clearTimeout(timer);
-    }
-  }, [showSplash]);
-
   return (
     <>
-      <AnimatePresence mode="wait">
-        {showSplash && <SplashScreen key="splash" />}
-      </AnimatePresence>
       <Toaster position="top-right" reverseOrder={false} />
       <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ScrollToTop />
         <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Main site routes with Navbar + Footer */}
-            <Route path="/" element={<Layout showSplash={showSplash}><Home /></Layout>} />
-            <Route path="/countries" element={<Layout showSplash={showSplash}><Countries /></Layout>} />
-            <Route path="/university/:slug" element={<Layout showSplash={showSplash}><UniversityDetails /></Layout>} />
-            <Route path="/team" element={<Layout showSplash={showSplash}><Team /></Layout>} />
-            <Route path="/process" element={<Layout showSplash={showSplash}><Process /></Layout>} />
-            <Route path="/reviews" element={<Layout showSplash={showSplash}><Reviews /></Layout>} />
-            <Route path="/observership" element={<Layout showSplash={showSplash}><Observership /></Layout>} />
-            <Route path="/contact" element={<Layout showSplash={showSplash}><Contact /></Layout>} />
+            <Route path="/" element={<Layout><Home /></Layout>} />
+            <Route path="/countries" element={<Layout><Countries /></Layout>} />
+            <Route path="/university/:slug" element={<Layout><UniversityDetails /></Layout>} />
+            <Route path="/team" element={<Layout><Team /></Layout>} />
+            <Route path="/process" element={<Layout><Process /></Layout>} />
+            <Route path="/reviews" element={<Layout><Reviews /></Layout>} />
+            <Route path="/observership" element={<Layout><Observership /></Layout>} />
+            <Route path="/contact" element={<Layout><Contact /></Layout>} />
 
             {/* Admin routes (minimal layout – sidebar built into each page) */}
             <Route path="/admin/login" element={<MinimalLayout><AdminLogin /></MinimalLayout>} />
@@ -157,7 +134,7 @@ const App = () => {
 
             {/* 404 fallback */}
             <Route path="*" element={
-              <Layout showSplash={showSplash}>
+              <Layout>
                 <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 pt-20">
                   <div className="text-center">
                     <div className="text-8xl font-bold text-blue-100 mb-4">404</div>

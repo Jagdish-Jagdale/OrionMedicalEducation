@@ -7,6 +7,7 @@ import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
+import WelcomeBanner from '../components/WelcomeBanner';
 
 const fadeUp = {
   initial: { opacity: 0, y: 40 },
@@ -138,6 +139,7 @@ const ReviewCard = ({ rev }) => {
 const Home = () => {
   return (
     <div className="font-sans">
+      <WelcomeBanner />
       {/* ── Hero Section ────────────────────────────────── */}
       <section className="relative min-h-screen flex items-center bg-gradient-to-br from-navy via-blue-900 to-blue-800 overflow-hidden">
         {/* Decorative circles */}
