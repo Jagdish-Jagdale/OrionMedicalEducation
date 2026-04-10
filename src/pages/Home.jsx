@@ -377,22 +377,26 @@ const Home = () => {
               {
                 title: "State-of-the-Art Campus",
                 synopsis: "Explore modern digital labs and research centers where students excel academic excellence.",
-                videoUrl: "https://player.vimeo.com/external/371433846.sd.mp4?s=2311894d033f242af070e17c988c5efba706d31c&profile_id=139&oauth2_token_id=57447761"
+                youtubeId: "s4fYA_wkta8",
+                videoUrl: "https://www.youtube.com/watch?v=s4fYA_wkta8"
               },
               {
                 title: "Clinical Hospital Practice",
                 synopsis: "Early hospital experience that ensures you graduate ready for global clinical practice.",
-                videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4"
+                youtubeId: "9tYngcASnTA",
+                videoUrl: "https://www.youtube.com/watch?v=9tYngcASnTA"
               },
               {
                 title: "Hostel & Social Life",
                 synopsis: "Comfortable living spaces and a thriving community where international doctors are born.",
-                videoUrl: "https://player.vimeo.com/external/371433846.sd.mp4?s=2311894d033f242af070e17c988c5efba706d31c&profile_id=139&oauth2_token_id=57447761"
+                youtubeId: "LhpZJwUboeI",
+                videoUrl: "https://www.youtube.com/watch?v=LhpZJwUboeI"
               },
               {
                 title: "Success Stories",
                 synopsis: "Hear directly from our graduates now practicing medicine in India and successfully abroad.",
-                videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4"
+                youtubeId: "q4LMRgn1x_Y",
+                videoUrl: "https://www.youtube.com/watch?v=q4LMRgn1x_Y"
               }
             ].map((video, i) => (
               <motion.div
@@ -403,24 +407,26 @@ const Home = () => {
                 transition={{ duration: 0.5, delay: i * 0.15 }}
                 className="group bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col"
               >
-                <div className="relative aspect-[4/3] bg-slate-900 group-hover:scale-[1.02] transition-transform duration-500">
-                  <video
-                    className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
-                    muted
-                    loop
-                    playsInline
-                    onMouseOver={event => event.target.play()}
-                    onMouseOut={event => event.target.pause()}
+                <div className="relative aspect-[4/3] bg-slate-900 overflow-hidden">
+                  <img
+                    src={`https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`}
+                    alt={video.title}
+                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
+                  />
+                  
+                  {/* Play Overlay Button */}
+                  <a 
+                    href={video.videoUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="absolute inset-0 flex items-center justify-center group/play transition-all bg-black/20 hover:bg-black/40"
                   >
-                    <source src={video.videoUrl} type="video/mp4" />
-                  </video>
-                  <div className="absolute inset-0 flex items-center justify-center opacity-100 group-hover:opacity-0 transition-opacity">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30">
-                      <svg className="w-6 h-6 text-white translate-x-0.5" fill="currentColor" viewBox="0 0 24 24">
+                    <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 group-hover/play:scale-110 group-hover/play:bg-blue-600 group-hover/play:border-blue-500 transition-all duration-300">
+                      <svg className="w-8 h-8 text-white translate-x-0.5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M8 5v14l11-7z" />
                       </svg>
                     </div>
-                  </div>
+                  </a>
                 </div>
                 <div className="p-6 flex-grow">
                   <h3 className="font-bold text-navy text-lg mb-3 leading-tight group-hover:text-blue-600 transition-colors">

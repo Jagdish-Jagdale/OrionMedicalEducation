@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { russiaOverview } from '../data/russiaData';
+import russiaFlag from '../assets/flags/russiaflag.png';
 
 const RussiaDetailedGuide = () => {
   return (
@@ -10,13 +11,17 @@ const RussiaDetailedGuide = () => {
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="bg-white rounded-2xl sm:rounded-[2rem] p-6 sm:p-12 shadow-xl border border-slate-100 overflow-hidden relative"
+        className="bg-white rounded-lg sm:rounded-xl p-6 sm:p-12 shadow-xl border border-slate-100 overflow-hidden relative"
       >
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/50 rounded-full blur-3xl -mr-32 -mt-32" />
 
         <div className="relative z-10">
           <div className="flex items-center gap-4 mb-6">
-            <span className="text-6xl">🇷🇺</span>
+            <img 
+              src={russiaFlag} 
+              alt="Russia Flag" 
+              className="w-16 h-10 object-cover rounded-lg shadow-lg border border-slate-100" 
+            />
             <div>
               <h2 className="text-3xl font-bold text-navy">MBBS in Russia</h2>
               <p className="text-blue-600 font-semibold tracking-wide uppercase text-xs mt-1">Premier Medical Destination</p>
@@ -45,7 +50,7 @@ const RussiaDetailedGuide = () => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-navy to-blue-900 rounded-2xl sm:rounded-3xl p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden">
+            <div className="bg-gradient-to-br from-navy to-blue-900 rounded-lg sm:rounded-xl p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden">
               <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
               <h3 className="text-xl font-bold mb-4 relative z-10">Global Recognition</h3>
               <p className="text-blue-100 text-sm leading-relaxed mb-6 relative z-10">
@@ -72,52 +77,54 @@ const RussiaDetailedGuide = () => {
           {russiaOverview.universities.map((uni, idx) => (
             <motion.div
               key={uni.id}
-              initial={{ opacity: 0, x: idx % 2 === 0 ? -30 : 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              className={`flex flex-col ${idx % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-8 items-stretch transform transition-all`}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              className="flex flex-col gap-6 transform transition-all"
             >
-              {/* Image Side */}
-              <div className="lg:w-1/3 relative group">
-                <div className="absolute inset-0 bg-blue-600 rounded-2xl sm:rounded-[2.5rem] rotate-3 scale-[1.02] -z-10 opacity-10 group-hover:rotate-1 transition-transform duration-500" />
-                <div className="h-full min-h-[250px] sm:min-h-[300px] rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-2xl relative">
+              {/* Image Top */}
+              <div className="w-full relative group">
+                <div className="h-64 sm:h-80 md:h-96 rounded-lg sm:rounded-xl overflow-hidden shadow-xl relative">
                   <img
                     src={uni.image}
                     alt={uni.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy/80 via-transparent to-transparent opacity-60" />
-                  <div className="absolute bottom-6 left-6 text-white text-5xl font-black opacity-20 select-none">{String(idx + 1).padStart(2, '0')}</div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-navy/60 via-transparent to-transparent opacity-40" />
+                  <div className="absolute bottom-6 left-6 text-white text-4xl font-black opacity-30 select-none">{String(idx + 1).padStart(2, '0')}</div>
                 </div>
               </div>
 
-              {/* Content Side */}
-              <div className="lg:w-2/3 flex flex-col justify-center">
-                <div className="bg-white rounded-2xl sm:rounded-[2rem] p-6 sm:p-8 md:p-10 shadow-lg border border-slate-50 flex flex-col h-full relative overflow-hidden group hover:border-blue-200 hover:shadow-blue-500/5 transition-all">
+              {/* Content Bottom */}
+              <div className="w-full">
+                <div className="bg-white rounded-lg sm:rounded-xl p-6 sm:p-10 shadow-lg border border-slate-50 flex flex-col h-full relative overflow-hidden group hover:border-blue-200 transition-all">
                   <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                     <svg className="w-24 h-24 text-blue-900" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 14l9-5-9-5-9 5 9 5z" />
                     </svg>
                   </div>
 
-                  <h3 className="text-2xl font-bold text-navy mb-4 group-hover:text-blue-600 transition-colors">{uni.name}</h3>
-                  <p className="text-slate-600 text-base leading-relaxed mb-6 font-medium">
+                  <h3 className="text-2xl font-bold text-navy mb-4 group-hover:text-blue-600 transition-colors uppercase tracking-tight">{uni.name}</h3>
+                  <p className="text-slate-600 text-base leading-relaxed mb-8 font-medium">
                     {uni.description}
                   </p>
 
-                  <div className="mt-auto p-5 bg-slate-50 rounded-2xl border-l-4 border-amber-500 relative">
-                    <span className="absolute -top-3 left-4 px-2 bg-amber-500 text-[10px] font-black text-white rounded uppercase tracking-widest">Key Highlight</span>
-                    <p className="text-slate-700 text-sm leading-relaxed">
-                      {uni.highlight}
+                  <div className="p-6 bg-blue-50/50 rounded-lg border-l-4 border-amber-500 relative mb-8">
+                    <span className="absolute -top-3 left-4 px-3 py-0.5 bg-amber-500 text-[10px] font-black text-white rounded-full uppercase tracking-widest shadow-lg shadow-amber-500/20">University Highlight</span>
+                    <p className="text-slate-700 text-sm leading-relaxed italic">
+                      "{uni.highlight}"
                     </p>
                   </div>
 
-                  <div className="mt-6 flex flex-wrap gap-3">
-                    <span className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-[10px] font-bold border border-green-100 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> English Medium
+                  <div className="flex flex-wrap gap-3">
+                    <span className="px-4 py-1.5 bg-green-50 text-green-700 rounded-full text-[10px] font-bold border border-green-100 flex items-center gap-1.5 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /> English Medium
                     </span>
-                    <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-[10px] font-bold border border-blue-100 flex items-center gap-1">
+                    <span className="px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full text-[10px] font-bold border border-blue-100 flex items-center gap-1.5 shadow-sm">
                       <span className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Research Oriented
+                    </span>
+                    <span className="px-4 py-1.5 bg-amber-50 text-amber-700 rounded-full text-[10px] font-bold border border-amber-100 flex items-center gap-1.5 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> MCI Recognized
                     </span>
                   </div>
                 </div>

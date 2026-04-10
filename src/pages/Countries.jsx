@@ -121,15 +121,16 @@ const Countries = () => {
               const dy_anchor = Math.sqrt(Math.pow(globe_radius, 2) - Math.pow(dx_anchor, 2));
               const y_start = isTop ? 50 - dy_anchor : 50 + dy_anchor;
 
-              // 2-SEGMENT 45-DEGREE LOGIC: Diagonal from globe -> Horizontal to card
+              // REFINED GEOMETRY: Short diagonal from globe -> Long horizontal to card
               const dy_total = y2_raw - y_start;
-              const dx_45 = (x2_raw < x_start ? -1 : 1) * Math.abs(dy_total);
-              const x_mid = x_start + dx_45;
-
+              const leanFactor = isMobile ? 0.18 : 0.35;
+              const dx_lean = (x2_raw < x_start ? -1 : 1) * (Math.abs(dy_total) * leanFactor);
+              const x_mid = x_start + dx_lean;
+              
               const x2 = x2_raw;
               const y2 = y2_raw;
-
-              // Path: M globe -> Diagonal to (x_mid, y2) -> Horizontal to card
+              
+              // Path: M globe -> Short diagonal to (x_mid, y2) -> Long horizontal to card
               const d = `M ${x_start} ${y_start} L ${x_mid} ${y2} L ${x2} ${y2}`;
 
               return (
