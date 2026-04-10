@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import bannerImg from '../assets/promotions/welcome_banner.png';
+import introAudio from '../assets/splash/intro.mp3';
 
 const WelcomeBanner = () => {
     const [isVisible, setIsVisible] = useState(false);
+    const audioRef = useRef(null);
 
     useEffect(() => {
         const hasShown = sessionStorage.getItem('welcomeBannerShown');
@@ -11,6 +13,43 @@ const WelcomeBanner = () => {
             setIsVisible(true);
         }
     }, []);
+
+    useEffect(() => {
+        let audio;
+
+        const startAudio = () => {
+            if (audio) {
+                audio.play().catch(() => {});
+            }
+            document.removeEventListener('click', startAudio);
+        };
+
+        if (isVisible) {
+            // Initialize Audio
+            audio = new Audio(introAudio);
+            audio.loop = true;
+            audioRef.current = audio;
+
+            // Attempt to play immediately
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(() => {
+                    console.log("Autoplay blocked. Sound will start on first click.");
+                    document.addEventListener('click', startAudio);
+                });
+            }
+        }
+
+        return () => {
+            // Definitive Cleanup: Stop audio and remove any pending listeners
+            document.removeEventListener('click', startAudio);
+            if (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+            audioRef.current = null;
+        };
+    }, [isVisible]);
 
     const handleClose = () => {
         setIsVisible(false);
