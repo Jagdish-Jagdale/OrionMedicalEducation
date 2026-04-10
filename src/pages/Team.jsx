@@ -4,6 +4,7 @@ import { getTeam } from '../firebase/firestore';
 import { useFirestore } from '../hooks/useFirestore';
 import TeamCard from '../components/TeamCard';
 import LoadingSkeleton from '../components/LoadingSkeleton';
+import { leadershipMembers } from '../data/leadershipData';
 
 const teamStats = [
   { value: '7+', label: 'Years Experience' },
@@ -58,6 +59,34 @@ const Team = () => {
 
       {/* Team cards */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        
+        {/* Core Leadership Section */}
+        <div className="mb-20">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-navy">Core Leadership</h2>
+            <div className="w-16 h-1 bg-amber-400 mx-auto mt-2 rounded-full" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {leadershipMembers.map((member, i) => (
+              <TeamCard key={member.id} member={member} index={i} />
+            ))}
+          </div>
+        </div>
+
+        {/* Counseling Section */}
+        <motion.div
+           initial={{ opacity: 0, y: 30 }}
+           whileInView={{ opacity: 1, y: 0 }}
+           viewport={{ once: true }}
+           className="my-16 sm:my-24 text-center p-8 sm:p-12 bg-white rounded-3xl border border-blue-100 shadow-xl relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl -mr-16 -mt-16" />
+          <p className="text-xl sm:text-2xl font-medium text-slate-700 leading-relaxed max-w-4xl mx-auto relative z-10 italic">
+            "We believe every student is unique, so we provide <span className="text-blue-600 font-bold">personalized career counseling</span> instead of one-size-fits-all solutions."
+          </p>
+        </motion.div>
+
+        {/* Dynamic Experts Section */}
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             <LoadingSkeleton count={3} type="team" />
@@ -69,13 +98,19 @@ const Team = () => {
               Try Again
             </button>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {(team || []).map((member, i) => (
-              <TeamCard key={member.id} member={member} index={i} />
-            ))}
+        ) : team && team.length > 0 ? (
+          <div>
+            <div className="text-center mb-10">
+              <h2 className="text-2xl sm:text-3xl font-bold text-navy">Our Regional Experts</h2>
+              <div className="w-16 h-1 bg-blue-600 mx-auto mt-2 rounded-full" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {team.map((member, i) => (
+                <TeamCard key={member.id} member={member} index={i + 3} />
+              ))}
+            </div>
           </div>
-        )}
+        ) : null}
 
         {/* End quote */}
         <motion.div
@@ -90,7 +125,7 @@ const Team = () => {
               <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
             </svg>
             <p className="text-xl sm:text-2xl lg:text-3xl font-bold leading-relaxed">
-              "Your dream is our{' '}
+              "-Your dream is our{' '}
               <span className="text-amber-300">responsibility</span>."
             </p>
             <p className="mt-4 text-blue-200 text-xs sm:text-sm">— Team Orion Medical Education</p>
