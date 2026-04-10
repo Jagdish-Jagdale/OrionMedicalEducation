@@ -6,6 +6,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
+import CursorPlane from './components/CursorPlane';
 import orionLogo from './assets/orionlogo.png';
 
 // Lazy-loaded pages
@@ -107,6 +108,7 @@ const App = () => {
   return (
     <>
       <Toaster position="top-right" reverseOrder={false} />
+      <CursorPlane />
       <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ScrollToTop />
         <Suspense fallback={<PageLoader />}>
