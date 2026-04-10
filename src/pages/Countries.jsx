@@ -6,6 +6,9 @@ import CountryCard from '../components/CountryCard';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import Globe3D from '../components/Globe3D';
 import RussiaDetailedGuide from '../components/RussiaDetailedGuide';
+import KyrgyzstanDetailedGuide from '../components/KyrgyzstanDetailedGuide';
+import GeorgiaDetailedGuide from '../components/GeorgiaDetailedGuide';
+import UzbekistanDetailedGuide from '../components/UzbekistanDetailedGuide';
 
 // Import Flag Images
 import georgiaFlag from '../assets/flags/georgiaflag.png';
@@ -285,6 +288,12 @@ const Countries = () => {
                   <div className="p-8 bg-white rounded-3xl border border-red-50 text-red-500 italic">Information for {meta.label} is currently unavailable.</div>
                 ) : meta.slug === 'russia' ? (
                   <RussiaDetailedGuide />
+                ) : meta.slug === 'kyrgyzstan' ? (
+                  <KyrgyzstanDetailedGuide />
+                ) : meta.slug === 'georgia' ? (
+                  <GeorgiaDetailedGuide />
+                ) : meta.slug === 'uzbekistan' ? (
+                  <UzbekistanDetailedGuide />
                 ) : country ? (
                   <CountryCard country={country} universities={universities} />
                 ) : (
