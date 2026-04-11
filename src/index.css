@@ -16,6 +16,7 @@
 
   * {
     -webkit-tap-highlight-color: transparent;
+    cursor: none !important;
   }
 }
 

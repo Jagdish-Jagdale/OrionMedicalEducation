@@ -14,9 +14,9 @@ const CursorPlane = () => {
     const { scrollY } = useScroll();
     const scrollVel = useVelocity(scrollY);
     
-    const springConfig = { damping: 30, stiffness: 200, mass: 0.5 };
-    const cursorX = useSpring(mouseX, springConfig);
-    const cursorY = useSpring(mouseY, springConfig);
+    // Instantaneous tracking: don't use spring for cursorX/cursorY
+    const cursorX = mouseX;
+    const cursorY = mouseY;
     
     const rotation = useSpring(0, { damping: 20, stiffness: 150 });
     const scale = useSpring(1, { damping: 15, stiffness: 200 });
@@ -108,9 +108,12 @@ const CursorPlane = () => {
                     y: cursorY,
                     rotate: rotation,
                     scale: scale,
-                    translateX: '-50%',
+                    // The airplane acts as the pointer. Its "nose" points right.
+                    // To make the nose the exact click point: x offsets to left side (-90%), y to center (-50%)
+                    translateX: '-90%',
                     translateY: '-50%',
                     display: isVisible ? 'block' : 'none',
+                    transformOrigin: '90% 50%',
                 }}
             >
                 <div className="relative">

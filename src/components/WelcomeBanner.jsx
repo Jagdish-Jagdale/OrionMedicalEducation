@@ -1,18 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import bannerImg from '../assets/promotions/welcome_banner.png';
+import orionLogo from '../assets/orionlogo.png';
 import introAudio from '../assets/splash/intro.mp3';
 
 const WelcomeBanner = () => {
-    const [isVisible, setIsVisible] = useState(false);
+    // Synchronous initialization to prevent "flash" of home screen
+    const [isVisible, setIsVisible] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return !sessionStorage.getItem('welcomeBannerShown');
+        }
+        return false;
+    });
+    
     const audioRef = useRef(null);
 
     useEffect(() => {
-        const hasShown = sessionStorage.getItem('welcomeBannerShown');
-        if (!hasShown) {
-            setIsVisible(true);
+        if (isVisible) {
+            // Sequence Timing:
+            // 0-1.5: Black
+            // 1.5-4.5: Logo phase
+            // 4.5: Banner starts
+            // 8.5: Start fading out the whole splash
+            const timer = setTimeout(() => {
+                handleClose();
+            }, 8500);
+            return () => clearTimeout(timer);
         }
-    }, []);
+    }, [isVisible]);
 
     useEffect(() => {
         let audio;
@@ -41,7 +56,6 @@ const WelcomeBanner = () => {
         }
 
         return () => {
-            // Definitive Cleanup: Stop audio and remove any pending listeners
             document.removeEventListener('click', startAudio);
             if (audio) {
                 audio.pause();
@@ -60,46 +74,73 @@ const WelcomeBanner = () => {
         <AnimatePresence>
             {isVisible && (
                 <motion.div
-                    initial={{ opacity: 0 }}
+                    initial={{ opacity: 1 }} // Instant opaque to cover home screen
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 0.6, ease: "easeInOut" }}
-                    className="fixed inset-0 z-[100] bg-black overflow-hidden"
+                    transition={{ duration: 1.2, ease: "easeInOut" }}
+                    className="fixed inset-0 z-[100] bg-black overflow-hidden flex items-center justify-center"
                 >
-                    {/* Full Screen Interactive Banner */}
-                    <a 
-                        href="https://wa.me/919999999999" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="block w-full h-full cursor-pointer"
+                    {/* ── STAGE 1: LOGO REVEAL (1.5s - 4.5s) ────────────────── */}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ 
+                            opacity: [0, 1, 1, 0],
+                            scale: [0.9, 1, 1, 1.05],
+                        }}
+                        transition={{ 
+                            times: [0, 0.2, 0.8, 1],
+                            duration: 3, 
+                            delay: 1.5, 
+                            ease: "easeInOut"
+                        }}
+                        className="absolute z-20 pointer-events-none"
                     >
-                        <img
-                            src={bannerImg}
-                            alt="MBBS Consultant for Abroad"
-                            className="w-full h-full object-cover"
+                        <img 
+                            src={orionLogo} 
+                            alt="Orion Logo" 
+                            className="w-48 sm:w-64 md:w-80 h-auto drop-shadow-[0_0_20px_rgba(255,255,255,0.15)]" 
                         />
-                    </a>
+                    </motion.div>
 
-                    {/* Close Button - Premium Glassmorphism */}
-                    <motion.button
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.8 }}
-                        onClick={handleClose}
-                        className="absolute top-6 right-6 z-[110] w-12 h-12 sm:w-14 sm:h-14 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center backdrop-blur-xl transition-all border border-white/20 group shadow-2xl active:scale-90"
-                        aria-label="Close"
+                    {/* ── STAGE 2: BANNER REVEAL (4.5s+) ────────────────────── */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 4.5, duration: 1.5, ease: "easeOut" }}
+                        className="absolute inset-0 z-10"
                     >
-                        <svg className="w-8 h-8 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />
-                        </svg>
-                    </motion.button>
+                        {/* Full Screen Interactive Banner */}
+                        <a 
+                            href="https://wa.me/919999999999" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="block w-full h-full cursor-pointer"
+                        >
+                            <img
+                                src={bannerImg}
+                                alt="MBBS Consultant for Abroad"
+                                className="w-full h-full object-cover"
+                            />
+                        </a>
+                    </motion.div>
 
-                    {/* Subtle Navigation Hint */}
-                    <div className="absolute bottom-6 left-0 right-0 flex justify-center pointer-events-none">
-                        <span className="bg-black/20 backdrop-blur-md px-4 py-2 rounded-full text-white/40 text-[10px] uppercase tracking-[.3em] font-medium border border-white/5">
-                            Click to consultation
-                        </span>
-                    </div>
+                    {/* ── UTILITIES (Revealed with Banner) ────────────────── */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 5.5 }}
+                    >
+                        {/* Skip/Close Button */}
+                        <button
+                            onClick={handleClose}
+                            className="absolute top-6 right-6 z-[110] w-12 h-12 sm:w-14 sm:h-14 bg-black/20 hover:bg-black/40 text-white/50 hover:text-white rounded-full flex items-center justify-center backdrop-blur-xl transition-all border border-white/5 group shadow-2xl active:scale-90"
+                            aria-label="Skip"
+                        >
+                            <svg className="w-8 h-8 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />
+                            </svg>
+                        </button>
+                    </motion.div>
                 </motion.div>
             )}
         </AnimatePresence>
