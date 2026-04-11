@@ -64,58 +64,29 @@ const WelcomeBanner = () => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.6, ease: "easeInOut" }}
-                    className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center overflow-hidden"
+                    className="fixed inset-0 z-[100] bg-black overflow-hidden"
                 >
-                    {/* Background Aesthetics: Blurred Banner */}
-                    <div 
-                        className="absolute inset-0 opacity-50 blur-[100px] scale-125 pointer-events-none"
-                        style={{ 
-                            backgroundImage: `url(${bannerImg})`,
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center'
-                        }}
-                    />
-                    
-                    {/* Subtle Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black opacity-60 pointer-events-none" />
-
-                    {/* Main Banner Content */}
-                    <motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0.9, opacity: 0 }}
-                        transition={{ 
-                            delay: 0.1, 
-                            duration: 0.4,
-                            ease: [0.16, 1, 0.3, 1] 
-                        }}
-                        className="relative w-full h-full flex items-center justify-center p-4 sm:p-0"
+                    {/* Full Screen Interactive Banner */}
+                    <a 
+                        href="https://wa.me/919999999999" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="block w-full h-full cursor-pointer"
                     >
-                        {/* Interactive Link wrapper */}
-                        <a 
-                            href="https://wa.me/919999999999" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="relative block w-full h-full max-h-screen cursor-pointer"
-                        >
-                            <img
-                                src={bannerImg}
-                                alt="MBBS Consultant for Abroad"
-                                className="w-full h-full object-contain drop-shadow-[0_0_30px_rgba(0,0,0,0.5)]"
-                            />
-                            
-                            {/* Reflection effect */}
-                            <div className="absolute inset-0 bg-gradient-to-tr from-white/5 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity" />
-                        </a>
-                    </motion.div>
+                        <img
+                            src={bannerImg}
+                            alt="MBBS Consultant for Abroad"
+                            className="w-full h-full object-cover"
+                        />
+                    </a>
 
-                    {/* Close Button - Viewport Positioned for Accessibility */}
+                    {/* Close Button - Premium Glassmorphism */}
                     <motion.button
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 }}
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.8 }}
                         onClick={handleClose}
-                        className="absolute top-6 right-6 z-[110] w-12 h-12 sm:w-14 sm:h-14 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center backdrop-blur-xl transition-all border border-white/20 group shadow-2xl active:scale-90"
+                        className="absolute top-6 right-6 z-[110] w-12 h-12 sm:w-14 sm:h-14 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center backdrop-blur-xl transition-all border border-white/20 group shadow-2xl active:scale-90"
                         aria-label="Close"
                     >
                         <svg className="w-8 h-8 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,15 +94,12 @@ const WelcomeBanner = () => {
                         </svg>
                     </motion.button>
 
-                    {/* Hint to close */}
-                    <motion.p 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 0.5 }}
-                        transition={{ delay: 1 }}
-                        className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/40 text-[10px] uppercase tracking-[0.3em] font-medium pointer-events-none"
-                    >
-                        Click anywhere to close
-                    </motion.p>
+                    {/* Subtle Navigation Hint */}
+                    <div className="absolute bottom-6 left-0 right-0 flex justify-center pointer-events-none">
+                        <span className="bg-black/20 backdrop-blur-md px-4 py-2 rounded-full text-white/40 text-[10px] uppercase tracking-[.3em] font-medium border border-white/5">
+                            Click to consultation
+                        </span>
+                    </div>
                 </motion.div>
             )}
         </AnimatePresence>
