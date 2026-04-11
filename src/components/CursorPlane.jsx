@@ -58,6 +58,34 @@ const CursorPlane = () => {
     };
 
     useEffect(() => {
+        const updateTheme = (x, y) => {
+            const now = Date.now();
+            if (now - lastThemeCheck.current > 100) {
+                const el = document.elementFromPoint(x, y);
+                if (el) {
+                    const bgColor = getBackgroundColor(el);
+                    setIsDarkTheme(checkIsDark(bgColor));
+                }
+                lastThemeCheck.current = now;
+            }
+        };
+
+        const updateRotation = (x, y, dx, dy) => {
+            const sVel = scrollVel.get() * 0.2;
+            
+            if (Math.abs(dx) > 0.1 || Math.abs(dy + sVel) > 0.5) {
+                const effectiveDx = (Math.abs(dx) < 0.1) ? (isMovingLeft ? -0.1 : 0.1) : dx;
+                const targetAngle = Math.atan2(dy + sVel, effectiveDx) * (180 / Math.PI);
+                
+                let diff = targetAngle - lastAngle.current;
+                if (diff > 180) angleOffset.current -= 360;
+                else if (diff < -180) angleOffset.current += 360;
+                
+                lastAngle.current = targetAngle;
+                rotation.set(targetAngle + angleOffset.current);
+            }
+        };
+
         const handleMouseMove = (e) => {
             if (!isVisible) setIsVisible(true);
             
@@ -70,31 +98,20 @@ const CursorPlane = () => {
             if (dx < -1) setIsMovingLeft(true);
             else if (dx > 1) setIsMovingLeft(false);
             
-            // Periodically check background theme for optimization
-            const now = Date.now();
-            if (now - lastThemeCheck.current > 150) {
-                const el = document.elementFromPoint(x, y);
-                if (el) {
-                    const bgColor = getBackgroundColor(el);
-                    setIsDarkTheme(checkIsDark(bgColor));
-                }
-                lastThemeCheck.current = now;
-            }
-
-            const sVel = scrollVel.get() * 0.1;
-            if (Math.abs(dx) > 0.5 || Math.abs(dy + sVel) > 0.5) {
-                const targetAngle = Math.atan2(dy + sVel, dx) * (180 / Math.PI);
-                let diff = targetAngle - lastAngle.current;
-                if (diff > 180) angleOffset.current -= 360;
-                else if (diff < -180) angleOffset.current += 360;
-                lastAngle.current = targetAngle;
-                rotation.set(targetAngle + angleOffset.current);
-            }
+            updateTheme(x, y);
+            updateRotation(x, y, dx, dy);
             
             mouseX.set(x);
             mouseY.set(y);
             lastPos.current = { x, y };
         };
+
+        const unmountScrollVel = scrollVel.on("change", (v) => {
+            if (Math.abs(v) > 1) {
+                updateRotation(lastPos.current.x, lastPos.current.y, 0, 0);
+                updateTheme(lastPos.current.x, lastPos.current.y);
+            }
+        });
 
         const handleMouseOver = (e) => {
             const target = e.target;
@@ -113,18 +130,18 @@ const CursorPlane = () => {
         window.addEventListener('mouseleave', handleMouseLeave);
 
         return () => {
+            unmountScrollVel();
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseover', handleMouseOver);
             window.removeEventListener('mousedown', handleMouseDown);
             window.removeEventListener('mouseup', handleMouseUp);
             window.removeEventListener('mouseleave', handleMouseLeave);
         };
-    }, [isVisible, mouseX, mouseY, rotation, scrollVel]);
+    }, [isVisible, mouseX, mouseY, rotation, scrollVel, isMovingLeft]);
 
     useEffect(() => {
         if (isClicking) scale.set(0.85);
-        else if (isHovering) scale.set(1.4);
-        else scale.set(1);
+        else scale.set(1); // Removed hover scaling as per user request
     }, [isHovering, isClicking, scale]);
 
     if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) {
