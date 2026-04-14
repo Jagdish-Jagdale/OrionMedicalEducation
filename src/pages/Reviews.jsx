@@ -128,7 +128,7 @@ const Reviews = () => {
 
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-20 relative overflow-visible" ref={containerRef}>
 
-        {/* ═══ HEADERs ═══ */}
+        {/* ═══ HEADER ═══ */}
         <div className="text-center mb-0 md:mb-16 relative z-40 mt-12 md:mt-0">
           <motion.span
             initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
