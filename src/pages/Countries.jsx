@@ -177,7 +177,7 @@ const Countries = () => {
             })}
           </svg>
 
-          {/* --- Central 3D Globes --- */}
+          {/* --- Central 3D Globe --- */}
           <div className="relative z-20 w-[52%] sm:w-[54%] aspect-square flex items-center justify-center">
             <Suspense fallback={<div className="w-40 h-40 rounded-full bg-slate-50 animate-pulse" />}>
               <div className="w-full h-full max-h-[85vh]">
