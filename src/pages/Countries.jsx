@@ -129,10 +129,10 @@ const Countries = () => {
               const leanFactor = isMobile ? 0.18 : 0.35;
               const dx_lean = (x2_raw < x_start ? -1 : 1) * (Math.abs(dy_total) * leanFactor);
               const x_mid = x_start + dx_lean;
-              
+
               const x2 = x2_raw;
               const y2 = y2_raw;
-              
+
               // Path: M globe -> Short diagonal to (x_mid, y2) -> Long horizontal to card
               const d = `M ${x_start} ${y_start} L ${x_mid} ${y2} L ${x2} ${y2}`;
 
@@ -177,7 +177,7 @@ const Countries = () => {
             })}
           </svg>
 
-          {/* --- Central 3D Globe --- */}
+          {/* --- Central 3D Globes --- */}
           <div className="relative z-20 w-[52%] sm:w-[54%] aspect-square flex items-center justify-center">
             <Suspense fallback={<div className="w-40 h-40 rounded-full bg-slate-50 animate-pulse" />}>
               <div className="w-full h-full max-h-[85vh]">
