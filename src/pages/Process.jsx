@@ -77,19 +77,22 @@ function buildTubePath(numSteps) {
   currY = 40;
 
   for (let i = 0; i < numSteps; i++) {
-    const targetX = i % 2 === 0 ? CX - CARD_OFFSET : CX + CARD_OFFSET;
-    // Sweeping cubic bezier with wide control points
-    const cp1Y = currY + STEP_H * 0.45;
-    const cp2Y = currY + STEP_H * 0.55;
-    const targetY = currY + STEP_H;
+    const isEven = i % 2 === 0;
+    const targetX = isEven ? CX + CARD_OFFSET : CX - CARD_OFFSET;
+    const targetY = startY + (i + 1) * STEP_H;
 
+    // Fluid Bezier curve to the next step
+    const cp1Y = currY + STEP_H * 0.4;
+    const cp2Y = targetY - STEP_H * 0.4;
     segments.push(`C ${currX},${cp1Y} ${targetX},${cp2Y} ${targetX},${targetY}`);
+    
     currX = targetX;
     currY = targetY;
   }
-  // Final attachment to the 8 o'clock diaphragm — Precision mapped to X=565, Y=2449
-  const targetX = CX + 115; 
-  const finalY = currY + 9;
+
+  // Final attachment to the 8 o'clock diaphragm — Absolute precision override
+  const targetX = CX + 120; 
+  const finalY = currY - 60; // Elevated to hit the top-right stem tip
   segments.push(`L ${targetX},${finalY}`);
   return { path: `M ${startX},${startY} ${segments.join(' ')}`, endY: finalY, startX };
 }
@@ -214,7 +217,7 @@ const Process = () => {
             })}
 
             {/* The new Stethoscope Head Image at the bottom — Exactly 8 o'clock */}
-            <foreignObject x={CX - 150} y={endY - 180} width="350" height="400">
+            <foreignObject x={CX - 150} y={endY - 240} width="350" height="400">
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
