@@ -365,40 +365,40 @@ const Home = () => {
             viewport={{ once: true }}
             className="text-center max-w-3xl mx-auto mb-12 sm:mb-16"
           >
-            <span className="inline-block text-blue-600 text-xs sm:text-sm font-bold uppercase tracking-widest mb-3">Life at the University</span>
+            <span className="inline-block text-blue-600 text-xs sm:text-sm font-bold uppercase tracking-widest mb-3">Clinical Training & Education</span>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-navy leading-tight">
-              Explore Our <span className="text-amber-500">Student Journey</span>
+              Mastering <span className="text-amber-500">Medical Excellence</span>
             </h2>
             <p className="mt-4 text-slate-500 leading-relaxed">
-              Experience the journey before you embark. Real glimpses into university life, clinical training, and our vibrant student community.
+              Gain exclusive access to clinical procedures, surgical training, and medical terminology mastery. A glimpse into the sophisticated training of future doctors.
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               {
-                title: "State-of-the-Art Campus",
-                synopsis: "Explore modern digital labs and research centers where students excel academic excellence.",
-                youtubeId: "s4fYA_wkta8",
-                videoUrl: "https://www.youtube.com/watch?v=s4fYA_wkta8"
+                title: "Advanced Surgical Training",
+                synopsis: "Step inside the operating room to witness complex surgical procedures and professional medical protocols firsthand.",
+                youtubeId: "dK6klQeM4v8",
+                videoUrl: "https://youtube.com/shorts/dK6klQeM4v8"
               },
               {
-                title: "Clinical Hospital Practice",
-                synopsis: "Early hospital experience that ensures you graduate ready for global clinical practice.",
-                youtubeId: "9tYngcASnTA",
-                videoUrl: "https://www.youtube.com/watch?v=9tYngcASnTA"
+                title: "Medical Anatomy Mastery",
+                synopsis: "In-depth understanding of physiological structures and clinical conditions through advanced visual demonstrations.",
+                youtubeId: "StJ34VMd6M8",
+                videoUrl: "https://youtu.be/StJ34VMd6M8?si=P5IQ-bntbGRqXrDY"
               },
               {
-                title: "Hostel & Social Life",
-                synopsis: "Comfortable living spaces and a thriving community where international doctors are born.",
-                youtubeId: "LhpZJwUboeI",
-                videoUrl: "https://www.youtube.com/watch?v=LhpZJwUboeI"
+                title: "Clinical Practice Highlights",
+                synopsis: "Real-world hospital experience and diagnostic skills essential for modern medical practice.",
+                youtubeId: "_6FbcwJ0V4Y",
+                videoUrl: "https://youtu.be/_6FbcwJ0V4Y"
               },
               {
-                title: "Success Stories",
-                synopsis: "Hear directly from our graduates now practicing medicine in India and successfully abroad.",
-                youtubeId: "q4LMRgn1x_Y",
-                videoUrl: "https://www.youtube.com/watch?v=q4LMRgn1x_Y"
+                title: "Emergency Response Training",
+                synopsis: "Gaining proficiency in critical care management and high-pressure emergency medical interventions.",
+                youtubeId: "j6rX7bqOnOc",
+                videoUrl: "https://youtube.com/shorts/j6rX7bqOnOc"
               }
             ].map((video, i) => (
               <motion.div
@@ -411,15 +411,15 @@ const Home = () => {
               >
                 <div className="relative aspect-[4/3] bg-slate-900 overflow-hidden">
                   <img
-                    src={`https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`}
+                    src={`https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`}
                     alt={video.title}
                     className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
                   />
-                  
+
                   {/* Play Overlay Button */}
-                  <a 
-                    href={video.videoUrl} 
-                    target="_blank" 
+                  <a
+                    href={video.videoUrl}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="absolute inset-0 flex items-center justify-center group/play transition-all bg-black/20 hover:bg-black/40"
                   >
