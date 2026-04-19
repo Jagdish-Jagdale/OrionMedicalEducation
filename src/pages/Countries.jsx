@@ -15,12 +15,14 @@ import georgiaFlag from '../assets/flags/georgiaflag.png';
 import russiaFlag from '../assets/flags/russiaflag.png';
 import kyrgyzstanFlag from '../assets/flags/kyrgyzstanflag.png';
 import uzbekistanFlag from '../assets/flags/uzbekistanflag.png';
+import kazakhstanFlag from '../assets/flags/kazakhstanflag.png';
 
 const countryMeta = [
   { key: 'georgia', label: 'GEORGIA', slug: 'georgia', flag: georgiaFlag, pos: { top: '22%', left: '68%', dtTop: '18%', dtLeft: '82%' } },
+  { key: 'kazakhstan', label: 'KAZAKHSTAN', slug: 'kazakhstan', flag: kazakhstanFlag, pos: { top: '50%', left: '68%', dtTop: '50%', dtLeft: '82%' } },
+  { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: uzbekistanFlag, pos: { top: '78%', left: '68%', dtTop: '82%', dtLeft: '82%' } },
   { key: 'russia', label: 'RUSSIA', slug: 'russia', flag: russiaFlag, pos: { top: '22%', left: '32%', dtTop: '18%', dtLeft: '18%' } },
   { key: 'kyrgyzstan', label: 'KYRGYZSTAN', slug: 'kyrgyzstan', flag: kyrgyzstanFlag, pos: { top: '78%', left: '32%', dtTop: '82%', dtLeft: '18%' } },
-  { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: uzbekistanFlag, pos: { top: '78%', left: '68%', dtTop: '82%', dtLeft: '82%' } },
 ];
 
 const Countries = () => {
@@ -115,16 +117,21 @@ const Countries = () => {
               const x_offset_raw = isMobile ? 6 : 14;
 
               const isLeft = x2_raw < 50;
+              const isKazakhstan = country.slug === 'kazakhstan';
+              const x_start = isKazakhstan
+                ? (isLeft ? 50 - 22 : 50 + 18)
+                : (isLeft ? 50 - x_offset_raw : 50 + x_offset_raw);
+
+              let y_start;
               const isTop = y2_raw < 50;
+              if (isKazakhstan) {
+                y_start = 50;
+              } else {
+                const dx_anchor = x_start - 50;
+                const dy_anchor = Math.sqrt(Math.pow(globe_radius, 2) - Math.pow(dx_anchor, 2));
+                y_start = isTop ? 50 - dy_anchor : 50 + dy_anchor;
+              }
 
-              const x_start = isLeft ? 50 - x_offset_raw : 50 + x_offset_raw;
-
-              // Circle equation: y = 50 +/- sqrt(radius^2 - (x - 50)^2)
-              const dx_anchor = x_start - 50;
-              const dy_anchor = Math.sqrt(Math.pow(globe_radius, 2) - Math.pow(dx_anchor, 2));
-              const y_start = isTop ? 50 - dy_anchor : 50 + dy_anchor;
-
-              // REFINED GEOMETRY: Short diagonal from globe -> Long horizontal to card
               const dy_total = y2_raw - y_start;
               const leanFactor = isMobile ? 0.18 : 0.35;
               const dx_lean = (x2_raw < x_start ? -1 : 1) * (Math.abs(dy_total) * leanFactor);
@@ -133,8 +140,9 @@ const Countries = () => {
               const x2 = x2_raw;
               const y2 = y2_raw;
 
-              // Path: M globe -> Short diagonal to (x_mid, y2) -> Long horizontal to card
-              const d = `M ${x_start} ${y_start} L ${x_mid} ${y2} L ${x2} ${y2}`;
+              const d = isKazakhstan
+                ? `M ${x_start} ${y_start} L ${x2} ${y2}`
+                : `M ${x_start} ${y_start} L ${x_mid} ${y2} L ${x2} ${y2}`;
 
               return (
                 <g key={`line-group-${country.slug}`}>
@@ -149,29 +157,31 @@ const Countries = () => {
                     transition={{ delay: 0.5 + i * 0.1 }}
                   />
 
-                  {/* Connection Line */}
                   <motion.path
                     d={d}
                     fill="none"
-                    stroke={selectedCountry === country.slug ? '#2563eb' : 'url(#line-grad)'}
-                    strokeWidth={isMobile ? 0.12 : 0.22}
+                    stroke={selectedCountry === country.slug ? '#2563eb' : (isKazakhstan ? '#3b82f6' : 'url(#line-grad)')}
+                    strokeWidth={isKazakhstan ? (isMobile ? 0.2 : 0.4) : (isMobile ? 0.12 : 0.22)}
                     strokeLinecap="round"
                     filter="url(#glow)"
+                    initial={{ pathLength: 0, opacity: 0 }}
                     animate={isGlobeLoaded ? { pathLength: 1, opacity: 1 } : { pathLength: 0, opacity: 0 }}
-                    transition={{ duration: 1.2, delay: 0.2 + i * 0.1 }}
+                    transition={{ duration: 0.8, delay: 0.2 + i * 0.1 }}
                   />
 
-                  {/* Corner Node: After 45 deg diagonal, starting horizontal */}
-                  <motion.circle
-                    cx={x_mid}
-                    cy={y2}
-                    r={0.12}
-                    fill="#3b82f6"
-                    opacity={0.6}
-                    initial={{ scale: 0 }}
-                    animate={isGlobeLoaded ? { scale: 1 } : { scale: 0 }}
-                    transition={{ delay: 0.8 + i * 0.1 }}
-                  />
+                  {/* Corner Node */}
+                  {!isKazakhstan && (
+                    <motion.circle
+                      cx={x_mid}
+                      cy={y2}
+                      r={0.12}
+                      fill="#3b82f6"
+                      opacity={0.6}
+                      initial={{ scale: 0 }}
+                      animate={isGlobeLoaded ? { scale: 1 } : { scale: 0 }}
+                      transition={{ delay: 0.8 + i * 0.1 }}
+                    />
+                  )}
                 </g>
               );
             })}

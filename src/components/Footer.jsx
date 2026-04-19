@@ -10,6 +10,7 @@ const Footer = () => {
   const marqueeData = [
     { country: "RUSSIA", accent: "text-blue-700" },
     { country: "GEORGIA", accent: "text-red-600" },
+    { country: "KAZAKHSTAN", accent: "text-blue-400" },
     { country: "KYRGYZSTAN", accent: "text-orange-600" },
     { country: "UZBEKISTAN", accent: "text-cyan-600" },
   ];
@@ -98,6 +99,7 @@ const Footer = () => {
                 { label: 'Kyrgyzstan', anchor: 'kyrgyzstan' },
                 { label: 'Russia', anchor: 'russia' },
                 { label: 'Georgia', anchor: 'georgia' },
+                { label: 'Kazakhstan', anchor: 'kazakhstan' },
                 { label: 'Uzbekistan', anchor: 'uzbekistan' },
               ].map((c) => (
                 <li key={c.anchor}>
