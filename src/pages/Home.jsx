@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import airplaneImg from '../assets/splash/airoplane.png';
+import orionLogo from '../assets/orionfullrmbg.png';
+
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import 'swiper/css';
@@ -152,14 +154,24 @@ const Home = () => {
           {/* Text */}
           <div className="text-center lg:text-left">
             <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="mb-8 flex justify-center lg:justify-start"
+            >
+              <img src={orionLogo} alt="Orion Medical Education" className="h-16 sm:h-20 w-auto object-contain brightness-0 invert drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
+            </motion.div>
+
+            <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
               className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-amber-300 text-[10px] sm:text-xs font-bold px-4 py-2 rounded-full border border-white/20 mb-6"
             >
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
               Trusted MBBS Abroad Consultancy Since 2017
             </motion.div>
+
 
             <motion.h1
               variants={fadeUp}

@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import orionLogo from '../assets/orionfullrmbg.png';
+
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -45,15 +47,8 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 8v8M8 12h8" strokeLinecap="round" />
-                </svg>
-              </div>
-              <div>
-                <div className="font-bold text-white">Orion Medical</div>
-                <div className="text-amber-400 text-xs">Education</div>
+              <div className="h-10 w-auto flex items-center justify-center">
+                <img src={orionLogo} alt="Orion Medical Education" className="h-full w-auto object-contain brightness-0 invert" />
               </div>
             </div>
             <p className="text-slate-400 text-sm leading-relaxed mb-4">

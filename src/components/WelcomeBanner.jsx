@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import bannerImg from '../assets/promotions/welcome_banner.png';
-import orionLogo from '../assets/orionlogo.png';
+import orionLogo from '../assets/orionfullrmbg.png';
 import introAudio from '../assets/splash/intro.mp3';
 
 const WelcomeBanner = () => {
@@ -98,7 +98,7 @@ const WelcomeBanner = () => {
                         <img 
                             src={orionLogo} 
                             alt="Orion Logo" 
-                            className="w-48 sm:w-64 md:w-80 h-auto drop-shadow-[0_0_20px_rgba(255,255,255,0.15)]" 
+                            className="w-48 sm:w-64 md:w-80 h-auto drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] brightness-0 invert" 
                         />
                     </motion.div>
 

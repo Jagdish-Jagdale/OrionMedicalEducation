@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import orionLogo from '../assets/orionlogo.png';
+import orionLogo from '../assets/orionfullrmbg.png';
 
 const navLinks = [
   { label: 'Home', to: '/' },
@@ -49,16 +49,12 @@ const Navbar = () => {
               transition={{ duration: 0.4 }}
               className="flex items-center gap-2"
             >
-              <div className="w-12 h-12 flex items-center justify-center transition-transform group-hover:scale-105">
-                <img src={orionLogo} alt="Orion Medical" className="w-full h-full object-contain" />
-              </div>
-              <div className="hidden sm:block">
-                <span className={`font-bold text-lg leading-tight block transition-colors ${shouldShowSolid ? 'text-navy' : 'text-white'}`}>
-                  Orion Medical
-                </span>
-                <span className={`text-sm font-medium transition-colors ${shouldShowSolid ? 'text-amber-500' : 'text-amber-300'}`}>
-                  Education
-                </span>
+              <div className="h-10 sm:h-12 w-auto flex items-center justify-center transition-transform group-hover:scale-105">
+                <img 
+                  src={orionLogo} 
+                  alt="Orion Medical Education" 
+                  className={`h-full w-auto object-contain transition-all duration-300 ${!shouldShowSolid ? 'brightness-0 invert' : ''}`} 
+                />
               </div>
             </motion.div>
           </Link>
