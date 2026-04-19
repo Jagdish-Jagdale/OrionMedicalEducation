@@ -17,6 +17,9 @@ const WelcomeBanner = () => {
 
     useEffect(() => {
         if (isVisible) {
+            // Lock scrolling
+            document.body.style.overflow = 'hidden';
+
             // Sequence Timing:
             // 0-1.5: Black
             // 1.5-4.5: Logo phase
@@ -25,7 +28,11 @@ const WelcomeBanner = () => {
             const timer = setTimeout(() => {
                 handleClose();
             }, 8500);
-            return () => clearTimeout(timer);
+
+            return () => {
+                clearTimeout(timer);
+                document.body.style.overflow = '';
+            };
         }
     }, [isVisible]);
 
