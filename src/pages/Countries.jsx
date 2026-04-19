@@ -17,8 +17,8 @@ import kyrgyzstanFlag from '../assets/flags/kyrgyzstanflag.png';
 import uzbekistanFlag from '../assets/flags/uzbekistanflag.png';
 
 const countryMeta = [
-  { key: 'georgia', label: 'GEORGIA', slug: 'georgia', flag: georgiaFlag, pos: { top: '22%', left: '32%', dtTop: '18%', dtLeft: '18%' } },
-  { key: 'russia', label: 'RUSSIA', slug: 'russia', flag: russiaFlag, pos: { top: '22%', left: '68%', dtTop: '18%', dtLeft: '82%' } },
+  { key: 'georgia', label: 'GEORGIA', slug: 'georgia', flag: georgiaFlag, pos: { top: '22%', left: '68%', dtTop: '18%', dtLeft: '82%' } },
+  { key: 'russia', label: 'RUSSIA', slug: 'russia', flag: russiaFlag, pos: { top: '22%', left: '32%', dtTop: '18%', dtLeft: '18%' } },
   { key: 'kyrgyzstan', label: 'KYRGYZSTAN', slug: 'kyrgyzstan', flag: kyrgyzstanFlag, pos: { top: '78%', left: '32%', dtTop: '82%', dtLeft: '18%' } },
   { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: uzbekistanFlag, pos: { top: '78%', left: '68%', dtTop: '82%', dtLeft: '82%' } },
 ];
