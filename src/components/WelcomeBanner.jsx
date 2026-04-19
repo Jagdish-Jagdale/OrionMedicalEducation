@@ -98,7 +98,7 @@ const WelcomeBanner = () => {
                         <img 
                             src={orionLogo} 
                             alt="Orion Logo" 
-                            className="w-48 sm:w-64 md:w-80 h-auto drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] brightness-0 invert" 
+                            className="w-48 sm:w-64 md:w-80 h-auto drop-shadow-[0_0_20px_rgba(255,255,255,0.15)]" 
                         />
                     </motion.div>
 

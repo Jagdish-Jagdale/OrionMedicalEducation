@@ -48,7 +48,7 @@ const Footer = () => {
           <div className="lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <div className="h-10 w-auto flex items-center justify-center">
-                <img src={orionLogo} alt="Orion Medical Education" className="h-full w-auto object-contain brightness-0 invert" />
+                <img src={orionLogo} alt="Orion Medical Education" className="h-full w-auto object-contain" />
               </div>
             </div>
             <p className="text-slate-400 text-sm leading-relaxed mb-4">

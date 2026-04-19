@@ -159,7 +159,7 @@ const Home = () => {
               transition={{ duration: 0.6 }}
               className="mb-8 flex justify-center lg:justify-start"
             >
-              <img src={orionLogo} alt="Orion Medical Education" className="h-16 sm:h-20 w-auto object-contain brightness-0 invert drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
+              <img src={orionLogo} alt="Orion Medical Education" className="h-16 sm:h-20 w-auto object-contain drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
             </motion.div>
 
             <motion.div
