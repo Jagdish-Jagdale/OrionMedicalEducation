@@ -8,16 +8,16 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   const marqueeData = [
-    { text: "MBBS IN RUSSIA", accent: "text-blue-400" },
-    { text: "MBBS IN GEORGIA", accent: "text-white" },
-    { text: "MBBS IN KYRGYZSTAN", accent: "text-blue-400" },
-    { text: "MBBS IN UZBEKISTAN", accent: "text-white" },
+    { country: "RUSSIA", accent: "text-blue-600" },
+    { country: "GEORGIA", accent: "text-blue-600" },
+    { country: "KYRGYZSTAN", accent: "text-blue-600" },
+    { country: "UZBEKISTAN", accent: "text-blue-600" },
   ];
 
   return (
-    <footer className="bg-gradient-to-b from-[#0f172a] to-[#020617] text-white mt-16 shadow-[0_-4px_30px_rgba(0,0,0,0.6)] border-t border-white/5">
+    <footer className="bg-slate-900/95 backdrop-blur-xl text-white mt-16 shadow-[0_-4px_30px_rgba(0,0,0,0.6)] border-t border-white/5 relative overflow-hidden">
       {/* Running Marquee / Special Offers Stripe */}
-      <div className="bg-white/[0.02] border-b border-white/5 overflow-hidden py-2.5 backdrop-blur-md">
+      <div className="bg-white border-b border-white/10 overflow-hidden py-3">
         <motion.div
           animate={{ x: [0, -1030] }}
           transition={{
@@ -31,8 +31,9 @@ const Footer = () => {
             <div key={set} className="flex gap-12 items-center pr-12">
               {marqueeData.map((item, idx) => (
                 <React.Fragment key={idx}>
-                  <span className={`${item.accent} font-bold tracking-[0.25em] text-[10px] uppercase font-inter`}>
-                    {item.text}
+                  <span className="font-bold tracking-[0.25em] text-[10px] uppercase font-inter">
+                    <span className="text-black">MBBS IN </span>
+                    <span className={item.accent}>{item.country}</span>
                   </span>
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-500/20" />
                 </React.Fragment>
