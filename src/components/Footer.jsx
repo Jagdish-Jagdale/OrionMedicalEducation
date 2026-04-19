@@ -8,10 +8,10 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   const marqueeData = [
-    { country: "RUSSIA", accent: "text-blue-600" },
-    { country: "GEORGIA", accent: "text-blue-600" },
-    { country: "KYRGYZSTAN", accent: "text-blue-600" },
-    { country: "UZBEKISTAN", accent: "text-blue-600" },
+    { country: "RUSSIA", accent: "text-blue-700" },
+    { country: "GEORGIA", accent: "text-red-600" },
+    { country: "KYRGYZSTAN", accent: "text-orange-600" },
+    { country: "UZBEKISTAN", accent: "text-cyan-600" },
   ];
 
   return (
@@ -25,17 +25,17 @@ const Footer = () => {
             repeat: Infinity,
             ease: "linear"
           }}
-          className="flex whitespace-nowrap gap-12 items-center"
+          className="flex whitespace-nowrap gap-6 items-center"
         >
-          {[1, 2, 3].map((set) => (
-            <div key={set} className="flex gap-12 items-center pr-12">
+          {[1, 2, 3, 4].map((set) => (
+            <div key={set} className="flex gap-6 items-center pr-6">
               {marqueeData.map((item, idx) => (
                 <React.Fragment key={idx}>
                   <span className="font-bold tracking-[0.25em] text-[10px] uppercase font-inter">
                     <span className="text-black">MBBS IN </span>
                     <span className={item.accent}>{item.country}</span>
                   </span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500/20" />
+                  <span className="w-1 h-1 rounded-full bg-slate-300" />
                 </React.Fragment>
               ))}
             </div>
