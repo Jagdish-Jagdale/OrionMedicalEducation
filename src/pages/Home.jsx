@@ -10,6 +10,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import WelcomeBanner from '../components/WelcomeBanner';
+import humanEvolution from '../assets/humanevolution.png';
 
 const fadeUp = {
   initial: { opacity: 0, y: 40 },
@@ -329,10 +330,23 @@ const Home = () => {
           </div>
 
           <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="max-w-3xl mx-auto -mb-6 sm:-mb-10 px-4 relative z-10"
+          >
+            <img 
+              src={humanEvolution} 
+              alt="Human Evolution to Doctor" 
+              className="w-full h-auto object-contain drop-shadow-2xl brightness-[1.02] block"
+            />
+          </motion.div>
+
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center bg-gradient-to-r from-navy to-blue-700 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-white mb-16 sm:mb-20 relative overflow-hidden"
+            className="text-center bg-gradient-to-r from-navy to-blue-700 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-white mb-16 sm:mb-20 relative overflow-hidden mt-0"
           >
             <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.8) 1px, transparent 0)', backgroundSize: '30px 30px' }} />
             <div className="relative z-10">

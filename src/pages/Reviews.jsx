@@ -140,13 +140,13 @@ const Reviews = () => {
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
             className="text-2xl md:text-6xl font-black text-navy tracking-tighter"
           >
-            Spinal <span className="text-blue-500">Success</span> Core
+            Anatomical <span className="text-red-500">Success</span> Core
           </motion.h1>
           <div className="w-16 md:w-20 h-1 bg-amber-500 mx-auto mt-4 md:mt-6 rounded-full shadow-lg" />
         </div>
 
         {/* ═══ ANIMATED NEURAL MAP ═══ */}
-        <div className="relative mt-4 md:mt-12 min-h-[1100px] md:min-h-[1600px] lg:min-h-[1800px]">
+        <div className="relative mt-4 md:mt-12 min-h-[750px] md:min-h-[1150px] lg:min-h-[1350px]">
 
           {/* ── Brain & Spine Hub ── */}
           <div className="absolute top-[30px] md:top-[0px] left-1/2 -translate-x-1/2 w-full flex items-start justify-center pointer-events-none z-20">
@@ -178,14 +178,14 @@ const Reviews = () => {
                 <motion.path
                   key={i}
                   d={d}
-                  stroke="#3b82f6"
+                  stroke="#ef4444"
                   strokeWidth={isMobile ? "1.5" : "4.0"}
                   strokeLinecap="round"
                   initial={{ opacity: 0, pathLength: 0 }}
                   style={{
                     pathLength: progressByIndex[i],
                     opacity: progressByIndex[i],
-                    filter: isMobile ? 'none' : 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.3))'
+                    filter: isMobile ? 'none' : 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.4))'
                   }}
                 />
               ) : null
@@ -253,15 +253,16 @@ const Reviews = () => {
         </div>
 
         {/* ═══ CTA ═══ */}
-        <div className="mt-16 md:mt-32 text-center relative z-40 pb-20">
+        <div className="mt-4 md:mt-8 text-center relative z-40 pb-20">
           <motion.a
             href="https://wa.me/919999999999"
-            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
-            className="inline-flex items-center gap-4 bg-navy text-white px-8 md:px-14 py-4 md:py-6 rounded-full shadow-3xl hover:bg-blue-900 transition-all group active:scale-95"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-4 bg-red-600 text-white px-8 md:px-14 py-4 md:py-6 rounded-full shadow-3xl hover:bg-red-700 transition-all group active:scale-95"
           >
-            <span className="w-2 h-2 bg-amber-500 rounded-full group-hover:scale-150 transition-transform" />
-            <span className="text-[10px] md:text-xs font-black tracking-widest uppercase">Sync into the Network</span>
-            <svg className="w-4 h-4 md:w-5 md:h-5 text-amber-500 group-hover:translate-x-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+            <span className="w-2 h-2 bg-amber-400 rounded-full group-hover:scale-150 transition-transform" />
+            <span className="text-[10px] md:text-xs font-black tracking-widest uppercase text-white">Sync into the Network</span>
+            <svg className="w-4 h-4 md:w-5 md:h-5 text-amber-400 group-hover:translate-x-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
               <path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </motion.a>

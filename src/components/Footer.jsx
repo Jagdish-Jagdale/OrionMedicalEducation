@@ -49,7 +49,7 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <div className="h-10 w-auto flex items-center justify-center">
+              <div className="h-10 w-auto flex items-center justify-center bg-white px-1 py-1 rounded-lg shadow-sm">
                 <img src={orionLogo} alt="Orion Medical Education" className="h-full w-auto object-contain" />
               </div>
             </div>

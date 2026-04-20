@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import processImage from '../assets/processimage.png';
 import processImage2 from '../assets/processimage2.png';
@@ -59,10 +59,10 @@ const TUBE_COLOR = '#7e2726';
 
 // SVG layout constants (all in viewBox units)
 const VB_W = 900;
-const STEP_H = 300;    // Further increased for ultra-smooth sweeps
+const STEP_H = 450;    // Significantly increased for a premium, elongated sweep
 const CX = VB_W / 2;  // center X
 const CARD_W = 320;
-const CARD_OFFSET = 310; // how far left/right card centers are from CX
+const CARD_OFFSET = 200; // Sleeker offset for a more modern look
 
 // Build the SVG path that snakes left and right
 function buildTubePath(numSteps) {
@@ -78,12 +78,14 @@ function buildTubePath(numSteps) {
 
   for (let i = 0; i < numSteps; i++) {
     const isEven = i % 2 === 0;
-    const targetX = isEven ? CX + CARD_OFFSET : CX - CARD_OFFSET;
+    const targetX = isEven ? CX - CARD_OFFSET : CX + CARD_OFFSET; // Consistent: Even is Left, Odd is Right
     const targetY = startY + (i + 1) * STEP_H;
 
-    // Fluid Bezier curve to the next step
-    const cp1Y = currY + STEP_H * 0.4;
-    const cp2Y = targetY - STEP_H * 0.4;
+    // Premium 'S' Curve logic: Handle influence scaled for an elongated, elegant flow
+    const segmentH = targetY - currY;
+    const cpYInfluence = 0.65; // Higher influence for wider, more rounded arcs
+    const cp1Y = currY + segmentH * cpYInfluence;
+    const cp2Y = targetY - segmentH * cpYInfluence;
     segments.push(`C ${currX},${cp1Y} ${targetX},${cp2Y} ${targetX},${targetY}`);
     
     currX = targetX;
@@ -101,6 +103,57 @@ const { path: tubePath, endY, startX: initialX } = buildTubePath(steps.length);
 const svgHeight = endY + 250; // High buffer to prevent clipping of tilted bottom hardware
 
 const Process = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Responsive Constants
+  const VB_W = isMobile ? 500 : 900;
+  const STEP_H = isMobile ? 550 : 450;
+  const CX = VB_W / 2;
+  const CARD_OFFSET = isMobile ? 65 : 200;
+  const CARD_W = isMobile ? 300 : 480; // Significantly increased for high impact
+  const CARD_H = isMobile ? 450 : 350; // Increased headroom for vertical content
+
+  // Build the SVG path dynamically based on responsive constants
+  const buildTubePath = (numSteps) => {
+    const startX = CX - 5;
+    const startY = -150;
+    const segments = [];
+    let currX = startX;
+    let currY = 40;
+
+    segments.push(`L ${startX},40`);
+
+    for (let i = 0; i < numSteps; i++) {
+      const isEven = i % 2 === 0;
+      const targetX = isEven ? CX - CARD_OFFSET : CX + CARD_OFFSET;
+      const targetY = startY + (i + 1) * STEP_H;
+
+      const segmentH = targetY - currY;
+      const cpYInfluence = isMobile ? 0.5 : 0.65;
+      const cp1Y = currY + segmentH * cpYInfluence;
+      const cp2Y = targetY - segmentH * cpYInfluence;
+      segments.push(`C ${currX},${cp1Y} ${targetX},${cp2Y} ${targetX},${targetY}`);
+      
+      currX = targetX;
+      currY = targetY;
+    }
+
+    const finalTargetX = CX + (isMobile ? 80 : 120);
+    const finalY = currY - 60;
+    segments.push(`L ${finalTargetX},${finalY}`);
+    return { path: `M ${startX},${startY} ${segments.join(' ')}`, endY: finalY };
+  };
+
+  const { path: tubePath, endY } = buildTubePath(steps.length);
+  const svgHeight = endY + (isMobile ? 350 : 250);
+
   return (
     <div className="min-h-screen bg-white pt-20">
 
@@ -140,14 +193,14 @@ const Process = () => {
             <img
               src={processImage}
               alt="Stethoscope"
-              className="relative z-10 w-72 sm:w-[300px] h-auto object-contain drop-shadow-2xl brightness-105"
+              className="relative z-10 w-48 sm:w-64 md:w-72 lg:w-[300px] h-auto object-contain drop-shadow-2xl brightness-105"
             />
           </motion.div>
         </div>
 
         {/* SVG Tube + Step Cards overlay */}
         <div
-          className="relative w-full"
+          className="relative w-full overflow-visible"
           style={{ height: `${svgHeight}px` }}
         >
           {/* ── SVG Tube path ── */}
@@ -158,66 +211,82 @@ const Process = () => {
             style={{ pointerEvents: 'none' }}
           >
             <defs>
-              {/* Tube-like gradient: lighter center, darker outer = 3D tube look */}
               <linearGradient id="tubeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="#7f1d1d" />
                 <stop offset="40%" stopColor="#ef4444" />
                 <stop offset="60%" stopColor="#ef4444" />
                 <stop offset="100%" stopColor="#7f1d1d" />
               </linearGradient>
-              {/* Drop shadow filter for tube depth */}
-              <filter id="tubeShadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#7f1d1d" floodOpacity="0.5" />
-              </filter>
             </defs>
 
-            {/* Subtle border for the tube */}
-            <path
-              d={tubePath}
-              fill="none"
-              stroke="#872b2f"
-              strokeWidth="24"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            {/* Single solid-colored tube matching the stethoscope */}
-            <path
-              d={tubePath}
-              fill="none"
-              stroke={TUBE_COLOR}
-              strokeWidth="21"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
+            {/* Tube Borders */}
+            <path d={tubePath} fill="none" stroke="#872b2f" strokeWidth={isMobile ? "18" : "24"} strokeLinecap="round" strokeLinejoin="round" />
+            {/* Core Tube */}
+            <path d={tubePath} fill="none" stroke={TUBE_COLOR} strokeWidth={isMobile ? "15" : "21"} strokeLinecap="round" strokeLinejoin="round" />
 
-            {/* Step node circles on the tube */}
+            {/* Step node circles + Info Cards on the tube */}
             {steps.map((step, i) => {
-              const nodeX = i % 2 === 0 ? CX - CARD_OFFSET : CX + CARD_OFFSET;
-              const nodeY = (i + 1) * STEP_H;
+              const isLeft = i % 2 === 0;
+              const nodeX = isLeft ? CX - CARD_OFFSET : CX + CARD_OFFSET;
+              const nodeY = -150 + (i + 1) * STEP_H;
+
               return (
                 <g key={i}>
-                  {/* Subtle outer glow using the step color */}
-                  <circle cx={nodeX} cy={nodeY} r="26" fill={step.color} opacity="0.15" />
-                  {/* Node circle */}
-                  <circle cx={nodeX} cy={nodeY} r="20" fill={step.color} />
-                  {/* Step number text */}
-                  <text
-                    x={nodeX}
-                    y={nodeY + 5}
-                    textAnchor="middle"
-                    fill="white"
-                    fontSize="13"
-                    fontWeight="bold"
-                    fontFamily="Inter, sans-serif"
-                  >
+                  <circle cx={nodeX} cy={nodeY} r={isMobile ? "20" : "26"} fill={step.color} opacity="0.15" />
+                  <circle cx={nodeX} cy={nodeY} r={isMobile ? "15" : "20"} fill={step.color} />
+                  <text x={nodeX} y={nodeY + 5} textAnchor="middle" fill="white" fontSize={isMobile ? "10" : "13"} fontWeight="bold" fontFamily="Inter, sans-serif">
                     {i + 1}
                   </text>
+
+                  {/* Info Card via foreignObject */}
+                  <foreignObject
+                    x={isLeft ? nodeX - CARD_W - 20 : nodeX + 20}
+                    y={nodeY - (CARD_H / 2)}
+                    width={CARD_W}
+                    height={CARD_H}
+                    className="overflow-visible"
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, x: isLeft ? -30 : 30 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true, margin: "-20px" }}
+                      className="w-full flex items-center relative h-full"
+                    >
+                      <div
+                        className="bg-white rounded-xl sm:rounded-2xl shadow-xl border-l-4 p-3 sm:p-4 hover:shadow-2xl transition-all duration-300 group w-full"
+                        style={{ borderLeftColor: step.color }}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <span
+                            className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center text-xs sm:text-base"
+                            style={{ backgroundColor: `${step.color}15`, color: step.color }}
+                          >
+                            {step.icon}
+                          </span>
+                          <h3 className="font-bold text-[#1e3a5f] text-sm sm:text-base leading-tight">{step.title}</h3>
+                        </div>
+                        <p className="text-slate-500 text-[11px] sm:text-sm leading-relaxed">{step.description}</p>
+                      </div>
+
+                      <div
+                        className="absolute top-1/2 -translate-y-1/2"
+                        style={{
+                          [isLeft ? 'right' : 'left']: '-8px',
+                          width: 0,
+                          height: 0,
+                          borderTop: isMobile ? '5px solid transparent' : '6px solid transparent',
+                          borderBottom: isMobile ? '5px solid transparent' : '6px solid transparent',
+                          [isLeft ? 'borderLeft' : 'borderRight']: isMobile ? `8px solid ${step.color}` : `8px solid ${step.color}`,
+                        }}
+                      />
+                    </motion.div>
+                  </foreignObject>
                 </g>
               );
             })}
 
-            {/* The new Stethoscope Head Image at the bottom — Exactly 8 o'clock */}
-            <foreignObject x={CX - 150} y={endY - 240} width="350" height="400">
+            {/* Bottom Stethoscope Head */}
+            <foreignObject x={CX - (isMobile ? 100 : 150)} y={endY - (isMobile ? 180 : 240)} width={isMobile ? 200 : 350} height={isMobile ? 250 : 400}>
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
@@ -227,75 +296,16 @@ const Process = () => {
                 <img 
                   src={processImage2} 
                   alt="Stethoscope Head" 
-                  className="w-40 h-auto object-contain transform rotate-[240deg] drop-shadow-2xl"
-                  style={{ filter: 'drop-shadow(0 20px 30px rgba(0,0,0,0.15))' }}
+                  className={`${isMobile ? 'w-24' : 'w-40'} h-auto object-contain transform rotate-[240deg] drop-shadow-2xl`}
                 />
                 <div className="mt-4 flex flex-col items-center">
-                  <span className="text-[#9b1c1c] text-[10px] font-black tracking-[0.2em] uppercase bg-white/90 px-4 py-1 rounded-full shadow-sm border border-rose-100">
+                  <span className="text-[#9b1c1c] text-[8px] sm:text-[10px] font-black tracking-[0.2em] uppercase bg-white/90 px-3 sm:px-4 py-1 rounded-full shadow-sm border border-rose-100 whitespace-nowrap">
                     Your Journey Begins
                   </span>
                 </div>
               </motion.div>
             </foreignObject>
           </svg>
-
-          {/* ── Step Cards — absolutely positioned to match SVG nodes ── */}
-          {steps.map((step, i) => {
-            const isLeft = i % 2 === 0;
-            // Map SVG coords to percentage of container width
-            const nodeXpct = isLeft
-              ? ((CX - CARD_OFFSET) / VB_W) * 100
-              : ((CX + CARD_OFFSET) / VB_W) * 100;
-            const nodeYpct = ((i + 1) * STEP_H / svgHeight) * 100;
-
-            return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: isLeft ? -40 : 40 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{ duration: 0.5, delay: i * 0.07 }}
-                style={{
-                  position: 'absolute',
-                  top: `${nodeYpct}%`,
-                  left: isLeft ? `${nodeXpct - 30}%` : 'auto',
-                  right: isLeft ? 'auto' : `${100 - nodeXpct - 30}%`,
-                  transform: 'translateY(-50%)',
-                  width: '220px',
-                  zIndex: 10,
-                }}
-                className={`${isLeft ? 'mr-2' : 'ml-2'}`}
-              >
-                <div
-                  className="bg-white rounded-2xl shadow-xl border-l-4 p-4 hover:shadow-2xl transition-all duration-300 group"
-                  style={{ borderLeftColor: step.color }}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span 
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-lg"
-                      style={{ backgroundColor: `${step.color}15`, color: step.color }}
-                    >
-                      {step.icon}
-                    </span>
-                    <h3 className="font-bold text-[#1e3a5f] text-sm leading-tight">{step.title}</h3>
-                  </div>
-                  <p className="text-slate-500 text-xs leading-relaxed">{step.description}</p>
-                </div>
-                {/* Connector arrow pointing from card to node */}
-                <div
-                  className="absolute top-1/2 -translate-y-1/2"
-                  style={{
-                    [isLeft ? 'right' : 'left']: '-10px',
-                    width: 0,
-                    height: 0,
-                    borderTop: '8px solid transparent',
-                    borderBottom: '8px solid transparent',
-                    [isLeft ? 'borderLeft' : 'borderRight']: `10px solid ${step.color}`,
-                  }}
-                />
-              </motion.div>
-            );
-          })}
         </div>
 
         {/* CTA below */}

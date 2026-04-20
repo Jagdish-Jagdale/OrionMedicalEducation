@@ -4,10 +4,10 @@ const NeuralReviewCard = ({ review, position, isLeft, style }) => {
   return (
     <div
       style={style}
-      className={`${position} z-30 w-full p-2 lg:p-5 bg-white rounded-lg lg:rounded-3xl border border-slate-100 shadow-[0_10px_40px_rgba(0,0,0,0.04)] group hover:shadow-[0_20px_50px_rgba(59,130,246,0.1)] transition-all border-l-[3px] lg:border-l-4 ${isLeft ? 'border-l-blue-500' : 'border-l-amber-500'}`}
+      className={`${position} z-30 w-full p-2 lg:p-5 bg-white rounded-lg lg:rounded-3xl border border-slate-100 shadow-[0_10px_40px_rgba(0,0,0,0.04)] group hover:shadow-[0_20px_50px_rgba(239,68,68,0.1)] transition-all border-l-[3px] lg:border-l-4 ${isLeft ? 'border-l-red-500' : 'border-l-amber-500'}`}
     >
       <div className="flex items-center gap-1.5 lg:gap-3 mb-1 lg:mb-4">
-        <div className="w-6 h-6 lg:w-11 lg:h-11 rounded-full border border-slate-100 p-0.5 overflow-hidden flex-shrink-0 group-hover:border-blue-400 transition-colors shadow-sm">
+        <div className="w-6 h-6 lg:w-11 lg:h-11 rounded-full border border-slate-100 p-0.5 overflow-hidden flex-shrink-0 group-hover:border-red-400 transition-colors shadow-sm">
           <img 
             src={review.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.studentName || 'User')}&background=random`} 
             alt={review.studentName} 
@@ -15,7 +15,7 @@ const NeuralReviewCard = ({ review, position, isLeft, style }) => {
           />
         </div>
         <div className="overflow-hidden">
-          <h4 className="text-navy font-bold text-[9px] lg:text-sm truncate group-hover:text-blue-600 transition-colors uppercase tracking-tight lg:tracking-wider">{review.studentName || 'Student'}</h4>
+          <h4 className="text-navy font-bold text-[9px] lg:text-sm truncate group-hover:text-red-600 transition-colors uppercase tracking-tight lg:tracking-wider">{review.studentName || 'Student'}</h4>
           <p className="text-slate-400 text-[6px] lg:text-[10px] uppercase font-black tracking-widest leading-none mt-0.5">{review.type}</p>
         </div>
       </div>
@@ -30,7 +30,7 @@ const NeuralReviewCard = ({ review, position, isLeft, style }) => {
       </div>
       
       {/* Precision Synapse Point */}
-      <div className={`absolute top-1/2 -translate-y-1/2 ${isLeft ? '-right-[4px] lg:-right-[5px]' : '-left-[4px] lg:-left-[5px]'} w-2 h-2 lg:w-3 lg:h-3 bg-blue-500 rounded-full shadow-[0_0_12px_rgba(59,130,246,0.6)] z-50 border-2 border-white`} />
+      <div className={`absolute top-1/2 -translate-y-1/2 ${isLeft ? '-right-[4px] lg:-right-[5px]' : '-left-[4px] lg:-left-[5px]'} w-2 h-2 lg:w-3 lg:h-3 bg-red-500 rounded-full shadow-[0_0_12px_rgba(239,68,68,0.6)] z-50 border-2 border-white`} />
     </div>
   );
 };
