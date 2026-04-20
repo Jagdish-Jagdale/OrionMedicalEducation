@@ -87,13 +87,13 @@ function buildTubePath(numSteps) {
     const cp1Y = currY + segmentH * cpYInfluence;
     const cp2Y = targetY - segmentH * cpYInfluence;
     segments.push(`C ${currX},${cp1Y} ${targetX},${cp2Y} ${targetX},${targetY}`);
-    
+
     currX = targetX;
     currY = targetY;
   }
 
   // Final attachment to the 8 o'clock diaphragm — Absolute precision override
-  const targetX = CX + 120; 
+  const targetX = CX + 120;
   const finalY = currY - 60; // Elevated to hit the top-right stem tip
   segments.push(`L ${targetX},${finalY}`);
   return { path: `M ${startX},${startY} ${segments.join(' ')}`, endY: finalY, startX };
@@ -113,12 +113,12 @@ const Process = () => {
   }, []);
 
   // Responsive Constants
-  const VB_W = isMobile ? 500 : 900;
+  const VB_W = isMobile ? 800 : 1000; // Balanced coordinate width
   const STEP_H = isMobile ? 550 : 450;
   const CX = VB_W / 2;
-  const CARD_OFFSET = isMobile ? 65 : 200;
-  const CARD_W = isMobile ? 300 : 480; // Significantly increased for high impact
-  const CARD_H = isMobile ? 450 : 350; // Increased headroom for vertical content
+  const CARD_OFFSET = isMobile ? 120 : 250;
+  const CARD_W = isMobile ? 320 : 480;
+  const CARD_H = isMobile ? 500 : 400;
 
   // Build the SVG path dynamically based on responsive constants
   const buildTubePath = (numSteps) => {
@@ -140,22 +140,28 @@ const Process = () => {
       const cp1Y = currY + segmentH * cpYInfluence;
       const cp2Y = targetY - segmentH * cpYInfluence;
       segments.push(`C ${currX},${cp1Y} ${targetX},${cp2Y} ${targetX},${targetY}`);
-      
+
       currX = targetX;
       currY = targetY;
     }
 
-    const finalTargetX = CX + (isMobile ? 80 : 120);
-    const finalY = currY - 60;
-    segments.push(`L ${finalTargetX},${finalY}`);
-    return { path: `M ${startX},${startY} ${segments.join(' ')}`, endY: finalY };
+    // Final segment: Curve smoothly into the stethoscope hardware
+    const finalTargetX = CX;
+    const finalTargetY = currY + 140;
+
+    // Smooth transition from the last step node to the hardware
+    const cp1Y = currY + 80;
+    const cp2Y = finalTargetY - 40;
+    segments.push(`C ${currX},${cp1Y} ${finalTargetX},${cp2Y} ${finalTargetX},${finalTargetY}`);
+
+    return { path: `M ${startX},${startY} ${segments.join(' ')}`, endX: finalTargetX, endY: finalTargetY };
   };
 
-  const { path: tubePath, endY } = buildTubePath(steps.length);
-  const svgHeight = endY + (isMobile ? 350 : 250);
+  const { path: tubePath, endX, endY } = buildTubePath(steps.length);
+  const svgHeight = endY + (isMobile ? 250 : 200);
 
   return (
-    <div className="min-h-screen bg-white pt-20">
+    <div className="min-h-screen bg-white pt-20 overflow-x-hidden">
 
       {/* ── Header Banner ── */}
       <div className="bg-gradient-to-br from-[#0a1a3a] via-navy to-blue-900 py-10 px-6 text-center relative overflow-hidden">
@@ -177,10 +183,10 @@ const Process = () => {
       </div>
 
       {/* ── Stethoscope + Tube Roadmap ── */}
-      <div className="relative max-w-4xl mx-auto px-4 pb-20 -mt-24 sm:-mt-32">
+      <div className="relative max-w-4xl mx-auto px-4 pb-20 -mt-24 sm:-mt-32 overflow-visible">
 
         {/* Stethoscope Image — centered at top */}
-        <div 
+        <div
           className="flex justify-center pt-32 relative z-20 pointer-events-none"
           style={{ marginBottom: '-45px' }}
         >
@@ -207,8 +213,8 @@ const Process = () => {
           <svg
             viewBox={`0 0 ${VB_W} ${svgHeight}`}
             className="absolute inset-0 w-full h-full"
-            preserveAspectRatio="xMidYMid meet"
-            style={{ pointerEvents: 'none' }}
+            preserveAspectRatio="xMidYMin meet"
+            style={{ pointerEvents: 'none', overflow: 'visible' }}
           >
             <defs>
               <linearGradient id="tubeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -285,25 +291,33 @@ const Process = () => {
               );
             })}
 
-            {/* Bottom Stethoscope Head */}
-            <foreignObject x={CX - (isMobile ? 100 : 150)} y={endY - (isMobile ? 180 : 240)} width={isMobile ? 200 : 350} height={isMobile ? 250 : 400}>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                className="flex flex-col items-center overflow-visible"
-              >
-                <img 
-                  src={processImage2} 
-                  alt="Stethoscope Head" 
-                  className={`${isMobile ? 'w-24' : 'w-40'} h-auto object-contain transform rotate-[240deg] drop-shadow-2xl`}
-                />
-                <div className="mt-4 flex flex-col items-center">
-                  <span className="text-[#9b1c1c] text-[8px] sm:text-[10px] font-black tracking-[0.2em] uppercase bg-white/90 px-3 sm:px-4 py-1 rounded-full shadow-sm border border-rose-100 whitespace-nowrap">
-                    Your Journey Begins
-                  </span>
-                </div>
-              </motion.div>
+            {/* Bottom Stethoscope Head — Centered Docking */}
+            <foreignObject 
+              x={endX - (isMobile ? 100 : 150)} 
+              y={endY - (isMobile ? 100 : 150)} 
+              width={isMobile ? 200 : 300} 
+              height={isMobile ? 200 : 300}
+              className="overflow-visible"
+            >
+              <div className="w-full h-full flex items-center justify-center overflow-visible">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  className="relative flex items-center justify-center"
+                >
+                  <img 
+                    src={processImage2} 
+                    alt="Stethoscope Head" 
+                    className={`${isMobile ? 'w-32' : 'w-64'} h-auto object-contain transform rotate-[-90deg] drop-shadow-2xl`}
+                  />
+                  <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2">
+                    <span className="text-[#9b1c1c] text-[10px] sm:text-[13px] font-black tracking-[0.2em] uppercase bg-white/95 px-5 sm:px-8 py-2.5 rounded-full shadow-2xl border border-rose-100 whitespace-nowrap">
+                      Your Journey Begins
+                    </span>
+                  </div>
+                </motion.div>
+              </div>
             </foreignObject>
           </svg>
         </div>
