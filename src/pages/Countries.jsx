@@ -18,11 +18,11 @@ import uzbekistanFlag from '../assets/flags/uzbekistanflag.png';
 import kazakhstanFlag from '../assets/flags/kazakhstanflag.png';
 
 const countryMeta = [
-  { key: 'georgia', label: 'GEORGIA', slug: 'georgia', flag: georgiaFlag, pos: { top: '22%', left: '68%', dtTop: '18%', dtLeft: '82%' } },
-  { key: 'kazakhstan', label: 'KAZAKHSTAN', slug: 'kazakhstan', flag: kazakhstanFlag, pos: { top: '50%', left: '68%', dtTop: '50%', dtLeft: '82%' } },
-  { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: uzbekistanFlag, pos: { top: '78%', left: '68%', dtTop: '82%', dtLeft: '82%' } },
-  { key: 'russia', label: 'RUSSIA', slug: 'russia', flag: russiaFlag, pos: { top: '22%', left: '32%', dtTop: '18%', dtLeft: '18%' } },
-  { key: 'kyrgyzstan', label: 'KYRGYZSTAN', slug: 'kyrgyzstan', flag: kyrgyzstanFlag, pos: { top: '78%', left: '32%', dtTop: '82%', dtLeft: '18%' } },
+  { key: 'georgia', label: 'GEORGIA', slug: 'georgia', flag: georgiaFlag, pos: { top: '24%', left: '70%', dtTop: '18%', dtLeft: '82%' } },
+  { key: 'kazakhstan', label: 'KAZAKHSTAN', slug: 'kazakhstan', flag: kazakhstanFlag, pos: { top: '50.5%', left: '70%', dtTop: '50.5%', dtLeft: '82%' } },
+  { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: uzbekistanFlag, pos: { top: '76%', left: '70%', dtTop: '82%', dtLeft: '82%' } },
+  { key: 'russia', label: 'RUSSIA', slug: 'russia', flag: russiaFlag, pos: { top: '24%', left: '30%', dtTop: '18%', dtLeft: '18%' } },
+  { key: 'kyrgyzstan', label: 'KYRGYZSTAN', slug: 'kyrgyzstan', flag: kyrgyzstanFlag, pos: { top: '76%', left: '30%', dtTop: '82%', dtLeft: '18%' } },
 ];
 
 const Countries = () => {
@@ -94,7 +94,7 @@ const Countries = () => {
         <div className="relative w-full max-w-7xl h-full flex items-center justify-center">
 
           {/* SVG Connecting Lines Layer - Precision 100x100 Grid */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none z-30" viewBox="0 0 100 100" preserveAspectRatio={isMobile ? "xMidYMid meet" : "none"}>
+          <svg className="absolute inset-0 w-full h-full pointer-events-none z-30" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
               <linearGradient id="line-grad" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
@@ -113,24 +113,21 @@ const Countries = () => {
               const y2_raw = parseFloat(finalTop);
 
               // REFINED GEOMETRY: Calculate exact starting point on globe surface
-              const globe_radius = isMobile ? 18.5 : 24.5;
-              const x_offset_raw = isMobile ? 6 : 14;
+              const globe_radius = isMobile ? 18.2 : 24.5;
+              const x_offset_raw = isMobile ? 7 : 14;
 
               const isLeft = x2_raw < 50;
               const isKazakhstan = country.slug === 'kazakhstan';
-              const x_start = isKazakhstan
-                ? (isLeft ? 50 - 22 : 50 + 18)
-                : (isLeft ? 50 - x_offset_raw : 50 + x_offset_raw);
+              const kazakhstan_offset = isMobile ? 18.2 : 17;
+              const x_start = isLeft 
+                ? 50 - (isKazakhstan ? kazakhstan_offset : x_offset_raw) 
+                : 50 + (isKazakhstan ? kazakhstan_offset : x_offset_raw);
 
-              let y_start;
+              const dx_anchor = x_start - 50;
+              const dy_anchor = Math.abs(dx_anchor) >= globe_radius ? 0 : Math.sqrt(Math.pow(globe_radius, 2) - Math.pow(dx_anchor, 2));
+
               const isTop = y2_raw < 50;
-              if (isKazakhstan) {
-                y_start = 50;
-              } else {
-                const dx_anchor = x_start - 50;
-                const dy_anchor = Math.sqrt(Math.pow(globe_radius, 2) - Math.pow(dx_anchor, 2));
-                y_start = isTop ? 50 - dy_anchor : 50 + dy_anchor;
-              }
+              const y_start = Math.abs(y2_raw - 50) < 2 ? 50 : (isTop ? 50 - dy_anchor : 50 + dy_anchor);
 
               const dy_total = y2_raw - y_start;
               const leanFactor = isMobile ? 0.18 : 0.35;
@@ -140,9 +137,7 @@ const Countries = () => {
               const x2 = x2_raw;
               const y2 = y2_raw;
 
-              const d = isKazakhstan
-                ? `M ${x_start} ${y_start} L ${x2} ${y2}`
-                : `M ${x_start} ${y_start} L ${x_mid} ${y2} L ${x2} ${y2}`;
+              const d = `M ${x_start} ${y_start} L ${x_mid} ${y2} L ${x2} ${y2}`;
 
               return (
                 <g key={`line-group-${country.slug}`}>
@@ -160,8 +155,8 @@ const Countries = () => {
                   <motion.path
                     d={d}
                     fill="none"
-                    stroke={selectedCountry === country.slug ? '#2563eb' : (isKazakhstan ? '#3b82f6' : 'url(#line-grad)')}
-                    strokeWidth={isKazakhstan ? (isMobile ? 0.2 : 0.4) : (isMobile ? 0.12 : 0.22)}
+                    stroke={selectedCountry === country.slug ? '#2563eb' : 'url(#line-grad)'}
+                    strokeWidth={isMobile ? 0.22 : 0.35}
                     strokeLinecap="round"
                     filter="url(#glow)"
                     initial={{ pathLength: 0, opacity: 0 }}
@@ -170,25 +165,23 @@ const Countries = () => {
                   />
 
                   {/* Corner Node */}
-                  {!isKazakhstan && (
-                    <motion.circle
-                      cx={x_mid}
-                      cy={y2}
-                      r={0.12}
-                      fill="#3b82f6"
-                      opacity={0.6}
-                      initial={{ scale: 0 }}
-                      animate={isGlobeLoaded ? { scale: 1 } : { scale: 0 }}
-                      transition={{ delay: 0.8 + i * 0.1 }}
-                    />
-                  )}
+                  <motion.circle
+                    cx={x_mid}
+                    cy={y2}
+                    r={0.12}
+                    fill="#3b82f6"
+                    opacity={0.6}
+                    initial={{ scale: 0 }}
+                    animate={isGlobeLoaded ? { scale: 1 } : { scale: 0 }}
+                    transition={{ delay: 0.8 + i * 0.1 }}
+                  />
                 </g>
               );
             })}
           </svg>
 
           {/* --- Central 3D Globe --- */}
-          <div className="relative z-20 w-[52%] sm:w-[54%] aspect-square flex items-center justify-center">
+          <div className="relative z-20 w-[56%] sm:w-[54%] aspect-square flex items-center justify-center">
             <Suspense fallback={<div className="w-40 h-40 rounded-full bg-slate-50 animate-pulse" />}>
               <div className="w-full h-full max-h-[85vh]">
                 <Globe3D onLoad={() => setIsGlobeLoaded(true)} />
@@ -237,18 +230,18 @@ const Countries = () => {
                     <div
                       className="relative pointer-events-none"
                       style={{
-                        width: isMobile ? '100px' : '210px',
+                        width: isMobile ? '72px' : '210px',
                         [isLeft ? 'marginRight' : 'marginLeft']: isMobile ? '-2px' : '-12px'
                       }}
                     >
                       <motion.button
                         onClick={() => handleCountrySelection(meta.slug)}
                         className={`relative w-full pointer-events-auto
-                          bg-white/95 backdrop-blur-md px-3 sm:px-6 py-2 sm:py-4 rounded-xl sm:rounded-2xl shadow-[0_15px_45px_rgba(0,0,0,0.18)] border transition-all duration-300 group active:scale-95 whitespace-nowrap
+                          bg-white/95 backdrop-blur-md px-2 sm:px-6 py-1.5 sm:py-4 rounded-lg sm:rounded-2xl shadow-[0_15px_45px_rgba(0,0,0,0.18)] border transition-all duration-300 group active:scale-95 whitespace-nowrap
                           ${selectedCountry === meta.slug ? 'border-blue-600 shadow-blue-500/25 scale-105' : 'border-slate-100 hover:border-blue-400'}`}
                       >
-                        <h3 className={`w-full font-black transition-colors uppercase flex items-center justify-center gap-1.5 sm:gap-3 tracking-[0.1em] sm:tracking-[0.2em] text-[8px] sm:text-[14px] ${selectedCountry === meta.slug ? 'text-blue-600' : 'text-navy group-hover:text-blue-600'}`}>
-                          <div className="w-6 h-4 sm:w-10 sm:h-6 rounded-sm overflow-hidden border border-slate-100 flex-shrink-0 shadow-sm">
+                        <h3 className={`w-full font-black transition-colors uppercase flex items-center justify-center gap-1 sm:gap-3 tracking-[0.1em] sm:tracking-[0.2em] text-[6.2px] sm:text-[14px] ${selectedCountry === meta.slug ? 'text-blue-600' : 'text-navy group-hover:text-blue-600'}`}>
+                          <div className="w-4 h-2.5 sm:w-10 sm:h-6 rounded-[1px] sm:rounded-sm overflow-hidden border border-slate-100 flex-shrink-0 shadow-sm">
                             <img src={meta.flag} alt={meta.label} className="w-full h-full object-cover" />
                           </div>
                           {meta.label}
