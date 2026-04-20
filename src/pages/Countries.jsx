@@ -19,8 +19,8 @@ import kazakhstanFlag from '../assets/flags/kazakhstanflag.png';
 
 const countryMeta = [
   { key: 'georgia', label: 'GEORGIA', slug: 'georgia', flag: georgiaFlag, pos: { top: '24%', left: '70%', dtTop: '18%', dtLeft: '82%' } },
-  { key: 'kazakhstan', label: 'KAZAKHSTAN', slug: 'kazakhstan', flag: kazakhstanFlag, pos: { top: '50.5%', left: '70%', dtTop: '50.5%', dtLeft: '82%' } },
-  { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: uzbekistanFlag, pos: { top: '76%', left: '70%', dtTop: '82%', dtLeft: '82%' } },
+  { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: uzbekistanFlag, pos: { top: '50.5%', left: '70%', dtTop: '50.5%', dtLeft: '82%' } },
+  { key: 'kazakhstan', label: 'KAZAKHSTAN', slug: 'kazakhstan', flag: kazakhstanFlag, pos: { top: '76%', left: '70%', dtTop: '82%', dtLeft: '82%' } },
   { key: 'russia', label: 'RUSSIA', slug: 'russia', flag: russiaFlag, pos: { top: '24%', left: '30%', dtTop: '18%', dtLeft: '18%' } },
   { key: 'kyrgyzstan', label: 'KYRGYZSTAN', slug: 'kyrgyzstan', flag: kyrgyzstanFlag, pos: { top: '76%', left: '30%', dtTop: '82%', dtLeft: '18%' } },
 ];
@@ -117,11 +117,11 @@ const Countries = () => {
               const x_offset_raw = isMobile ? 7 : 14;
 
               const isLeft = x2_raw < 50;
-              const isKazakhstan = country.slug === 'kazakhstan';
+              const isMiddleCountry = country.slug === 'uzbekistan'; // Uzbekistan is now in the middle
               const kazakhstan_offset = isMobile ? 18.2 : 17;
               const x_start = isLeft 
-                ? 50 - (isKazakhstan ? kazakhstan_offset : x_offset_raw) 
-                : 50 + (isKazakhstan ? kazakhstan_offset : x_offset_raw);
+                ? 50 - (isMiddleCountry ? kazakhstan_offset : x_offset_raw) 
+                : 50 + (isMiddleCountry ? kazakhstan_offset : x_offset_raw);
 
               const dx_anchor = x_start - 50;
               const dy_anchor = Math.abs(dx_anchor) >= globe_radius ? 0 : Math.sqrt(Math.pow(globe_radius, 2) - Math.pow(dx_anchor, 2));
