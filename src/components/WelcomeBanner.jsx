@@ -85,7 +85,7 @@ const WelcomeBanner = () => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 1.2, ease: "easeInOut" }}
-                    className="fixed inset-0 z-[100] bg-black overflow-hidden flex items-center justify-center"
+                    className="fixed inset-0 z-[100] bg-gradient-to-br from-white to-slate-200 overflow-hidden flex items-center justify-center"
                 >
                     {/* ── STAGE 1: LOGO REVEAL (1.5s - 4.5s) ────────────────── */}
                     <motion.div
@@ -105,7 +105,7 @@ const WelcomeBanner = () => {
                         <img 
                             src={orionLogo} 
                             alt="Orion Logo" 
-                            className="w-64 sm:w-80 md:w-96 lg:w-[32rem] h-auto drop-shadow-[0_0_20px_rgba(255,255,255,0.15)]" 
+                            className="w-64 sm:w-80 md:w-96 lg:w-[32rem] h-auto drop-shadow-xl" 
                         />
                     </motion.div>
 
@@ -140,7 +140,7 @@ const WelcomeBanner = () => {
                         {/* Skip/Close Button */}
                         <button
                             onClick={handleClose}
-                            className="absolute top-6 right-6 z-[110] w-12 h-12 sm:w-14 sm:h-14 bg-black/20 hover:bg-black/40 text-white/50 hover:text-white rounded-full flex items-center justify-center backdrop-blur-xl transition-all border border-white/5 group shadow-2xl active:scale-90"
+                            className="absolute top-6 right-6 z-[110] w-12 h-12 sm:w-14 sm:h-14 bg-white/60 hover:bg-white text-slate-400 hover:text-slate-800 rounded-full flex items-center justify-center backdrop-blur-xl transition-all border border-slate-200 group shadow-lg active:scale-90"
                             aria-label="Skip"
                         >
                             <svg className="w-8 h-8 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
