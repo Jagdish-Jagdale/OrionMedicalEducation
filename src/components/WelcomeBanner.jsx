@@ -89,13 +89,13 @@ const WelcomeBanner = () => {
                 >
                     {/* ── STAGE 1: LOGO REVEAL (1.5s - 4.5s) ────────────────── */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
+                        initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ 
                             opacity: [0, 1, 1, 0],
-                            scale: [0.9, 1, 1, 1.05],
+                            scale: [0.95, 1, 1, 1.05],
                         }}
                         transition={{ 
-                            times: [0, 0.2, 0.8, 1],
+                            times: [0, 0.3, 0.7, 1],
                             duration: 3, 
                             delay: 1.5, 
                             ease: "easeInOut"
@@ -105,7 +105,7 @@ const WelcomeBanner = () => {
                         <img 
                             src={orionLogo} 
                             alt="Orion Logo" 
-                            className="w-48 sm:w-64 md:w-80 h-auto drop-shadow-[0_0_20px_rgba(255,255,255,0.15)]" 
+                            className="w-64 sm:w-80 md:w-96 lg:w-[32rem] h-auto drop-shadow-[0_0_20px_rgba(255,255,255,0.15)]" 
                         />
                     </motion.div>
 

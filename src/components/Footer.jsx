@@ -20,7 +20,7 @@ const Footer = () => {
       {/* Running Marquee / Special Offers Stripe */}
       <div className="bg-white border-b border-white/10 overflow-hidden py-3">
         <motion.div
-          animate={{ x: [0, -1030] }}
+          animate={{ x: [-1030, 0] }}
           transition={{
             duration: 35,
             repeat: Infinity,
