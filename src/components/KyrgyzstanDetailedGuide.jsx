@@ -16,16 +16,16 @@ const KyrgyzstanDetailedGuide = () => {
         <div className="absolute top-0 right-0 w-64 h-64 bg-red-50/50 rounded-full blur-3xl -mr-32 -mt-32" />
 
         <div className="relative z-10">
-          <div className="flex items-center gap-4 mb-6">
-            <img 
-              src={kyrgyzstanFlag} 
-              alt="Kyrgyzstan Flag" 
-              className="w-16 h-10 object-cover rounded-lg shadow-lg border border-slate-100" 
-            />
-            <div>
-              <h2 className="text-3xl font-bold text-navy">MBBS in Kyrgyzstan</h2>
-              <p className="text-red-600 font-semibold tracking-wide uppercase text-xs mt-1">Quality Education, Affordable Costs</p>
-            </div>
+          <div className="mb-6">
+            <h2 className="text-3xl font-bold text-navy flex items-center gap-4">
+              MBBS in Kyrgyzstan
+              <img 
+                src={kyrgyzstanFlag} 
+                alt="Kyrgyzstan Flag" 
+                className="w-12 h-8 object-cover rounded-md shadow-md border border-slate-100" 
+              />
+            </h2>
+            <p className="text-red-600 font-semibold tracking-wide uppercase text-xs mt-2">Quality Education, Affordable Costs</p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
@@ -157,7 +157,7 @@ const KyrgyzstanDetailedGuide = () => {
                     </svg>
                   </div>
 
-                  <h3 className="text-2xl font-bold text-navy mb-4 group-hover:text-red-600 transition-colors uppercase tracking-tight">{uni.name}</h3>
+                  <h3 className="text-2xl font-bold text-navy mb-4 group-hover:text-red-600 transition-colors uppercase tracking-tight">{idx + 1}. {uni.name}</h3>
                   <p className="text-slate-600 text-base leading-relaxed mb-8 font-medium">
                     {uni.description}
                   </p>

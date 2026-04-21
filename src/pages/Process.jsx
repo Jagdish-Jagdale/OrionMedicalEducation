@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import processImage from '../assets/processimage.png';
 import processImage2 from '../assets/processimage2.png';
+import orionLogo from '../assets/orionologo.png';
 
 const steps = [
   {
@@ -194,13 +195,21 @@ const Process = () => {
             initial={{ opacity: 0, y: -30, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.8 }}
-            className="relative"
+            className="relative inline-block"
           >
             <img
               src={processImage}
               alt="Stethoscope"
               className="relative z-10 w-48 sm:w-64 md:w-72 lg:w-[300px] h-auto object-contain drop-shadow-2xl brightness-105"
             />
+            {/* Orion Logo inside Stethoscope Head/Earpieces */}
+            <div className="absolute top-[32%] left-[49%] -translate-x-1/2 -translate-y-1/2 z-20">
+              <img 
+                src={orionLogo} 
+                alt="Orion Logo" 
+                className="w-16 sm:w-20 md:w-24 lg:w-28 h-auto object-contain drop-shadow-xl"
+              />
+            </div>
           </motion.div>
         </div>
 
