@@ -1,7 +1,7 @@
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase/config';
 
-// ── COUNTRIES ──────────────────────────────────────────────
+// ── COUNTRIESs ──────────────────────────────────────────────
 const countries = [
   {
     name: 'Kyrgyzstan',
