@@ -252,7 +252,7 @@ const Home = () => {
             transition={{ duration: 1, delay: 0.5 }}
             className="w-full flex justify-center lg:justify-end pr-0 lg:pr-16"
           >
-            {/* Ultra-Large Cinematic Flags - Floating freely */}
+            {/* Ultra-Large Cinematic Flags - Floating freelys */}
             <div className="flex flex-row justify-center items-end gap-8 sm:gap-14 h-64 w-full relative">
               {DESTINATION_COUNTRIES.map((country, idx) => (
                 <motion.div
