@@ -111,23 +111,27 @@ const WelcomeBanner = () => {
 
                     {/* ── STAGE 2: BANNER REVEAL (4.5s+) ────────────────────── */}
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 4.5, duration: 1.5, ease: "easeOut" }}
-                        className="absolute inset-0 z-10"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 4.5, duration: 1.2, ease: "easeOut" }}
+                        className="relative z-10 w-full max-w-[95%] lg:max-w-6xl px-4"
                     >
-                        {/* Full Screen Interactive Banner */}
+                        {/* Interactive Banner Card - Cinematic Aspect Ratio */}
                         <a 
                             href="https://wa.me/919999999999" 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="block w-full h-full cursor-pointer"
+                            className="block relative group"
                         >
-                            <img
-                                src={bannerImg}
-                                alt="MBBS Consultant for Abroad"
-                                className="w-full h-full object-cover"
-                            />
+                            <div className="relative h-[55vh] sm:h-[65vh] lg:h-[82vh] rounded-2xl md:rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)] border-[4px] lg:border-[10px] border-white group-hover:border-blue-50 transition-all duration-500">
+                                <img
+                                    src={bannerImg}
+                                    alt="MBBS Consultant for Abroad"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2000ms]"
+                                />
+                                {/* Premium Subtle Overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                            </div>
                         </a>
                     </motion.div>
 
