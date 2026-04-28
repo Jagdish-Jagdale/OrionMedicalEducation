@@ -11,6 +11,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import WelcomeBanner from '../components/WelcomeBanner';
 import humanEvolution from '../assets/humanevolution.png';
+import heroVideo from '../assets/Make_flags_wave_202604281710.mp4';
 
 const fadeUp = {
   initial: { opacity: 0, y: 40 },
@@ -247,82 +248,27 @@ const Home = () => {
           </div>
 
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.5 }}
-            className="w-full flex justify-center lg:justify-end pr-0 lg:pr-16"
+            className="w-full flex justify-center lg:justify-end"
           >
-            {/* Ultra-Large Cinematic Flags - Floating freely */}
-            <div className="flex flex-row justify-center items-end gap-8 sm:gap-14 h-64 w-full relative">
-              {DESTINATION_COUNTRIES.map((country, idx) => (
-                <motion.div
-                  key={country.code}
-                  initial={{ opacity: 0, y: 60 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    delay: 0.6 + idx * 0.15,
-                    duration: 1.2,
-                    type: "spring",
-                    stiffness: 70
-                  }}
-                  className="relative flex flex-col items-center group cursor-pointer"
-                  style={{ zIndex: 10 + idx }}
-                >
-                  {/* Tooltip on Hover - Premium Dark Mode */}
-                  <div className="absolute -top-16 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-400 bg-navy/95 text-white text-xs font-black tracking-[0.2em] px-4 py-2 rounded-full whitespace-nowrap border border-white/20 backdrop-blur-xl z-50 pointer-events-none shadow-[0_10px_40px_rgba(0,0,0,0.5)] uppercase scale-90 group-hover:scale-100">
-                    {country.name}
-                  </div>
-
-                  {/* Premium Flag Component - Hero Scale & Realistic Physics */}
-                  <div
-                    className="relative w-28 flex flex-col items-center"
-                    style={{ height: `${150 + (idx % 3) * 40}px` }}
-                  >
-                    {/* Metallic Pole - Monumental Scale */}
-                    <div className="absolute left-0 top-0 bottom-0 w-[5px] bg-gradient-to-r from-slate-500 via-slate-100 to-slate-600 rounded-full shadow-[inset_-2px_0_4px_rgba(0,0,0,0.6),4px_0_15px_rgba(0,0,0,0.3)] z-20">
-                      {/* Golden Finial (Polished Oversized Ball) */}
-                      <div className="absolute -top-2.5 -left-[5px] w-4 h-4 bg-gradient-to-br from-amber-100 via-amber-400 to-amber-700 rounded-full shadow-[0_0_20px_rgba(251,191,36,0.8),inset_0_2px_4px_rgba(255,255,255,0.4)] border border-amber-300/60" />
-                    </div>
-
-                    {/* Realistic Heavy-Fabric Waving Flag */}
-                    <motion.div
-                      animate={{
-                        rotateY: [0, 25, -20, 0],
-                        skewY: [0, 4, -4, 0],
-                        x: [0, 4, -4, 0],
-                        scaleX: [1, 1.08, 0.92, 1],
-                        scaleY: [1, 1.02, 0.98, 1],
-                      }}
-                      transition={{
-                        duration: 6 + idx * 0.9,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                      style={{ transformOrigin: 'left center', perspective: '2000px' }}
-                      className="ml-[5px] mt-2.5 relative"
-                    >
-                      {/* Multi-Layer Physical Lighting Engine */}
-                      {/* Fabric Texture Grain */}
-                      <div className="absolute inset-0 z-30 opacity-10 mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/canvas-fabric.png')] rounded-sm pointer-events-none" />
-
-                      {/* Dynamic Fold Shadows */}
-                      <div className="absolute inset-0 z-30 pointer-events-none bg-gradient-to-r from-black/40 via-transparent to-black/20 mix-blend-multiply rounded-sm" />
-
-                      {/* Specular Light Wrap */}
-                      <div className="absolute inset-0 z-40 pointer-events-none bg-[radial-gradient(circle_at_30%_0%,rgba(255,255,255,0.4),transparent)] mix-blend-screen rounded-sm" />
-
-                      {/* Ambient Deep Shadow */}
-                      <div className="absolute -inset-2 z-10 bg-black/40 blur-xl rounded-full translate-y-8" />
-
-                      <img
-                        src={`https://flagcdn.com/${country.code}.svg`}
-                        alt={country.name}
-                        className="w-28 sm:w-32 h-auto aspect-[3/2] object-cover rounded-[3px] shadow-[12px_24px_48px_rgba(0,0,0,0.7)] border-[1px] border-white/30"
-                      />
-                    </motion.div>
-                  </div>
-                </motion.div>
-              ))}
+            <div className="relative w-full max-w-2xl lg:max-w-3xl aspect-video rounded-[2rem] overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.6)] border border-white/10 group">
+              {/* Subtle glassmorphism overlay */}
+              <div className="absolute inset-0 z-10 bg-gradient-to-t from-navy/40 to-transparent pointer-events-none" />
+              
+              <video 
+                src={heroVideo}
+                autoPlay 
+                loop 
+                muted 
+                playsInline
+                className="w-full h-full object-cover"
+              />
+              
+              {/* Floating accent elements */}
+              <div className="absolute -top-4 -right-4 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl group-hover:bg-blue-400/30 transition-all duration-700" />
+              <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl group-hover:bg-amber-400/30 transition-all duration-700" />
             </div>
           </motion.div>
         </div>

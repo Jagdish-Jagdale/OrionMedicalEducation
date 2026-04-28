@@ -7,6 +7,7 @@ import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
 import CursorPlane from './components/CursorPlane';
+import BackgroundMusic from './components/BackgroundMusic';
 
 // Lazy-loaded pages
 const Home = lazy(() => import('./pages/Home'));
@@ -108,6 +109,7 @@ const App = () => {
     <>
       <Toaster position="top-right" reverseOrder={false} />
       <CursorPlane />
+      <BackgroundMusic />
       <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ScrollToTop />
         <Suspense fallback={<PageLoader />}>
