@@ -12,7 +12,7 @@ const WelcomeBanner = () => {
         }
         return false;
     });
-    
+
     const audioRef = useRef(null);
 
     useEffect(() => {
@@ -41,7 +41,7 @@ const WelcomeBanner = () => {
 
         const startAudio = () => {
             if (audio) {
-                audio.play().catch(() => {});
+                audio.play().catch(() => { });
             }
             document.removeEventListener('click', startAudio);
         };
@@ -90,22 +90,22 @@ const WelcomeBanner = () => {
                     {/* ── STAGE 1: LOGO REVEAL (1.5s - 4.5s) ────────────────── */}
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ 
+                        animate={{
                             opacity: [0, 1, 1, 0],
                             scale: [0.95, 1, 1, 1.05],
                         }}
-                        transition={{ 
+                        transition={{
                             times: [0, 0.3, 0.7, 1],
-                            duration: 3, 
-                            delay: 1.5, 
+                            duration: 3,
+                            delay: 1.5,
                             ease: "easeInOut"
                         }}
                         className="absolute z-20 pointer-events-none"
                     >
-                        <img 
-                            src={orionLogo} 
-                            alt="Orion Logo" 
-                            className="w-64 sm:w-80 md:w-96 lg:w-[32rem] h-auto drop-shadow-xl" 
+                        <img
+                            src={orionLogo}
+                            alt="Orion Logo"
+                            className="w-64 sm:w-80 md:w-96 lg:w-[32rem] h-auto drop-shadow-xl"
                         />
                     </motion.div>
 
@@ -117,9 +117,9 @@ const WelcomeBanner = () => {
                         className="relative z-10 w-full max-w-[95%] lg:max-w-6xl px-4"
                     >
                         {/* Interactive Banner Card - Cinematic Aspect Ratio */}
-                        <a 
-                            href="https://wa.me/919999999999" 
-                            target="_blank" 
+                        <a
+                            href="https://wa.me/919999999999"
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="block relative group"
                         >
@@ -129,7 +129,7 @@ const WelcomeBanner = () => {
                                     alt="MBBS Consultant for Abroad"
                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2000ms]"
                                 />
-                                {/* Premium Subtle Overlay */}
+                                {/* Premium Subtle Overlays */}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                             </div>
                         </a>
