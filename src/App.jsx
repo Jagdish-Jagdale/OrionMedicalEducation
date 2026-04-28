@@ -6,6 +6,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
+import PublicRoute from './components/PublicRoute';
 import CursorPlane from './components/CursorPlane';
 import BackgroundMusic from './components/BackgroundMusic';
 
@@ -125,7 +126,7 @@ const App = () => {
             <Route path="/contact" element={<Layout><Contact /></Layout>} />
 
             {/* Admin routes (minimal layout – sidebar built into each page) */}
-            <Route path="/admin/login" element={<MinimalLayout><AdminLogin /></MinimalLayout>} />
+            <Route path="/admin/login" element={<PublicRoute><MinimalLayout><AdminLogin /></MinimalLayout></PublicRoute>} />
             <Route path="/admin/dashboard" element={<ProtectedRoute><MinimalLayout><AdminDashboard /></MinimalLayout></ProtectedRoute>} />
             <Route path="/admin/home" element={<ProtectedRoute><MinimalLayout><AdminHome /></MinimalLayout></ProtectedRoute>} />
             <Route path="/admin/countries" element={<ProtectedRoute><MinimalLayout><AdminCountries /></MinimalLayout></ProtectedRoute>} />
