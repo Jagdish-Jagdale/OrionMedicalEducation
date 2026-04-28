@@ -19,7 +19,7 @@ import kazakhstanFlag from '../assets/flags/kazakhstanflag.png';
 
 const countryMeta = [
   { key: 'georgia', label: 'GEORGIA', slug: 'georgia', flag: georgiaFlag, pos: { top: '24%', left: '70%', dtTop: '18%', dtLeft: '82%' } },
-  { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: uzbekistanFlag, pos: { top: '50.5%', left: '70%', dtTop: '50.5%', dtLeft: '82%' } },
+  { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: uzbekistanFlag, pos: { top: '92%', left: '50%', dtTop: '97%', dtLeft: '50%' } },
   { key: 'kazakhstan', label: 'KAZAKHSTAN', slug: 'kazakhstan', flag: kazakhstanFlag, pos: { top: '76%', left: '70%', dtTop: '82%', dtLeft: '82%' } },
   { key: 'russia', label: 'RUSSIA', slug: 'russia', flag: russiaFlag, pos: { top: '24%', left: '30%', dtTop: '18%', dtLeft: '18%' } },
   { key: 'kyrgyzstan', label: 'KYRGYZSTAN', slug: 'kyrgyzstan', flag: kyrgyzstanFlag, pos: { top: '76%', left: '30%', dtTop: '82%', dtLeft: '18%' } },
@@ -96,9 +96,9 @@ const Countries = () => {
           {/* SVG Connecting Lines Layer - Precision 100x100 Grid */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none z-30" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
-              <linearGradient id="line-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.9" />
+              <linearGradient id="line-grad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.7" />
+                <stop offset="100%" stopColor="#3b82f6" stopOpacity="1" />
               </linearGradient>
               <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
                 <feGaussianBlur stdDeviation="0.08" result="blur" />
@@ -111,40 +111,56 @@ const Countries = () => {
 
               const x2_raw = parseFloat(finalLeft);
               const y2_raw = parseFloat(finalTop);
+              const isLeft = x2_raw < 50;
 
               // REFINED GEOMETRY: Calculate exact starting point on globe surface
               const globe_radius = isMobile ? 18.2 : 24.5;
               const x_offset_raw = isMobile ? 7 : 14;
+              const isVerticalStraight = Math.abs(x2_raw - 50) < 2; // Top or Bottom center
+              const isHorizontalStraight = Math.abs(y2_raw - 50) < 2; // Left or Right center
 
-              const isLeft = x2_raw < 50;
-              const isMiddleCountry = country.slug === 'uzbekistan'; // Uzbekistan is now in the middle
-              const kazakhstan_offset = isMobile ? 18.2 : 17;
-              const x_start = isLeft 
-                ? 50 - (isMiddleCountry ? kazakhstan_offset : x_offset_raw) 
-                : 50 + (isMiddleCountry ? kazakhstan_offset : x_offset_raw);
+              const x_start = isVerticalStraight ? 50 : (isLeft
+                ? 50 - x_offset_raw
+                : 50 + x_offset_raw);
 
               const dx_anchor = x_start - 50;
               const dy_anchor = Math.abs(dx_anchor) >= globe_radius ? 0 : Math.sqrt(Math.pow(globe_radius, 2) - Math.pow(dx_anchor, 2));
 
               const isTop = y2_raw < 50;
-              const y_start = Math.abs(y2_raw - 50) < 2 ? 50 : (isTop ? 50 - dy_anchor : 50 + dy_anchor);
+              const y_start = isHorizontalStraight ? 50 : (isTop ? 50 - dy_anchor : 50 + dy_anchor);
 
               const dy_total = y2_raw - y_start;
               const leanFactor = isMobile ? 0.18 : 0.35;
-              const dx_lean = (x2_raw < x_start ? -1 : 1) * (Math.abs(dy_total) * leanFactor);
+              const dx_lean = x2_raw === x_start ? 0 : (x2_raw < x_start ? -1 : 1) * (Math.abs(dy_total) * leanFactor);
               const x_mid = x_start + dx_lean;
 
-              const x2 = x2_raw;
-              const y2 = y2_raw;
+              // Generalized Responsive Offsets for "Straight" connections
+              let x_start_final = x_start;
+              let y_start_final = y_start;
+              let x_end_final = x2_raw;
 
-              const d = `M ${x_start} ${y_start} L ${x_mid} ${y2} L ${x2} ${y2}`;
+              if (isVerticalStraight) {
+                const vertOffset = isMobile ? 0.2 : 7.80;
+                y_start_final = isTop ? y_start - vertOffset : y_start + vertOffset;
+                // Tiny balanced offset to prevent browser rendering glitch on vertical lines
+                x_start_final += 0.05;
+                x_end_final -= 0.05;
+              } else if (isHorizontalStraight) {
+                const horizOffset = isMobile ? 1.5 : 6.8;
+                x_start_final = isLeft ? x_start - horizOffset : x_start + horizOffset;
+              }
+
+              const y2 = y2_raw;
+              const d = (isVerticalStraight || isHorizontalStraight)
+                ? `M ${x_start_final} ${y_start_final} L ${x_end_final} ${y2}`
+                : `M ${x_start} ${y_start} L ${x_mid} ${y2} L ${x2_raw} ${y2}`;
 
               return (
                 <g key={`line-group-${country.slug}`}>
                   {/* Anchor Point on Globe */}
                   <motion.circle
-                    cx={x_start}
-                    cy={y_start}
+                    cx={x_start_final}
+                    cy={y_start_final}
                     r={0.18}
                     fill="#3b82f6"
                     initial={{ scale: 0 }}
@@ -156,7 +172,7 @@ const Countries = () => {
                     d={d}
                     fill="none"
                     stroke={selectedCountry === country.slug ? '#2563eb' : 'url(#line-grad)'}
-                    strokeWidth={isMobile ? 0.22 : 0.35}
+                    strokeWidth={(isVerticalStraight || isHorizontalStraight) ? (isMobile ? 0.8 : 1.4) : (isMobile ? 0.22 : 0.35)}
                     strokeLinecap="round"
                     filter="url(#glow)"
                     initial={{ pathLength: 0, opacity: 0 }}
@@ -206,22 +222,14 @@ const Countries = () => {
                   left: isMobile ? meta.pos.left : meta.pos.dtLeft,
                 }}
               >
-                {/* 
-                  Wrapper centered on the dot: 
-                  The center of this absolute container is the exact target point for the SVG line.
-                */}
-                {/* 
-                  Wrapper centered on the dot: 
-                  The center of this absolute container is (0,0), the target for the SVG line.
-                */}
                 <div className="relative w-0 h-0">
                   {/* Unified Fusion Container - Forces Dot and Card onto the same vertical axis */}
                   <div
-                    className={`absolute top-0 flex items-center pointer-events-none -translate-y-1/2 ${isLeft ? 'flex-row-reverse right-0' : 'flex-row left-0'}`}
+                    className={`absolute top-0 flex items-center pointer-events-none -translate-y-1/2 ${meta.slug === 'uzbekistan' ? 'flex-col -translate-x-1/2' : (isLeft ? 'flex-row-reverse right-0' : 'flex-row left-0')}`}
                     style={{ zIndex: 50 }}
                   >
                     {/* Visual Pinpoint Dot - THE ANCHOR */}
-                    <div className="relative w-4 h-4 sm:w-6 sm:h-6 bg-white rounded-full border-2 sm:border-[3px] border-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.4)] flex-shrink-0 z-50">
+                    <div className={`relative w-4 h-4 sm:w-6 sm:h-6 bg-white rounded-full border-2 sm:border-[3px] border-blue-600 flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.4)] flex-shrink-0 z-50`}>
                       <div className="absolute inset-[-4px] rounded-full border border-blue-200/50 animate-ping opacity-20" />
                       <div className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${selectedCountry === meta.slug ? 'bg-blue-600 shadow-[0_0_12px_rgba(37,99,235,0.6)]' : 'bg-blue-300'}`} />
                     </div>
@@ -231,7 +239,7 @@ const Countries = () => {
                       className="relative pointer-events-none"
                       style={{
                         width: isMobile ? '72px' : '210px',
-                        [isLeft ? 'marginRight' : 'marginLeft']: isMobile ? '-2px' : '-12px'
+                        [meta.slug === 'uzbekistan' ? 'marginTop' : (isLeft ? 'marginRight' : 'marginLeft')]: isMobile ? '-2px' : (meta.slug === 'uzbekistan' ? '-8px' : '-12px')
                       }}
                     >
                       <motion.button

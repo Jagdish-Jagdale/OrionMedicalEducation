@@ -421,7 +421,7 @@ const Home = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="max-w-3xl mx-auto -mb-6 sm:-mb-10 px-4 relative z-10"
+            className="max-w-5xl mx-auto px-4 relative z-10"
           >
             <img
               src={humanEvolution}

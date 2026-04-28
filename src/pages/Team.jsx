@@ -66,7 +66,7 @@ const Team = () => {
             <h2 className="text-2xl sm:text-3xl font-bold text-navy">Core Leadership</h2>
             <div className="w-16 h-1 bg-amber-400 mx-auto mt-2 rounded-full" />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="flex flex-col gap-8">
             {leadershipMembers.map((member, i) => (
               <TeamCard key={member.id} member={member} index={i} />
             ))}
@@ -104,7 +104,7 @@ const Team = () => {
               <h2 className="text-2xl sm:text-3xl font-bold text-navy">Our Regional Experts</h2>
               <div className="w-16 h-1 bg-blue-600 mx-auto mt-2 rounded-full" />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="flex flex-col gap-8">
               {team.map((member, i) => (
                 <TeamCard key={member.id} member={member} index={i + 3} />
               ))}

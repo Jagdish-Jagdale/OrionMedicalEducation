@@ -4,6 +4,7 @@ import { getReviews } from '../firebase/firestore';
 import { useFirestore } from '../hooks/useFirestore';
 import NeuralReviewCard from '../components/NeuralReviewCard';
 import brainImg from '../assets/reviewimage.png';
+import brainMobileImg from '../assets/brainrightpov.png';
 
 const Reviews = () => {
   const { data: reviews } = useFirestore(getReviews);
@@ -50,18 +51,27 @@ const Reviews = () => {
     const svgRect = svgRef.current.getBoundingClientRect();
     const brainRect = brainRef.current.getBoundingClientRect();
 
-    const stemX = brainRect.left + brainRect.width * 0.5 - svgRect.left;
+    // Target the spine center (roughly 47% from the left edge of the side-profile image)
+    const stemX = isMobile 
+      ? brainRect.left + (brainRect.width * 0.47) - svgRect.left
+      : brainRect.left + brainRect.width * 0.5 - svgRect.left;
 
     const newPaths = cardRefs.current.map((el, i) => {
       if (!el) return '';
       const r = el.getBoundingClientRect();
 
       const row = Math.floor(i / 2);
-      const verticalFactors = isMobile ? [0.20, 0.36, 0.52] : [0.28, 0.44, 0.60];
-      const verticalFactor = verticalFactors[row];
+      // Start from brain's bottom/top of spine (higher vertical factor on mobile)
+      const verticalFactor = isMobile 
+        ? 0.25 + (row * 0.22) 
+        : [0.28, 0.44, 0.60][row];
+      
       const cardStemY = brainRect.top + brainRect.height * verticalFactor - svgRect.top;
 
-      const dotX = isLeftCard[i]
+      // On mobile, all cards are on the right
+      const mobileIsRight = isMobile ? true : !isLeftCard[i];
+      
+      const dotX = !mobileIsRight
         ? r.right - svgRect.left + (isMobile ? 2 : 6)
         : r.left - svgRect.left - (isMobile ? 2 : 6);
       const dotY = r.top + r.height / 2 - svgRect.top;
@@ -72,12 +82,13 @@ const Reviews = () => {
       const endX = dotX;
       const endY = dotY;
 
-      const cp1X = startX + (isLeftCard[i] ? (isMobile ? -30 : -100) : (isMobile ? 30 : 100));
-      const cp1Y = startY;
+      // Smoother, more organic emergence (shortened cp1X to avoid sharp 'elbows')
+      const cp1X = startX + (isMobile ? 40 : (isLeftCard[i] ? -100 : 100));
+      const cp1Y = startY + (isMobile ? 10 : 0);
 
-      const dipAmount = isMobile ? 45 : 200; // Refined tension for smaller cards
-      const cp2X = (startX + endX) / 2;
-      const cp2Y = Math.max(startY, endY) + dipAmount;
+      // CP2 handles the main curve tension
+      const cp2X = isMobile ? (startX + endX) * 0.5 : (startX + endX) / 2;
+      const cp2Y = endY - (isMobile ? 20 : 0);
 
       return `M ${s(startX)} ${s(startY)} C ${s(cp1X)} ${s(cp1Y)}, ${s(cp2X)} ${s(cp2Y)}, ${s(endX)} ${s(endY)}`;
     });
@@ -146,11 +157,11 @@ const Reviews = () => {
         </div>
 
         {/* ═══ ANIMATED NEURAL MAP ═══ */}
-        <div className="relative mt-4 md:mt-12 min-h-[750px] md:min-h-[1150px] lg:min-h-[1350px]">
+        <div className="relative mt-4 md:mt-12 min-h-[950px] md:min-h-[1150px] lg:min-h-[1350px]">
 
           {/* ── Brain & Spine Hub ── */}
-          <div className="absolute top-[30px] md:top-[0px] left-1/2 -translate-x-1/2 w-full flex items-start justify-center pointer-events-none z-20">
-            <div className="relative w-[320px] md:w-[600px] lg:w-[900px]">
+          <div className={`absolute top-[20px] md:top-[0px] ${isMobile ? 'left-[-50px] translate-x-0 w-[300px]' : 'left-1/2 -translate-x-1/2 w-full'} flex items-start justify-center pointer-events-none z-20`}>
+            <div className={`relative ${isMobile ? 'w-full' : 'w-[320px] md:w-[600px] lg:w-[900px]'}`}>
               <motion.div
                 animate={{ opacity: [0.1, 0.2, 0.1] }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
@@ -158,7 +169,7 @@ const Reviews = () => {
               />
               <motion.img
                 ref={brainRef}
-                src={brainImg}
+                src={isMobile ? brainMobileImg : brainImg}
                 alt="Scale and Precision"
                 className="w-full h-auto object-contain relative z-20 scale-100"
                 onLoad={measurePaths}
@@ -179,7 +190,7 @@ const Reviews = () => {
                   key={i}
                   d={d}
                   stroke="#ef4444"
-                  strokeWidth={isMobile ? "1.5" : "4.0"}
+                  strokeWidth={isMobile ? "2.0" : "4.0"}
                   strokeLinecap="round"
                   initial={{ opacity: 0, pathLength: 0 }}
                   style={{
@@ -198,15 +209,15 @@ const Reviews = () => {
             {/* Row 1 */}
             <div
               ref={setCardRef(0)}
-              className="absolute top-[180px] lg:top-[420px] left-1/2 -translate-x-[calc(100%+85px)] md:-translate-x-[calc(100%+140px)] lg:-translate-x-[550px] w-[100px] md:w-[220px] lg:w-[280px] -translate-y-1/2"
+              className={`absolute top-[150px] lg:top-[420px] left-1/2 ${isMobile ? 'translate-x-[20px] w-[130px]' : '-translate-x-[calc(100%+140px)] lg:-translate-x-[550px] w-[280px]'} -translate-y-1/2`}
             >
               <motion.div style={{ opacity: cardProgressByIndex[0], scale: scaleByIndex[0] }}>
-                {topReviews[0] && <NeuralReviewCard review={topReviews[0]} position="relative" isLeft={true} />}
+                {topReviews[0] && <NeuralReviewCard review={topReviews[0]} position="relative" isLeft={!isMobile} />}
               </motion.div>
             </div>
             <div
               ref={setCardRef(1)}
-              className="absolute top-[180px] lg:top-[420px] left-1/2 translate-x-[85px] md:translate-x-[140px] lg:translate-x-[270px] w-[100px] md:w-[220px] lg:w-[280px] -translate-y-1/2"
+              className={`absolute top-[260px] lg:top-[420px] left-1/2 ${isMobile ? 'translate-x-[20px] w-[130px]' : 'translate-x-[140px] lg:translate-x-[270px] w-[280px]'} -translate-y-1/2`}
             >
               <motion.div style={{ opacity: cardProgressByIndex[1], scale: scaleByIndex[0] }}>
                 {topReviews[1] && <NeuralReviewCard review={topReviews[1]} position="relative" isLeft={false} />}
@@ -216,15 +227,15 @@ const Reviews = () => {
             {/* Row 2 */}
             <div
               ref={setCardRef(2)}
-              className="absolute top-[360px] lg:top-[750px] left-1/2 -translate-x-[calc(100%+85px)] md:-translate-x-[calc(100%+140px)] lg:-translate-x-[550px] w-[100px] md:w-[220px] lg:w-[280px] -translate-y-1/2"
+              className={`absolute top-[390px] lg:top-[750px] left-1/2 ${isMobile ? 'translate-x-[20px] w-[130px]' : '-translate-x-[calc(100%+140px)] lg:-translate-x-[550px] w-[280px]'} -translate-y-1/2`}
             >
               <motion.div style={{ opacity: cardProgressByIndex[2], scale: scaleByIndex[0] }}>
-                {topReviews[2] && <NeuralReviewCard review={topReviews[2]} position="relative" isLeft={true} />}
+                {topReviews[2] && <NeuralReviewCard review={topReviews[2]} position="relative" isLeft={!isMobile} />}
               </motion.div>
             </div>
             <div
               ref={setCardRef(3)}
-              className="absolute top-[360px] lg:top-[750px] left-1/2 translate-x-[85px] md:translate-x-[140px] lg:translate-x-[270px] w-[100px] md:w-[220px] lg:w-[280px] -translate-y-1/2"
+              className={`absolute top-[500px] lg:top-[750px] left-1/2 ${isMobile ? 'translate-x-[20px] w-[130px]' : 'translate-x-[140px] lg:translate-x-[270px] w-[280px]'} -translate-y-1/2`}
             >
               <motion.div style={{ opacity: cardProgressByIndex[3], scale: scaleByIndex[0] }}>
                 {topReviews[3] && <NeuralReviewCard review={topReviews[3]} position="relative" isLeft={false} />}
@@ -234,15 +245,15 @@ const Reviews = () => {
             {/* Row 3 */}
             <div
               ref={setCardRef(4)}
-              className="absolute top-[540px] lg:top-[1080px] left-1/2 -translate-x-[calc(100%+85px)] md:-translate-x-[calc(100%+140px)] lg:-translate-x-[550px] w-[100px] md:w-[220px] lg:w-[280px] -translate-y-1/2"
+              className={`absolute top-[630px] lg:top-[1080px] left-1/2 ${isMobile ? 'translate-x-[20px] w-[130px]' : '-translate-x-[calc(100%+140px)] lg:-translate-x-[550px] w-[280px]'} -translate-y-1/2`}
             >
               <motion.div style={{ opacity: cardProgressByIndex[4], scale: scaleByIndex[0] }}>
-                {topReviews[4] && <NeuralReviewCard review={topReviews[4]} position="relative" isLeft={true} />}
+                {topReviews[4] && <NeuralReviewCard review={topReviews[4]} position="relative" isLeft={!isMobile} />}
               </motion.div>
             </div>
             <div
               ref={setCardRef(5)}
-              className="absolute top-[540px] lg:top-[1080px] left-1/2 translate-x-[85px] md:translate-x-[140px] lg:translate-x-[270px] w-[100px] md:w-[220px] lg:w-[280px] -translate-y-1/2"
+              className={`absolute top-[740px] lg:top-[1080px] left-1/2 ${isMobile ? 'translate-x-[20px] w-[130px]' : 'translate-x-[140px] lg:translate-x-[270px] w-[280px]'} -translate-y-1/2`}
             >
               <motion.div style={{ opacity: cardProgressByIndex[5], scale: scaleByIndex[0] }}>
                 {topReviews[5] && <NeuralReviewCard review={topReviews[5]} position="relative" isLeft={false} />}

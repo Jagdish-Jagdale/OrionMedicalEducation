@@ -3,6 +3,9 @@ import { motion } from 'framer-motion';
 import processImage from '../assets/processimage.png';
 import processImage2 from '../assets/processimage2.png';
 import orionLogo from '../assets/orionologo.png';
+import img15 from '../assets/1 (15).png';
+import img14 from '../assets/1 (14).png';
+import img40 from '../assets/1 (40).png';
 
 const steps = [
   {
@@ -115,21 +118,21 @@ const Process = () => {
 
   // Responsive Constants
   const VB_W = isMobile ? 800 : 1000; // Balanced coordinate width
-  const STEP_H = isMobile ? 550 : 450;
+  const STEP_H = isMobile ? 380 : 450;
   const CX = VB_W / 2;
-  const CARD_OFFSET = isMobile ? 120 : 250;
-  const CARD_W = isMobile ? 320 : 480;
+  const CARD_OFFSET = isMobile ? 80 : 250;
+  const CARD_W = isMobile ? 220 : 480;
   const CARD_H = isMobile ? 500 : 400;
 
   // Build the SVG path dynamically based on responsive constants
   const buildTubePath = (numSteps) => {
-    const startX = CX - 5;
-    const startY = -150;
+    const startX = CX - 2;
+    const startY = -120;
     const segments = [];
     let currX = startX;
-    let currY = 40;
+    let currY = 80;
 
-    segments.push(`L ${startX},40`);
+    segments.push(`L ${startX},80`);
 
     for (let i = 0; i < numSteps; i++) {
       const isEven = i % 2 === 0;
@@ -146,20 +149,20 @@ const Process = () => {
       currY = targetY;
     }
 
-    // Final segment: Curve smoothly into the stethoscope hardware
-    const finalTargetX = CX;
-    const finalTargetY = currY + 140;
+    // Final segment: Curve smoothly into the steeply tilted and lowered stethoscope hardware stem (Bottom Image)
+    const finalTargetX = isMobile ? CX + 30 : CX + 75;
+    const finalTargetY = currY + (isMobile ? 160 : 235);
 
     // Smooth transition from the last step node to the hardware
-    const cp1Y = currY + 80;
-    const cp2Y = finalTargetY - 40;
+    const cp1Y = currY + 100;
+    const cp2Y = finalTargetY - 20;
     segments.push(`C ${currX},${cp1Y} ${finalTargetX},${cp2Y} ${finalTargetX},${finalTargetY}`);
 
     return { path: `M ${startX},${startY} ${segments.join(' ')}`, endX: finalTargetX, endY: finalTargetY };
   };
 
   const { path: tubePath, endX, endY } = buildTubePath(steps.length);
-  const svgHeight = endY + (isMobile ? 250 : 200);
+  const svgHeight = endY + (isMobile ? -20 : 40);
 
   return (
     <div className="min-h-screen bg-white pt-20 overflow-x-hidden">
@@ -184,7 +187,7 @@ const Process = () => {
       </div>
 
       {/* ── Stethoscope + Tube Roadmap ── */}
-      <div className="relative max-w-4xl mx-auto px-4 pb-20 -mt-24 sm:-mt-32 overflow-visible">
+      <div className="relative max-w-4xl mx-auto px-4 pb-0 -mt-24 sm:-mt-32 overflow-visible">
 
         {/* Stethoscope Image — centered at top */}
         <div
@@ -204,9 +207,9 @@ const Process = () => {
             />
             {/* Orion Logo inside Stethoscope Head/Earpieces */}
             <div className="absolute top-[32%] left-[49%] -translate-x-1/2 -translate-y-1/2 z-20">
-              <img 
-                src={orionLogo} 
-                alt="Orion Logo" 
+              <img
+                src={orionLogo}
+                alt="Orion Logo"
                 className="w-16 sm:w-20 md:w-24 lg:w-28 h-auto object-contain drop-shadow-xl"
               />
             </div>
@@ -241,6 +244,8 @@ const Process = () => {
 
             {/* Step node circles + Info Cards on the tube */}
             {steps.map((step, i) => {
+              const decorativeImages = [img15, img14, img40];
+              const decImg = decorativeImages[i % decorativeImages.length];
               const isLeft = i % 2 === 0;
               const nodeX = isLeft ? CX - CARD_OFFSET : CX + CARD_OFFSET;
               const nodeY = -150 + (i + 1) * STEP_H;
@@ -252,6 +257,17 @@ const Process = () => {
                   <text x={nodeX} y={nodeY + 5} textAnchor="middle" fill="white" fontSize={isMobile ? "10" : "13"} fontWeight="bold" fontFamily="Inter, sans-serif">
                     {i + 1}
                   </text>
+
+                  {/* Decorative Image on opposite side */}
+                  <image
+                    href={decImg}
+                    x={isLeft ? nodeX + (isMobile ? 140 : 400) : nodeX - (isMobile ? 380 : 720)}
+                    y={nodeY - (isMobile ? 120 : 160)}
+                    width={isMobile ? 240 : 320}
+                    height={isMobile ? 240 : 320}
+                    className="opacity-90 drop-shadow-xl"
+                    style={{ pointerEvents: 'none' }}
+                  />
 
                   {/* Info Card via foreignObject */}
                   <foreignObject
@@ -278,9 +294,9 @@ const Process = () => {
                           >
                             {step.icon}
                           </span>
-                          <h3 className="font-bold text-[#1e3a5f] text-sm sm:text-base leading-tight">{step.title}</h3>
+                          <h3 className="font-bold text-[#1e3a5f] text-base sm:text-lg leading-tight">{step.title}</h3>
                         </div>
-                        <p className="text-slate-500 text-[11px] sm:text-sm leading-relaxed">{step.description}</p>
+                        <p className="text-slate-500 text-sm sm:text-base leading-relaxed">{step.description}</p>
                       </div>
 
                       <div
@@ -301,10 +317,10 @@ const Process = () => {
             })}
 
             {/* Bottom Stethoscope Head — Centered Docking */}
-            <foreignObject 
-              x={endX - (isMobile ? 100 : 150)} 
-              y={endY - (isMobile ? 100 : 150)} 
-              width={isMobile ? 200 : 300} 
+            <foreignObject
+              x={endX - (isMobile ? 110 : 230)}
+              y={endY - (isMobile ? 70 : 85)}
+              width={isMobile ? 200 : 300}
               height={isMobile ? 200 : 300}
               className="overflow-visible"
             >
@@ -315,13 +331,13 @@ const Process = () => {
                   viewport={{ once: true }}
                   className="relative flex items-center justify-center"
                 >
-                  <img 
-                    src={processImage2} 
-                    alt="Stethoscope Head" 
-                    className={`${isMobile ? 'w-32' : 'w-64'} h-auto object-contain transform rotate-[-90deg] drop-shadow-2xl`}
+                  <img
+                    src={processImage2}
+                    alt="Stethoscope Head"
+                    className={`${isMobile ? 'w-40 rotate-[-160deg]' : 'w-52 rotate-[-130deg]'} h-auto object-contain transform drop-shadow-2xl`}
                   />
-                  <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2">
-                    <span className="text-[#9b1c1c] text-[10px] sm:text-[13px] font-black tracking-[0.2em] uppercase bg-white/95 px-5 sm:px-8 py-2.5 rounded-full shadow-2xl border border-rose-100 whitespace-nowrap">
+                  <div className="absolute top-full mt-4 sm:mt-12 left-1/2 -translate-x-1/2">
+                    <span className="text-[#9b1c1c] text-[15px] sm:text-[16px] font-black tracking-[0.2em] uppercase bg-white/95 px-5 sm:px-8 py-2.5 rounded-full shadow-2xl border border-rose-100 whitespace-nowrap">
                       Your Journey Begins
                     </span>
                   </div>
@@ -336,7 +352,7 @@ const Process = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mt-10 rounded-2xl text-center p-8 text-white shadow-2xl"
+          className="-mt-[280px] sm:-mt-48 rounded-2xl text-center p-8 text-white shadow-2xl relative z-30 mx-4 flex flex-col items-center justify-center sm:min-h-[180px]"
           style={{ background: `linear-gradient(135deg, ${TUBE_COLOR}, #ef4444)` }}
         >
           <p className="font-bold text-xl mb-1">You've arrived. Your medical journey begins!</p>
