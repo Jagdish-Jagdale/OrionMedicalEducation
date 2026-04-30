@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import bannerImg from '../assets/promotions/welcome_banner.png';
+
 import orionLogo from '../assets/orionfullrmbg.png';
 import introAudio from '../assets/splash/intro.mp3';
 
@@ -23,11 +23,10 @@ const WelcomeBanner = () => {
             // Sequence Timing:
             // 0-1.5: Black
             // 1.5-4.5: Logo phase
-            // 4.5: Banner starts
-            // 8.5: Start fading out the whole splash
+            // 5.0: Fade out to home
             const timer = setTimeout(() => {
                 handleClose();
-            }, 8500);
+            }, 5000);
 
             return () => {
                 clearTimeout(timer);
@@ -85,7 +84,8 @@ const WelcomeBanner = () => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 1.2, ease: "easeInOut" }}
-                    className="fixed inset-0 z-[100] bg-gradient-to-br from-white to-slate-200 overflow-hidden flex items-center justify-center"
+                    className="fixed inset-0 z-[100] overflow-hidden flex items-center justify-center"
+                    style={{ background: 'linear-gradient(135deg, #f8f9fc 0%, #eef1f8 40%, #e8ecf4 70%, #f0f2f8 100%)' }}
                 >
                     {/* ── STAGE 1: LOGO REVEAL (1.5s - 4.5s) ────────────────── */}
                     <motion.div
@@ -109,37 +109,12 @@ const WelcomeBanner = () => {
                         />
                     </motion.div>
 
-                    {/* ── STAGE 2: BANNER REVEAL (4.5s+) ────────────────────── */}
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 4.5, duration: 1.2, ease: "easeOut" }}
-                        className="relative z-10 w-full max-w-[95%] lg:max-w-6xl px-4"
-                    >
-                        {/* Interactive Banner Card - Cinematic Aspect Ratio */}
-                        <a
-                            href="https://wa.me/919999999999"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block relative group"
-                        >
-                            <div className="relative h-[55vh] sm:h-[65vh] lg:h-[82vh] rounded-2xl md:rounded-[2rem] lg:rounded-[2.5rem] overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)] border-[4px] lg:border-[10px] border-white group-hover:border-blue-50 transition-all duration-500">
-                                <img
-                                    src={bannerImg}
-                                    alt="MBBS Consultant for Abroad"
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2000ms]"
-                                />
-                                {/* Premium Subtle Overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-                            </div>
-                        </a>
-                    </motion.div>
 
-                    {/* ── UTILITIES (Revealed with Banner) ────────────────── */}
+                    {/* ── SKIP BUTTON ────────────────────────────────────── */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ delay: 5.5 }}
+                        transition={{ delay: 3 }}
                     >
                         {/* Skip/Close Button */}
                         <button
