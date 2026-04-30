@@ -35,6 +35,12 @@ const CursorPlane = () => {
 
     // Helpers for background detection
     const getBackgroundColor = (el) => {
+        // Check if cursor is over a video/img or inside a dark-themed container
+        const originEl = el;
+        if (originEl && (originEl.tagName === 'VIDEO' || originEl.tagName === 'IMG' || originEl.closest('video, .dark-cursor-zone'))) {
+            return 'rgb(30, 30, 30)'; // Dark — use white cursor
+        }
+
         while (el && el !== document.body) {
             const style = window.getComputedStyle(el);
             const bg = style.backgroundColor;
@@ -46,7 +52,7 @@ const CursorPlane = () => {
             if (bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent' && bg !== '') return bg;
             el = el.parentElement;
         }
-        return window.getComputedStyle(document.body).backgroundColor || 'rgb(30, 58, 95)';
+        return window.getComputedStyle(document.body).backgroundColor || 'rgb(230, 235, 245)';
     };
 
     const checkIsDark = (color) => {

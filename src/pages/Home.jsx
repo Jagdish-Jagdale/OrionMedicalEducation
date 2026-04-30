@@ -298,7 +298,7 @@ const Home = () => {
                 ease: "easeInOut",
                 repeatDelay: 3
               }}
-              className="w-10 sm:w-16 h-auto object-contain filter drop-shadow-[0_0_12px_rgba(0,0,100,0.3)] z-30"
+              className="w-10 sm:w-16 h-auto object-contain filter brightness-0 drop-shadow-[0_0_8px_rgba(0,0,0,0.15)] z-30"
               style={{
                 position: 'absolute',
                 transform: 'translate(-50%, -50%)'
