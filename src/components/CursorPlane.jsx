@@ -40,8 +40,8 @@ const CursorPlane = () => {
             const bg = style.backgroundColor;
             const bgi = style.backgroundImage;
 
-            // Gradient detection: If there's a gradient, consider it dark for contrast
-            if (bgi && bgi.includes('gradient')) return 'rgb(30, 58, 95)'; 
+            // Gradient detection: treat as light background for black cursor
+            if (bgi && bgi.includes('gradient')) return 'rgb(230, 235, 245)'; 
             
             if (bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent' && bg !== '') return bg;
             el = el.parentElement;
