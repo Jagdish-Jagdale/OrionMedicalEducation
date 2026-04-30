@@ -153,12 +153,15 @@ const Home = () => {
     <div className="font-sans">
       <WelcomeBanner />
       {/* ── Hero Section ────────────────────────────────── */}
-      <section className="relative min-h-screen flex items-center bg-gradient-to-br from-navy via-blue-900 to-blue-800 overflow-hidden">
+      <section
+        className="relative min-h-screen flex items-center overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #e8edf6 0%, #dce4f2 25%, #d0d9ee 50%, #e2e8f4 75%, #edf0f7 100%)' }}
+      >
         {/* Decorative circles */}
-        <div className="absolute top-1/4 -right-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 -left-20 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 -right-20 w-96 h-96 bg-blue-400/8 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 -left-20 w-80 h-80 bg-amber-400/8 rounded-full blur-3xl" />
         {/* Grid pattern */}
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.5) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.3) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-24 sm:py-32 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Text */}
@@ -169,17 +172,17 @@ const Home = () => {
               transition={{ duration: 0.6 }}
               className="mb-8 flex justify-center lg:justify-start"
             >
-              <img src={orionLogo} alt="Orion Medical Education" className="h-16 sm:h-20 w-auto object-contain brightness-0 invert drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
+              <img src={orionLogo} alt="Orion Medical Education" className="h-16 sm:h-20 w-auto object-contain drop-shadow-md" />
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-amber-300 text-[10px] sm:text-xs font-bold px-4 py-2 rounded-full border border-white/20 mb-6"
+              className="inline-flex items-center gap-2 bg-blue-600/10 backdrop-blur-sm text-blue-700 text-[10px] sm:text-xs font-bold px-4 py-2 rounded-full border border-blue-200/40 mb-6"
             >
-              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-              Trusted MBBS Abroad Consultancy Since 2017
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+              Trusted MBBS Abroad Company Since 2017
             </motion.div>
 
 
@@ -188,10 +191,10 @@ const Home = () => {
               initial="initial"
               animate="animate"
               transition={{ duration: 0.7, delay: 0.1 }}
-              className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight"
+              className="text-3xl sm:text-5xl lg:text-6xl font-bold text-navy leading-[1.1] tracking-tight"
             >
               Your Trusted{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-amber-500">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800">
                 Custodian
               </span>{' '}
               in MBBS Abroad Journey
@@ -202,7 +205,7 @@ const Home = () => {
               initial="initial"
               animate="animate"
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="mt-4 text-lg sm:text-xl font-semibold text-blue-200"
+              className="mt-4 text-lg sm:text-xl font-semibold text-blue-700"
             >
               Orion Medical Education
             </motion.p>
@@ -212,7 +215,7 @@ const Home = () => {
               initial="initial"
               animate="animate"
               transition={{ duration: 0.7, delay: 0.3 }}
-              className="mt-6 text-slate-300 text-sm sm:text-base leading-relaxed max-w-lg mx-auto lg:mx-0"
+              className="mt-6 text-slate-600 text-sm sm:text-base leading-relaxed max-w-lg mx-auto lg:mx-0"
             >
               With over 7+ years of clinical expertise, we have helped 500+ students secure admissions to world-class NMC & WHO-approved medical universities.
             </motion.p>
@@ -255,17 +258,17 @@ const Home = () => {
           >
             <div className="relative w-full max-w-2xl lg:max-w-3xl aspect-video rounded-[2rem] overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.6)] border border-white/10 group">
               {/* Subtle glassmorphism overlay */}
-              <div className="absolute inset-0 z-10 bg-gradient-to-t from-navy/40 to-transparent pointer-events-none" />
-              
-              <video 
+              <div className="absolute inset-0 z-10 bg-gradient-to-t from-slate-900/40 to-transparent pointer-events-none" />
+
+              <video
                 src={heroVideo}
-                autoPlay 
-                loop 
-                muted 
+                autoPlay
+                loop
+                muted
                 playsInline
                 className="w-full h-full object-cover"
               />
-              
+
               {/* Floating accent elements */}
               <div className="absolute -top-4 -right-4 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl group-hover:bg-blue-400/30 transition-all duration-700" />
               <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl group-hover:bg-amber-400/30 transition-all duration-700" />
@@ -277,7 +280,7 @@ const Home = () => {
         <div className="absolute bottom-8 sm:bottom-12 left-0 right-0 px-6 sm:px-12 pointer-events-none z-20">
           <div className="max-w-7xl mx-auto flex items-end justify-between gap-4 sm:gap-8 h-20 sm:h-28 relative overflow-visible">
             {/* Left: MBBS Label */}
-            <span className="text-white font-black text-xl sm:text-3xl italic tracking-tighter opacity-80 select-none drop-shadow-md z-10">MBBS</span>
+            <span className="text-navy font-black text-xl sm:text-3xl italic tracking-tighter opacity-60 select-none drop-shadow-sm z-10">MBBS</span>
 
             {/* High-Fidelity Continuous Flight - Responsive scaling */}
             <motion.img
@@ -295,7 +298,7 @@ const Home = () => {
                 ease: "easeInOut",
                 repeatDelay: 3
               }}
-              className="w-10 sm:w-16 h-auto object-contain filter brightness-0 invert drop-shadow-[0_0_12px_rgba(255,255,255,0.8)] z-30"
+              className="w-10 sm:w-16 h-auto object-contain filter drop-shadow-[0_0_12px_rgba(0,0,100,0.3)] z-30"
               style={{
                 position: 'absolute',
                 transform: 'translate(-50%, -50%)'
@@ -303,7 +306,7 @@ const Home = () => {
             />
 
             {/* Right: ABROAD Label */}
-            <span className="text-white font-black text-xl sm:text-3xl italic tracking-tighter opacity-80 select-none drop-shadow-md z-10">ABROAD</span>
+            <span className="text-navy font-black text-xl sm:text-3xl italic tracking-tighter opacity-60 select-none drop-shadow-sm z-10">ABROAD</span>
           </div>
         </div>
 
@@ -314,13 +317,13 @@ const Home = () => {
           transition={{ delay: 1 }}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
         >
-          <span className="text-white/40 text-xs uppercase tracking-widest">Scroll</span>
+          <span className="text-slate-400 text-xs uppercase tracking-widest">Scroll</span>
           <motion.div
             animate={{ y: [0, 6, 0] }}
             transition={{ repeat: Infinity, duration: 1.5 }}
-            className="w-5 h-8 border-2 border-white/20 rounded-full flex items-start justify-center pt-1.5"
+            className="w-5 h-8 border-2 border-slate-300/40 rounded-full flex items-start justify-center pt-1.5"
           >
-            <div className="w-1 h-2 bg-white/40 rounded-full" />
+            <div className="w-1 h-2 bg-slate-400/60 rounded-full" />
           </motion.div>
         </motion.div>
       </section>

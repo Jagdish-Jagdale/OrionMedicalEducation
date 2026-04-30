@@ -36,8 +36,8 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${shouldShowSolid ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-slate-100' : 'bg-transparent'
-        }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-md border-b border-slate-200/60 ${scrolled ? 'shadow-lg' : 'shadow-sm'}`}
+      style={{ background: 'linear-gradient(135deg, #f8f9fc 0%, #eef1f8 40%, #e8ecf4 70%, #f0f2f8 100%)' }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
@@ -53,7 +53,7 @@ const Navbar = () => {
                 <img 
                   src={orionLogo} 
                   alt="Orion Medical Education" 
-                  className={`h-full w-auto object-contain transition-all duration-300 ${!shouldShowSolid ? 'brightness-0 invert' : ''}`} 
+                  className="h-full w-auto object-contain transition-all duration-300" 
                 />
               </div>
             </motion.div>
@@ -68,15 +68,15 @@ const Navbar = () => {
                   key={link.to}
                   to={link.to}
                   className={`relative px-3 py-2 text-sm font-medium rounded-lg transition-all ${isActive
-                    ? shouldShowSolid ? 'text-blue-600' : 'text-amber-300'
-                    : shouldShowSolid ? 'text-slate-700 hover:text-blue-600 hover:bg-blue-50' : 'text-white/90 hover:text-white hover:bg-white/10'
+                    ? 'text-blue-600'
+                    : 'text-slate-700 hover:text-blue-600 hover:bg-blue-50/60'
                     }`}
                 >
                   {link.label}
                   {isActive && (
                     <motion.div
                       layoutId="navbar-underline"
-                      className={`absolute bottom-0 left-3 right-3 h-0.5 rounded-full ${shouldShowSolid ? 'bg-blue-600' : 'bg-amber-300'}`}
+                      className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-blue-600"
                     />
                   )}
                 </Link>
@@ -99,7 +99,7 @@ const Navbar = () => {
             </a>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className={`md:hidden p-2 rounded-lg transition-colors ${shouldShowSolid ? 'text-slate-700 hover:bg-slate-100' : 'text-white hover:bg-white/10'}`}
+              className="md:hidden p-2 rounded-lg transition-colors text-slate-700 hover:bg-slate-100"
               aria-label="Toggle menu"
             >
               <div className="w-5 flex flex-col gap-1">
