@@ -3,9 +3,7 @@ import { motion } from 'framer-motion';
 import processImage from '../assets/processimage.png';
 import processImage2 from '../assets/processimage2.png';
 import orionLogo from '../assets/orionologo.png';
-import img15 from '../assets/1 (15).png';
-import img14 from '../assets/1 (14).png';
-import img40 from '../assets/1 (40).png';
+
 
 const steps = [
   {
@@ -244,8 +242,6 @@ const Process = () => {
 
             {/* Step node circles + Info Cards on the tube */}
             {steps.map((step, i) => {
-              const decorativeImages = [img15, img14, img40];
-              const decImg = decorativeImages[i % decorativeImages.length];
               const isLeft = i % 2 === 0;
               const nodeX = isLeft ? CX - CARD_OFFSET : CX + CARD_OFFSET;
               const nodeY = -150 + (i + 1) * STEP_H;
@@ -257,17 +253,6 @@ const Process = () => {
                   <text x={nodeX} y={nodeY + 5} textAnchor="middle" fill="white" fontSize={isMobile ? "10" : "13"} fontWeight="bold" fontFamily="Inter, sans-serif">
                     {i + 1}
                   </text>
-
-                  {/* Decorative Image on opposite side */}
-                  <image
-                    href={decImg}
-                    x={isLeft ? nodeX + (isMobile ? 140 : 400) : nodeX - (isMobile ? 380 : 720)}
-                    y={nodeY - (isMobile ? 120 : 160)}
-                    width={isMobile ? 240 : 320}
-                    height={isMobile ? 240 : 320}
-                    className="opacity-90 drop-shadow-xl"
-                    style={{ pointerEvents: 'none' }}
-                  />
 
                   {/* Info Card via foreignObject */}
                   <foreignObject

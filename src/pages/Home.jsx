@@ -10,7 +10,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import WelcomeBanner from '../components/WelcomeBanner';
-import humanEvolution from '../assets/humanevolution.png';
+
 import heroVideo from '../assets/Make_flags_wave_202604281710.mp4';
 
 const fadeUp = {
@@ -155,7 +155,7 @@ const Home = () => {
       {/* ── Hero Section ────────────────────────────────── */}
       <section
         className="relative min-h-screen flex items-center overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #e8edf6 0%, #dce4f2 25%, #d0d9ee 50%, #e2e8f4 75%, #edf0f7 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fb 25%, #f3f4f6 50%, #f8f9fb 75%, #ffffff 100%)' }}
       >
         {/* Decorative circles */}
         <div className="absolute top-1/4 -right-20 w-96 h-96 bg-blue-400/8 rounded-full blur-3xl" />
@@ -237,7 +237,7 @@ const Home = () => {
                 </svg>
               </Link>
               <a
-                href="https://wa.me/919999999999"
+                href="https://wa.me/917738230335"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-semibold px-8 py-4 rounded-full transition-all hover:shadow-xl hover:shadow-green-500/30 text-sm"
@@ -347,36 +347,45 @@ const Home = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-            {focusCards.map((card, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.15 }}
-                className="group bg-slate-50 hover:bg-blue-600 rounded-2xl p-8 transition-all duration-300 border border-slate-100 hover:border-blue-600 hover:shadow-xl hover:shadow-blue-600/20 cursor-default"
-              >
-                <div className="w-12 h-12 bg-blue-100 group-hover:bg-white/20 rounded-xl flex items-center justify-center text-blue-600 group-hover:text-white mb-5 transition-all">
-                  {card.icon}
-                </div>
-                <h3 className="font-bold text-navy group-hover:text-white text-lg mb-2 transition-colors">{card.title}</h3>
-                <p className="text-slate-500 group-hover:text-blue-100 text-sm leading-relaxed transition-colors">{card.desc}</p>
-              </motion.div>
-            ))}
+          <div className="relative mb-20 py-10 sm:py-16 px-6 sm:px-10 rounded-[3rem] overflow-hidden">
+            {/* Soft blue linear gradient background to make the glassmorphism pop */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-100/90 via-blue-50/60 to-blue-200/90" />
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+              {focusCards.map((card, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 80, filter: "blur(15px)" }}
+                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ 
+                    duration: 1, 
+                    ease: [0.16, 1, 0.3, 1], 
+                    delay: i * 0.2 
+                  }}
+                  className="group bg-white/10 backdrop-blur-[40px] hover:bg-white/20 rounded-3xl p-8 transition-all duration-500 border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] cursor-default overflow-hidden relative"
+                >
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur-md group-hover:bg-white/30 rounded-xl flex items-center justify-center text-blue-700 group-hover:text-blue-900 mb-5 transition-all shadow-sm border border-white/30">
+                    {card.icon}
+                  </div>
+                  <h3 className="font-bold text-navy group-hover:text-white text-lg mb-2 transition-colors">{card.title}</h3>
+                  <p className="text-slate-600 group-hover:text-blue-100 text-sm leading-relaxed transition-colors">{card.desc}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="max-w-5xl mx-auto px-4 relative z-10"
+            initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="text-center mb-20 px-4"
           >
-            <img
-              src={humanEvolution}
-              alt="Human Evolution to Doctor"
-              className="w-full h-auto object-contain drop-shadow-2xl brightness-[1.02] block"
-            />
+            <h3 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-navy to-blue-800 tracking-tight">
+              Premium MBBS Education Guidance Company
+            </h3>
+            <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-amber-500 mx-auto mt-6 rounded-full" />
           </motion.div>
 
           <motion.div
@@ -606,10 +615,10 @@ const Home = () => {
 
       {/* WhatsApp Floating Button */}
       <a
-        href="https://wa.me/919999999999"
+        href="https://wa.me/917738230335"
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all hover:scale-110"
+        className="fixed top-1/2 -translate-y-1/2 right-6 z-40 w-14 h-14 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-lg hover:shadow-xl flex items-center justify-center transition-all hover:scale-110"
         aria-label="WhatsApp"
       >
         <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">

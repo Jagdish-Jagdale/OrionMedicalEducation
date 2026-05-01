@@ -19,6 +19,7 @@ const Process = lazy(() => import('./pages/Process'));
 const Reviews = lazy(() => import('./pages/Reviews'));
 const Observership = lazy(() => import('./pages/Observership'));
 const Contact = lazy(() => import('./pages/Contact'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminHome = lazy(() => import('./pages/admin/AdminHome'));
@@ -124,6 +125,7 @@ const App = () => {
             <Route path="/reviews" element={<Layout><Reviews /></Layout>} />
             <Route path="/observership" element={<Layout><Observership /></Layout>} />
             <Route path="/contact" element={<Layout><Contact /></Layout>} />
+            <Route path="/privacy-policy" element={<Layout><PrivacyPolicy /></Layout>} />
 
             {/* Admin routes (minimal layout – sidebar built into each page) */}
             <Route path="/admin/login" element={<PublicRoute><MinimalLayout><AdminLogin /></MinimalLayout></PublicRoute>} />

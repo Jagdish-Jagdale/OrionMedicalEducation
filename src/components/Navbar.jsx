@@ -87,7 +87,7 @@ const Navbar = () => {
           {/* CTA + Hamburger */}
           <div className="flex items-center gap-3">
             <a
-              href="https://wa.me/919999999999"
+              href="https://wa.me/917738230335"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-full transition-all hover:shadow-lg"
@@ -136,7 +136,7 @@ const Navbar = () => {
                 </Link>
               ))}
               <a
-                href="https://wa.me/919999999999"
+                href="https://wa.me/917738230335"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 mt-3 bg-green-500 text-white text-sm font-semibold px-4 py-3 rounded-xl"

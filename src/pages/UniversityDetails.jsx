@@ -184,7 +184,7 @@ const UniversityDetails = () => {
         {/* CTA */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
-            href="https://wa.me/919999999999"
+            href="https://wa.me/917738230335"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-8 py-4 rounded-full transition-all text-sm shadow-lg"

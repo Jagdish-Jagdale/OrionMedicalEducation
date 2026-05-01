@@ -208,7 +208,7 @@ const Observership = () => {
           <h2 className="text-2xl font-bold text-navy mb-3">Interested in the Observership Program?</h2>
           <p className="text-slate-500 text-sm mb-6">Limited seats available each batch. Contact us now to register your interest.</p>
           <a
-            href="https://wa.me/919999999999?text=I%20am%20interested%20in%20the%20Orion%20Observership%20Program"
+            href="https://wa.me/917738230335?text=I%20am%20interested%20in%20the%20Orion%20Observership%20Program"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-8 py-4 rounded-full transition-all text-sm shadow-lg"
