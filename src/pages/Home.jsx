@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import airplaneImg from '../assets/splash/airoplane.png';
@@ -100,9 +100,24 @@ const DESTINATION_COUNTRIES = [
 
 const ReviewCard = ({ rev }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (cardRef.current && !cardRef.current.contains(event.target)) {
+        setIsExpanded(false);
+      }
+    };
+    if (isExpanded) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isExpanded]);
 
   return (
-    <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 h-full relative group/card flex flex-col">
+    <div ref={cardRef} className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 h-full relative group/card flex flex-col">
       {/* Quote Icon in Top Right */}
       <div className="absolute top-6 right-6 w-10 h-10 bg-amber-50 rounded-full flex items-center justify-center group-hover/card:bg-amber-100 transition-colors">
         <svg className="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 32 32">
@@ -566,7 +581,7 @@ const Home = () => {
             >
               {reviews.map((rev, i) => (
                 <SwiperSlide key={i}>
-                  <div className="h-full py-4">
+                  <div className="h-full pt-4 pb-12">
                     <ReviewCard rev={rev} />
                   </div>
                 </SwiperSlide>

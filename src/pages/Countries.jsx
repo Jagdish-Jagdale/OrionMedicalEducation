@@ -46,7 +46,7 @@ const Countries = () => {
   const isMobile = windowWidth < 640;
   const isMediumMobile = windowWidth >= 380 && windowWidth < 640;
   const isExtraSmall = windowWidth < 380;
-  const isTablet = windowWidth >= 640 && windowWidth < 1024;
+  const isTablet = windowWidth >= 640 && windowWidth <= 1024;
 
   const fetchData = useCallback(async () => {
     try {
