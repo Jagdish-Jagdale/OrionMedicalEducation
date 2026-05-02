@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import orionLogo from '../assets/orionfullrmbg.png';
+import orionLogo from '../assets/orionologo.png';
 import introAudio from '../assets/splash/intro.mp3';
 
 const WelcomeBanner = () => {
@@ -105,28 +105,12 @@ const WelcomeBanner = () => {
                         <img
                             src={orionLogo}
                             alt="Orion Logo"
-                            className="w-64 sm:w-80 md:w-96 lg:w-[32rem] h-auto drop-shadow-xl"
+                            className="w-48 sm:w-64 md:w-80 lg:w-[24rem] h-auto drop-shadow-xl"
                         />
                     </motion.div>
 
 
-                    {/* ── SKIP BUTTON ────────────────────────────────────── */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 3 }}
-                    >
-                        {/* Skip/Close Button */}
-                        <button
-                            onClick={handleClose}
-                            className="absolute top-6 right-6 z-[110] w-12 h-12 sm:w-14 sm:h-14 bg-white/60 hover:bg-white text-slate-400 hover:text-slate-800 rounded-full flex items-center justify-center backdrop-blur-xl transition-all border border-slate-200 group shadow-lg active:scale-90"
-                            aria-label="Skip"
-                        >
-                            <svg className="w-8 h-8 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />
-                            </svg>
-                        </button>
-                    </motion.div>
+
                 </motion.div>
             )}
         </AnimatePresence>
