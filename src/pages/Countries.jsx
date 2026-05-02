@@ -35,13 +35,18 @@ const Countries = () => {
   const [isGlobeLoaded, setIsGlobeLoaded] = useState(false);
   const location = useLocation();
 
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024); // Use 1024 for tablet/mobile spread
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const isMobile = windowWidth < 640;
+  const isMediumMobile = windowWidth >= 380 && windowWidth < 640;
+  const isExtraSmall = windowWidth < 380;
+  const isTablet = windowWidth >= 640 && windowWidth < 1024;
 
   const fetchData = useCallback(async () => {
     try {
@@ -106,16 +111,25 @@ const Countries = () => {
               </filter>
             </defs>
             {countryMeta.map((country, i) => {
-              const finalLeft = isMobile ? country.pos.left : country.pos.dtLeft;
-              const finalTop = isMobile ? country.pos.top : country.pos.dtTop;
+              // Responsive layout overrides for iPad/Tablets to prevent clipping and pull cards closer
+              const finalTop = isMobile 
+                ? country.pos.top 
+                : (isTablet 
+                    ? (country.slug === 'uzbekistan' ? '80%' : (parseFloat(country.pos.top) < 50 ? '28%' : '72%'))
+                    : country.pos.dtTop);
+              const finalLeft = isMobile 
+                ? country.pos.left 
+                : (isTablet 
+                    ? (country.slug === 'uzbekistan' ? '50%' : (parseFloat(country.pos.left) < 50 ? '26%' : '74%'))
+                    : country.pos.dtLeft);
 
               const x2_raw = parseFloat(finalLeft);
               const y2_raw = parseFloat(finalTop);
               const isLeft = x2_raw < 50;
 
               // REFINED GEOMETRY: Calculate exact starting point on globe surface
-              const globe_radius = isMobile ? 18.2 : 24.5;
-              const x_offset_raw = isMobile ? 7 : 14;
+              const globe_radius = isExtraSmall ? 23.5 : (isMediumMobile ? 20.0 : (isTablet ? 18.0 : 26.0));
+              const x_offset_raw = isExtraSmall ? 10.5 : (isMediumMobile ? 9.0 : (isTablet ? 12.0 : 15.0));
               const isVerticalStraight = Math.abs(x2_raw - 50) < 2; // Top or Bottom center
               const isHorizontalStraight = Math.abs(y2_raw - 50) < 2; // Left or Right center
 
@@ -140,7 +154,7 @@ const Countries = () => {
               let x_end_final = x2_raw;
 
               if (isVerticalStraight) {
-                const vertOffset = isMobile ? 0.2 : 7.80;
+                const vertOffset = isExtraSmall ? 2.0 : (isMediumMobile ? 1.0 : (isTablet ? 0.0 : 7.80));
                 y_start_final = isTop ? y_start - vertOffset : y_start + vertOffset;
                 // Tiny balanced offset to prevent browser rendering glitch on vertical lines
                 x_start_final += 0.05;
@@ -218,8 +232,16 @@ const Countries = () => {
                 transition={{ duration: 0.6, delay: 0.5 + i * 0.15 }}
                 className="absolute z-40"
                 style={{
-                  top: isMobile ? meta.pos.top : meta.pos.dtTop,
-                  left: isMobile ? meta.pos.left : meta.pos.dtLeft,
+                  top: isMobile 
+                    ? meta.pos.top 
+                    : (isTablet 
+                        ? (meta.slug === 'uzbekistan' ? '80%' : (isTop ? '28%' : '72%'))
+                        : meta.pos.dtTop),
+                  left: isMobile 
+                    ? meta.pos.left 
+                    : (isTablet 
+                        ? (meta.slug === 'uzbekistan' ? '50%' : (isLeft ? '26%' : '74%'))
+                        : meta.pos.dtLeft),
                 }}
               >
                 <div className="relative w-0 h-0">
@@ -238,18 +260,18 @@ const Countries = () => {
                     <div
                       className="relative pointer-events-none"
                       style={{
-                        width: isMobile ? '72px' : '210px',
-                        [meta.slug === 'uzbekistan' ? 'marginTop' : (isLeft ? 'marginRight' : 'marginLeft')]: isMobile ? '-2px' : (meta.slug === 'uzbekistan' ? '-8px' : '-12px')
+                        width: isMobile ? (isMediumMobile ? '95px' : '72px') : (isTablet ? '160px' : '210px'),
+                        [meta.slug === 'uzbekistan' ? 'marginTop' : (isLeft ? 'marginRight' : 'marginLeft')]: isMobile ? (isMediumMobile ? '-4px' : '-2px') : (meta.slug === 'uzbekistan' ? '-8px' : '-12px')
                       }}
                     >
                       <motion.button
                         onClick={() => handleCountrySelection(meta.slug)}
                         className={`relative w-full pointer-events-auto
-                          bg-white/95 backdrop-blur-md px-2 sm:px-6 py-1.5 sm:py-4 rounded-lg sm:rounded-2xl shadow-[0_15px_45px_rgba(0,0,0,0.18)] border transition-all duration-300 group active:scale-95 whitespace-nowrap
+                          bg-white/95 backdrop-blur-md ${isMobile ? (isMediumMobile ? 'px-3 py-2 rounded-xl' : 'px-2 py-1.5 rounded-lg') : (isTablet ? 'px-5 py-3.5 rounded-[14px]' : 'px-6 py-4 rounded-2xl')} shadow-[0_15px_45px_rgba(0,0,0,0.18)] border transition-all duration-300 group active:scale-95 whitespace-nowrap
                           ${selectedCountry === meta.slug ? 'border-blue-600 shadow-blue-500/25 scale-105' : 'border-slate-100 hover:border-blue-400'}`}
                       >
-                        <h3 className={`w-full font-black transition-colors uppercase flex items-center justify-center gap-1 sm:gap-3 tracking-[0.1em] sm:tracking-[0.2em] text-[6.2px] sm:text-[14px] ${selectedCountry === meta.slug ? 'text-blue-600' : 'text-navy group-hover:text-blue-600'}`}>
-                          <div className="w-4 h-2.5 sm:w-10 sm:h-6 rounded-[1px] sm:rounded-sm overflow-hidden border border-slate-100 flex-shrink-0 shadow-sm">
+                        <h3 className={`w-full font-black transition-colors uppercase flex items-center justify-center ${isMobile ? (isMediumMobile ? 'gap-2 tracking-[0.15em] text-[8.5px]' : 'gap-1 tracking-[0.1em] text-[6.2px]') : (isTablet ? 'gap-2 tracking-[0.15em] text-[11.5px]' : 'gap-3 tracking-[0.2em] text-[14px]')} ${selectedCountry === meta.slug ? 'text-blue-600' : 'text-navy group-hover:text-blue-600'}`}>
+                          <div className={`${isMobile ? (isMediumMobile ? 'w-5 h-3.5 rounded-[1.5px]' : 'w-4 h-2.5 rounded-[1px]') : (isTablet ? 'w-9 h-6 rounded-sm' : 'w-10 h-6 rounded-sm')} overflow-hidden border border-slate-100 flex-shrink-0 shadow-sm`}>
                             <img src={meta.flag} alt={meta.label} className="w-full h-full object-cover" />
                           </div>
                           {meta.label}

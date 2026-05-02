@@ -8,11 +8,11 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   const marqueeData = [
-    { country: "RUSSIA", accent: "text-blue-700" },
-    { country: "GEORGIA", accent: "text-red-600" },
-    { country: "KAZAKHSTAN", accent: "text-blue-400" },
-    { country: "KYRGYZSTAN", accent: "text-orange-600" },
-    { country: "UZBEKISTAN", accent: "text-cyan-600" },
+    { country: "RUSSIA", accent: "text-blue-700", flagUrl: "https://flagcdn.com/w40/ru.png" },
+    { country: "GEORGIA", accent: "text-red-600", flagUrl: "https://flagcdn.com/w40/ge.png" },
+    { country: "KAZAKHSTAN", accent: "text-blue-400", flagUrl: "https://flagcdn.com/w40/kz.png" },
+    { country: "KYRGYZSTAN", accent: "text-orange-600", flagUrl: "https://flagcdn.com/w40/kg.png" },
+    { country: "UZBEKISTAN", accent: "text-cyan-600", flagUrl: "https://flagcdn.com/w40/uz.png" },
   ];
 
   return (
@@ -32,9 +32,18 @@ const Footer = () => {
             <div key={set} className="flex gap-6 items-center pr-6">
               {marqueeData.map((item, idx) => (
                 <React.Fragment key={idx}>
-                  <span className="font-bold tracking-[0.25em] text-xs uppercase font-inter">
-                    <span className="text-black">MBBS IN </span>
-                    <span className={item.accent}>{item.country}</span>
+                  <span className="font-bold tracking-[0.25em] text-xs uppercase font-inter flex items-center gap-1.5">
+                    <span>
+                      <span className="text-black">MBBS IN </span>
+                      <span className={item.accent}>{item.country}</span>
+                    </span>
+                    <motion.span
+                      animate={{ rotate: [0, 15, -10, 15, -5, 10, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      className="origin-bottom-right inline-block h-3.5 sm:h-4 ml-1"
+                    >
+                      <img src={item.flagUrl} alt={`${item.country} flag`} className="h-full w-auto object-contain rounded-[1px] shadow-sm" />
+                    </motion.span>
                   </span>
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
                 </React.Fragment>
