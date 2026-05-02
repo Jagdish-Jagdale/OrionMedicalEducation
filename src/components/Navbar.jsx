@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import orionLogo from '../assets/orionfullrmbg.png';
+import orionLogo from '../assets/orionologo.png';
 
 const navLinks = [
   { label: 'Home', to: '/' },
