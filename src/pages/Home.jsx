@@ -348,28 +348,34 @@ const Home = () => {
           </motion.div>
 
           <div className="relative mb-20 py-10 sm:py-16 px-6 sm:px-10 rounded-[3rem] overflow-hidden">
-            {/* Soft blue linear gradient background to make the glassmorphism pop */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-100/90 via-blue-50/60 to-blue-200/90" />
+            {/* Soft blue linear gradient background and colorful orbs to make the glassmorphism pop */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/90 via-slate-50/60 to-blue-100/90" />
+            <div className="absolute -top-10 -left-10 w-64 h-64 bg-blue-400/30 rounded-full blur-3xl" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-cyan-300/20 rounded-full blur-3xl" />
+            <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-indigo-400/20 rounded-full blur-3xl" />
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
               {focusCards.map((card, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 80, filter: "blur(15px)" }}
-                  whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ 
-                    duration: 1, 
-                    ease: [0.16, 1, 0.3, 1], 
-                    delay: i * 0.2 
+                    duration: 1.2,
+                    ease: "easeInOut",
+                    delay: i * 0.3 
                   }}
-                  className="group bg-white/10 backdrop-blur-[40px] hover:bg-white/20 rounded-3xl p-8 transition-all duration-500 border border-white/20 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] cursor-default overflow-hidden relative"
+                  className="group bg-gradient-to-br from-white/60 to-white/10 backdrop-blur-2xl hover:from-white/70 hover:to-white/30 rounded-3xl p-8 transition-all duration-500 border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] cursor-default overflow-hidden relative"
                 >
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-md group-hover:bg-white/30 rounded-xl flex items-center justify-center text-blue-700 group-hover:text-blue-900 mb-5 transition-all shadow-sm border border-white/30">
+                  {/* Subtle inner highlight */}
+                  <div className="absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/50 pointer-events-none" />
+                  
+                  <div className="relative z-10 w-12 h-12 bg-white/60 backdrop-blur-md group-hover:bg-white/80 rounded-xl flex items-center justify-center text-blue-700 group-hover:text-black mb-5 transition-all shadow-sm border border-white/80">
                     {card.icon}
                   </div>
-                  <h3 className="font-bold text-navy group-hover:text-white text-lg mb-2 transition-colors">{card.title}</h3>
-                  <p className="text-slate-600 group-hover:text-blue-100 text-sm leading-relaxed transition-colors">{card.desc}</p>
+                  <h3 className="relative z-10 font-bold text-navy group-hover:text-black text-lg mb-2 transition-colors">{card.title}</h3>
+                  <p className="relative z-10 text-slate-600 group-hover:text-slate-900 text-sm leading-relaxed transition-colors">{card.desc}</p>
                 </motion.div>
               ))}
             </div>

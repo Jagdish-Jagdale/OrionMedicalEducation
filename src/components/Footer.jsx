@@ -18,11 +18,11 @@ const Footer = () => {
   return (
     <footer className="bg-gradient-to-br from-[#0a1a3a] via-[#1e3a6e] to-[#2563eb] text-white mt-16 shadow-[0_-4px_30px_rgba(0,0,0,0.6)] border-t border-white/10 relative overflow-hidden">
       {/* Running Marquee / Special Offers Stripe */}
-      <div className="bg-white border-b border-white/10 overflow-hidden py-3">
+      <div className="bg-white border-b border-white/10 overflow-hidden py-5">
         <motion.div
           animate={{ x: [-1030, 0] }}
           transition={{
-            duration: 35,
+            duration: 10,
             repeat: Infinity,
             ease: "linear"
           }}
@@ -32,11 +32,11 @@ const Footer = () => {
             <div key={set} className="flex gap-6 items-center pr-6">
               {marqueeData.map((item, idx) => (
                 <React.Fragment key={idx}>
-                  <span className="font-bold tracking-[0.25em] text-[10px] uppercase font-inter">
+                  <span className="font-bold tracking-[0.25em] text-xs uppercase font-inter">
                     <span className="text-black">MBBS IN </span>
                     <span className={item.accent}>{item.country}</span>
                   </span>
-                  <span className="w-1 h-1 rounded-full bg-slate-300" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
                 </React.Fragment>
               ))}
             </div>
