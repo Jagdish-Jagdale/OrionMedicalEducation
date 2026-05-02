@@ -39,23 +39,7 @@ const PageLoader = () => (
     className="min-h-screen flex items-center justify-center bg-white"
   >
     <div className="flex flex-col items-center gap-6">
-      {/* Circular Loader */}
-      <div className="flex items-center justify-center">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-          className="text-blue-600 w-16 h-16"
-        >
-          <svg viewBox="0 0 24 24" fill="none" className="w-full h-full" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <path d="M12 2a10 10 0 0 1 10 10" opacity="0.1" />
-            <path d="M12 2a10 10 0 0 1 10 10" />
-          </svg>
-        </motion.div>
-      </div>
+
 
       {/* Brand Text */}
       <div className="text-center px-4">

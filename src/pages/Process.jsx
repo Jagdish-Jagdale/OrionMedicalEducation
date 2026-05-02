@@ -3,6 +3,25 @@ import { motion } from 'framer-motion';
 import processImage from '../assets/processimage.png';
 import processImage2 from '../assets/processimage2.png';
 import orionLogo from '../assets/orionologo.png';
+import eyeImg from '../assets/eye.png';
+import abdomenImg from '../assets/abdomen.png';
+import lungsImg from '../assets/lungs.png';
+import teethImg from '../assets/teeth.png';
+import brainImg from '../assets/brain_final.png';
+import heartImg from '../assets/heart.png';
+import liverImg from '../assets/liver.png';
+import kidneyImg from '../assets/kidney.png';
+
+const organImages = [
+  { img: eyeImg, title: 'Ophthalmology', baseScale: 0.7 },
+  { img: abdomenImg, title: 'Internal Medicine', baseScale: 1 },
+  { img: lungsImg, title: 'Pulmonology', baseScale: 1.8 },
+  { img: teethImg, title: 'Stomatology', baseScale: 0.7 },
+  { img: brainImg, title: 'Neurology', baseScale: 2.5 },
+  { img: heartImg, title: 'Cardiology', baseScale: 0.8 },
+  { img: liverImg, title: 'Hepatology', baseScale: 0.8 },
+  { img: kidneyImg, title: 'Nephrology', baseScale: 0.8 }
+];
 
 
 const steps = [
@@ -10,49 +29,57 @@ const steps = [
     icon: '🩺',
     title: 'Career Counseling',
     description: 'In-depth one-on-one consultation to understand your academic profile, budget, and future goals.',
-    color: '#0D9488',
+    color: '#2DD4BF', // Fresh Teal
+    color2: '#0891B2', // Cyan
   },
   {
     icon: '🏫',
     title: 'University Selection & Application',
     description: 'We shortlist the best NMC/WHO-approved universities and submit a flawless application on your behalf.',
-    color: '#2563EB',
+    color: '#38BDF8', // Fresh Sky Blue
+    color2: '#2DD4BF', // Teal
   },
   {
     icon: '📄',
     title: 'Documentation Support',
     description: 'Our experts guide you through every document — all notarized and attested correctly.',
-    color: '#4F46E5',
+    color: '#818CF8', // Fresh Indigo
+    color2: '#C084FC', // Purple
   },
   {
     icon: '📩',
     title: 'Admission Letter',
     description: 'Upon acceptance, we obtain your official admission letter directly from the university.',
-    color: '#7C3AED',
+    color: '#C084FC', // Fresh Purple
+    color2: '#F472B6', // Pink
   },
   {
     icon: '🛂',
     title: 'Visa Processing',
     description: 'We prepare and submit your student visa application with full documentation coaching.',
-    color: '#9333EA',
+    color: '#F472B6', // Fresh Pink
+    color2: '#FB7185', // Rose
   },
   {
     icon: '✈️',
     title: 'Air Ticket Assistance',
     description: 'We help you book the most convenient flights coordinated with university intake dates.',
-    color: '#E11D48',
+    color: '#FB7185', // Fresh Rose
+    color2: '#FB923C', // Orange
   },
   {
     icon: '🎒',
     title: 'Pre-Departure Guidance',
     description: 'Briefing on weather, culture, packing essentials — so you arrive confident and prepared.',
-    color: '#EA580C',
+    color: '#FB923C', // Fresh Orange
+    color2: '#F59E0B', // Amber
   },
   {
     icon: '🏥',
     title: 'Post-Arrival Support',
     description: 'Our local team receives you at the airport. Hostel, SIM, mess, orientation — covered.',
-    color: '#059669',
+    color: '#4ADE80', // Fresh Green
+    color2: '#10B981', // Emerald
   },
 ];
 
@@ -269,19 +296,21 @@ const Process = () => {
                       className="w-full flex items-center relative h-full"
                     >
                       <div
-                        className="bg-white rounded-xl sm:rounded-2xl shadow-xl border-l-4 p-3 sm:p-4 hover:shadow-2xl transition-all duration-300 group w-full"
-                        style={{ borderLeftColor: step.color }}
+                        className="rounded-xl sm:rounded-2xl shadow-xl p-3 sm:p-4 hover:shadow-2xl transition-all duration-500 group w-full relative overflow-hidden"
+                        style={{ background: `linear-gradient(135deg, ${step.color} 0%, ${step.color2} 100%)` }}
                       >
-                        <div className="flex items-center gap-2 mb-1">
+                        {/* Subtle glassmorphism light effect */}
+                        <div className="absolute top-0 left-0 w-full h-full bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                        <div className="flex items-center gap-3 mb-3 relative z-10">
                           <span
-                            className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center text-xs sm:text-base"
-                            style={{ backgroundColor: `${step.color}15`, color: step.color }}
+                            className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center text-sm sm:text-xl bg-white/20 text-white shadow-lg backdrop-blur-sm"
                           >
                             {step.icon}
                           </span>
-                          <h3 className="font-bold text-[#1e3a5f] text-base sm:text-lg leading-tight">{step.title}</h3>
+                          <h3 className="font-bold text-white text-base sm:text-xl leading-tight tracking-tight">{step.title}</h3>
                         </div>
-                        <p className="text-slate-500 text-sm sm:text-base leading-relaxed">{step.description}</p>
+                        <p className="text-white/90 text-sm sm:text-base leading-relaxed font-medium relative z-10">{step.description}</p>
                       </div>
 
                       <div
@@ -295,6 +324,51 @@ const Process = () => {
                           [isLeft ? 'borderLeft' : 'borderRight']: isMobile ? `8px solid ${step.color}` : `8px solid ${step.color}`,
                         }}
                       />
+                    </motion.div>
+                  </foreignObject>
+
+                  {/* Decorative Medical Images on the opposite side */}
+                  <foreignObject
+                    x={isLeft ? nodeX + (isMobile ? 120 : 280) : nodeX - (isMobile ? 240 : 580)}
+                    y={nodeY - (isMobile ? 100 : 180)}
+                    width={isMobile ? 180 : 360}
+                    height={isMobile ? 180 : 360}
+                    className="overflow-visible"
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, rotate: 0 }}
+                      whileInView={{ opacity: 0.95, rotate: 0 }}
+                      whileHover="hover"
+                      viewport={{ once: true }}
+                      transition={{ duration: 1, delay: 0.2 }}
+                      className="w-full h-full flex flex-col items-center justify-center cursor-pointer pointer-events-auto group"
+                    >
+                      <motion.img
+                        initial={{ rotate: 0, scale: organImages[i % organImages.length].baseScale }}
+                        animate={{ rotate: 0, scale: organImages[i % organImages.length].baseScale }}
+                        variants={{
+                          hover: { scale: organImages[i % organImages.length].baseScale * 1.18, rotate: 0, y: -8 }
+                        }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                        src={organImages[i % organImages.length].img}
+                        alt="Medical Icon"
+                        className="w-[85%] h-[85%] object-contain drop-shadow-2xl"
+                        style={{
+                          filter: `drop-shadow(0 0 25px ${step.color}99)`
+                        }}
+                      />
+
+                      {/* Floating Title on Hover */}
+                      <motion.span
+                        variants={{
+                          initial: { opacity: 0, y: 10, scale: 0.8 },
+                          hover: { opacity: 1, y: 0, scale: 1 }
+                        }}
+                        initial="initial"
+                        className="mt-2 text-navy font-black text-[10px] sm:text-[14px] uppercase tracking-widest bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full shadow-lg border border-slate-100 whitespace-nowrap pointer-events-none"
+                      >
+                        {organImages[i % organImages.length].title}
+                      </motion.span>
                     </motion.div>
                   </foreignObject>
                 </g>
