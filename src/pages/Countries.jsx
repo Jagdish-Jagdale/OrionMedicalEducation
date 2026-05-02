@@ -9,6 +9,7 @@ import RussiaDetailedGuide from '../components/RussiaDetailedGuide';
 import KyrgyzstanDetailedGuide from '../components/KyrgyzstanDetailedGuide';
 import GeorgiaDetailedGuide from '../components/GeorgiaDetailedGuide';
 import UzbekistanDetailedGuide from '../components/UzbekistanDetailedGuide';
+import KazakhstanDetailedGuide from '../components/KazakhstanDetailedGuide';
 
 // Import Flag Images
 import georgiaFlag from '../assets/flags/georgiaflag.png';
@@ -317,8 +318,6 @@ const Countries = () => {
                     <div className="h-10 w-64 bg-slate-200 animate-pulse rounded-md" />
                     <LoadingSkeleton count={3} type="card" />
                   </div>
-                ) : error ? (
-                  <div className="p-8 bg-white rounded-3xl border border-red-50 text-red-500 italic">Information for {meta.label} is currently unavailable.</div>
                 ) : meta.slug === 'russia' ? (
                   <RussiaDetailedGuide />
                 ) : meta.slug === 'kyrgyzstan' ? (
@@ -327,6 +326,10 @@ const Countries = () => {
                   <GeorgiaDetailedGuide />
                 ) : meta.slug === 'uzbekistan' ? (
                   <UzbekistanDetailedGuide />
+                ) : meta.slug === 'kazakhstan' ? (
+                  <KazakhstanDetailedGuide />
+                ) : error ? (
+                  <div className="p-8 bg-white rounded-3xl border border-red-50 text-red-500 italic">Information for {meta.label} is currently unavailable.</div>
                 ) : country ? (
                   <CountryCard country={country} universities={universities} />
                 ) : (

@@ -18,7 +18,7 @@ const AdminLayout = ({ children, title }) => {
       {/* Main Content Area */}
       <div
         className={`flex-1 flex flex-col transition-all duration-300 ${
-          collapsed ? 'lg:ml-20' : 'lg:ml-72'
+          collapsed ? 'lg:ml-20' : 'lg:ml-56'
         }`}
       >
         {/* Top bar & Mobile Header */}
@@ -37,20 +37,14 @@ const AdminLayout = ({ children, title }) => {
             <h1 className="text-slate-900 font-bold text-xl tracking-tight">{title}</h1>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:block text-right mr-2">
-              <p className="text-xs font-bold text-slate-900 leading-none">Admin User</p>
-              <p className="text-[10px] font-medium text-slate-400 mt-1 uppercase tracking-wider">Super Administrator</p>
-            </div>
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 shadow-lg shadow-blue-200 border-2 border-white flex items-center justify-center text-white text-sm font-bold">
-              A
-            </div>
+          <div className="flex items-center gap-3 invisible">
+            {/* User section removed per request */}
           </div>
         </header>
 
         {/* Page Content Rendering */}
-        <main className="flex-1 p-4 md:p-8 animate-in fade-in duration-500">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 p-4 md:p-8 animate-in fade-in duration-500 flex justify-center">
+          <div className="w-full max-w-4xl">
             {children}
           </div>
         </main>

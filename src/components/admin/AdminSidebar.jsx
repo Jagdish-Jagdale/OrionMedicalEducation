@@ -3,18 +3,9 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { auth } from '../../firebase/config';
 import { signOut } from 'firebase/auth';
 import toast from 'react-hot-toast';
+import orionLogo from '../../assets/orionologo.png';
 
 const navItems = [
-  {
-    label: 'Dashboard',
-    to: '/admin/dashboard',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-        <rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" />
-        <rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" />
-      </svg>
-    ),
-  },
   {
     label: 'Home',
     to: '/admin/home',
@@ -100,18 +91,21 @@ const AdminSidebar = ({ isMobileOpen, setMobileOpen, collapsed, setCollapsed }) 
   const SidebarContent = (
     <div className="flex flex-col h-full bg-white border-r border-slate-200">
       {/* Brand */}
-      <div className="flex items-center gap-3 px-6 py-8">
-        <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200 flex-shrink-0">
-          <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <circle cx="12" cy="12" r="10" /><path d="M12 8v8M8 12h8" strokeLinecap="round" />
-          </svg>
-        </div>
-        {!collapsed && (
-          <div>
-            <div className="font-bold text-slate-900 text-base leading-tight">Orion Medical</div>
-            <div className="text-blue-600 text-[10px] font-bold uppercase tracking-wider">Admin Panel</div>
+      <div className={`pb-2 ${collapsed ? 'px-2' : 'px-4'}`}>
+        <div className="flex flex-col items-center py-5 gap-2">
+          {/* Logo - horizontal / full width */}
+          <div className={`bg-white rounded-xl flex items-center justify-center shadow-sm p-2 border border-slate-50 ${collapsed ? 'w-10 h-10' : 'w-full h-14'}`}>
+            <img src={orionLogo} alt="Orion" className="h-full object-contain" />
           </div>
-        )}
+          {/* Text below logo */}
+          {!collapsed && (
+            <div className="text-center mt-1">
+              <div className="font-bold text-slate-900 text-sm leading-tight">Orion Medical Education</div>
+              <div className="text-blue-600 text-[10px] font-bold uppercase tracking-widest mt-0.5">Admin Panel</div>
+            </div>
+          )}
+        </div>
+        <hr className="border-slate-100" />
       </div>
 
       {/* Nav */}
@@ -155,7 +149,7 @@ const AdminSidebar = ({ isMobileOpen, setMobileOpen, collapsed, setCollapsed }) 
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className={`hidden lg:block fixed left-0 top-0 h-screen transition-all duration-300 z-50 ${collapsed ? 'w-20' : 'w-72'}`}>
+      <aside className={`hidden lg:block fixed left-0 top-0 h-screen transition-all duration-300 z-50 ${collapsed ? 'w-20' : 'w-56'}`}>
         {SidebarContent}
         {/* Collapse toggle (Desktop only) */}
         <button

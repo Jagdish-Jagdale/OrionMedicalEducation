@@ -50,7 +50,7 @@ const KyrgyzstanDetailedGuide = () => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-navy to-[#1a365d] rounded-lg sm:rounded-xl p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden">
+            <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-navy rounded-lg sm:rounded-xl p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden">
               <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
               <h3 className="text-xl font-bold mb-4 relative z-10">Our Exclusive Support</h3>
               <p className="text-blue-100 text-sm leading-relaxed mb-6 relative z-10">

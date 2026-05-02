@@ -31,7 +31,7 @@ const BackgroundMusic = () => {
   }, []);
 
   return (
-    <div className="fixed bottom-6 left-6 z-[100]">
+    <div className="fixed bottom-6 right-6 z-[100]">
       <audio
         ref={audioRef}
         src={introMusic}
