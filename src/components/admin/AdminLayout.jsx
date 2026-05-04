@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AdminSidebar from './AdminSidebar';
 
-const AdminLayout = ({ children, title }) => {
+const AdminLayout = ({ children, title, isDirty, dirtySections, onNavigate }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobileOpen, setMobileOpen] = useState(false);
 
@@ -13,6 +13,9 @@ const AdminLayout = ({ children, title }) => {
         setCollapsed={setCollapsed}
         isMobileOpen={isMobileOpen}
         setMobileOpen={setMobileOpen}
+        isDirty={isDirty}
+        dirtySections={dirtySections}
+        onNavigate={onNavigate}
       />
 
       {/* Main Content Area */}

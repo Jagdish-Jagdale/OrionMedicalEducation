@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
+import PageTitle from '../components/PageTitle';
 
 const PrivacyPolicy = () => {
+
   const currentYear = new Date().getFullYear();
 
   const sections = [
@@ -132,6 +134,7 @@ const PrivacyPolicy = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 pt-28 pb-20">
+      <PageTitle title="Privacy Policy" />
       {/* Hero Header */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-transparent to-blue-600/5 pointer-events-none" />

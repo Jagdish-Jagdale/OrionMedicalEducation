@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getUniversityBySlug } from '../firebase/firestore';
 import { useFirestore } from '../hooks/useFirestore';
 import { CardSkeleton } from '../components/LoadingSkeleton';
+import PageTitle from '../components/PageTitle';
 
 const accreditationColors = {
   NMC: 'bg-green-100 text-green-700 border-green-300',
@@ -60,6 +61,7 @@ const UniversityDetails = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 pt-20 pb-20">
+      <PageTitle title={university?.name || "University Details"} />
       {/* Back button */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 mb-6">
         <button

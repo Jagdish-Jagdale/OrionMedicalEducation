@@ -14,9 +14,25 @@
     font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   }
 
-  * {
-    -webkit-tap-highlight-color: transparent;
+  /* Hide default cursor on main site where custom cursor is used */
+  body:not(.admin-panel) * {
     cursor: none !important;
+  }
+
+  /* Restore standard cursor for admin panel */
+  .admin-panel, .admin-panel * {
+    cursor: auto !important;
+  }
+
+  .admin-panel a,
+  .admin-panel button,
+  .admin-panel [role="button"],
+  .admin-panel input[type="submit"],
+  .admin-panel input[type="button"],
+  .admin-panel select,
+  .admin-panel .clickable,
+  .admin-panel .cursor-pointer {
+    cursor: pointer !important;
   }
 }
 

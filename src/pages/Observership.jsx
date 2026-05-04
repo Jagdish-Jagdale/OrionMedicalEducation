@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { getObservership } from '../firebase/firestore';
 import { useFirestore } from '../hooks/useFirestore';
+import PageTitle from '../components/PageTitle';
 
 const highlightCards = [
   {
@@ -42,8 +43,49 @@ const whyCards = [
 const Observership = () => {
   const { data: observership, loading, error } = useFirestore(getObservership);
 
+  // Randomized background dots
+  const backgroundDots = React.useMemo(() => {
+    return [...Array(40)].map((_, i) => ({
+      id: i,
+      top: `${Math.random() * 100}%`,
+      left: `${Math.random() * 100}%`,
+      size: Math.random() * 2 + 1,
+      opacity: Math.random() * 0.3 + 0.1,
+    }));
+  }, []);
+
   return (
-    <div className="min-h-screen bg-slate-50 pt-20">
+    <div className="min-h-screen bg-[#e0f2fe] pt-20 relative overflow-hidden">
+      {/* Background Pattern - Randomized Dots & Stars */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        {backgroundDots.map((dot) => (
+          <div
+            key={dot.id}
+            className="absolute bg-blue-400 rounded-full"
+            style={{
+              top: dot.top,
+              left: dot.left,
+              width: `${dot.size}px`,
+              height: `${dot.size}px`,
+              opacity: dot.opacity,
+            }}
+          />
+        ))}
+        {/* Animated Stars */}
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={`star-${i}`}
+            animate={{ opacity: [0.1, 0.6, 0.1], scale: [1, 1.4, 1] }}
+            transition={{ duration: 3 + i, repeat: Infinity, ease: "easeInOut", delay: i * 0.5 }}
+            className="absolute w-1 h-1 bg-blue-400 rounded-full"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+            }}
+          />
+        ))}
+      </div>
+      <PageTitle title="Observership" />
       {/* Header */}
       <div className="bg-gradient-to-r from-navy to-blue-700 py-16 px-4 text-center">
         <motion.p

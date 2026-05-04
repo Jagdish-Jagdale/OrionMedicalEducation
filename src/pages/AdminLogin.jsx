@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import toast from 'react-hot-toast';
 import loginBg from '../assets/adminloginbg.jpg';
 import logo from '../assets/orionologo.png';
+import PageTitle from '../components/PageTitle';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
@@ -17,13 +18,14 @@ const AdminLogin = () => {
   // Redirect to dashboard automatically if already logged in
   React.useEffect(() => {
     if (user) {
-      navigate('/admin/dashboard');
+      navigate('/admin/home');
     }
   }, [user, navigate]);
 
   if (user) {
     return (
       <div className="min-h-screen relative flex items-center justify-center px-4 overflow-hidden">
+        <PageTitle title="Admin Login" />
         {/* Background Image with Black Overlay */}
         <div
           className="absolute inset-0 z-0 bg-cover bg-center"
@@ -41,7 +43,7 @@ const AdminLogin = () => {
 
           <div className="flex flex-col gap-3">
             <button
-              onClick={() => navigate('/admin/dashboard')}
+              onClick={() => navigate('/admin/home')}
               className="w-full bg-navy hover:bg-blue-800 text-white font-bold py-4 rounded-2xl transition-all text-sm shadow-xl shadow-navy/20"
             >
               Go to Dashboard
@@ -68,7 +70,7 @@ const AdminLogin = () => {
     setLoading(false);
     if (result.success) {
       toast.success('Logged in successfully!');
-      navigate('/admin/dashboard');
+      navigate('/admin/home');
     } else {
       toast.error('Invalid email or password. Please try again.');
     }
@@ -76,6 +78,7 @@ const AdminLogin = () => {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center px-4 overflow-hidden">
+      <PageTitle title="Admin Login" />
       {/* Background Image with Black Overlay */}
       <div
         className="absolute inset-0 z-0 bg-cover bg-center"
@@ -149,6 +152,18 @@ const AdminLogin = () => {
             )}
           </button>
         </form>
+
+        <div className="mt-8 text-center border-t border-slate-100 pt-6">
+          <Link
+            to="/"
+            className="text-slate-400 hover:text-navy text-[11px] font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2 group"
+          >
+            <svg className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+              <path d="M10 19l-7-7m0 0l7-7m-7 7h18" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Back to Website
+          </Link>
+        </div>
 
 
       </motion.div>

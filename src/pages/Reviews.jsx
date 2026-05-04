@@ -1,13 +1,19 @@
-import React, { useRef, useCallback, useLayoutEffect, useState } from 'react';
+import React, { useRef, useCallback, useLayoutEffect, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
-import { getReviews } from '../firebase/firestore';
-import { useFirestore } from '../hooks/useFirestore';
 import NeuralReviewCard from '../components/NeuralReviewCard';
 import brainImg from '../assets/reviewimage.png';
 import brainMobileImg from '../assets/brainrightpov.png';
+import PageTitle from '../components/PageTitle';
 
 const Reviews = () => {
-  const { data: reviews } = useFirestore(getReviews);
+  const reviews = [
+    { id: 1, studentName: 'Aditya Sharma', type: 'MBBS STUDENT', text: "Orion's neural map of medical universities made my decision much clearer. The spinal network of support is real!" },
+    { id: 2, studentName: 'Priya Patel', type: 'PARENT', text: "Seeing the entire structure of medical education through Orion's lens gave us peace of mind." },
+    { id: 3, studentName: 'Rahul Verma', type: 'MBBS STUDENT', text: 'The guidance here is the backbone of my medical career. Truly anatomical excellence.' },
+    { id: 4, studentName: 'Sneha Reddy', type: 'PARENT', text: 'A robust network that connects aspiring doctors to reputable global institutions.' },
+    { id: 5, studentName: 'Vikram Singh', type: 'MBBS STUDENT', text: 'From the brain core to the finest nerve, every detail of the admission process was handled perfectly.' },
+    { id: 6, studentName: 'Ananya Iyer', type: 'PARENT', text: "The structural integrity of Orion's placement system is unmatched in the industry." },
+  ];
 
   /* ── Layout refs ── */
   const containerRef = useRef(null);
@@ -18,6 +24,17 @@ const Reviews = () => {
   /* ── Dynamically-computed SVG path strings ── */
   const [pathDefs, setPathDefs] = useState(Array(6).fill(''));
   const [isMobile, setIsMobile] = useState(false);
+
+  // Randomized background dots
+  const backgroundDots = React.useMemo(() => {
+    return [...Array(60)].map((_, i) => ({
+      id: i,
+      top: `${Math.random() * 100}%`,
+      left: `${Math.random() * 100}%`,
+      size: Math.random() * 2 + 1,
+      opacity: Math.random() * 0.3 + 0.1,
+    }));
+  }, []);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -52,7 +69,7 @@ const Reviews = () => {
     const brainRect = brainRef.current.getBoundingClientRect();
 
     // Target the spine center (roughly 47% from the left edge of the side-profile image)
-    const stemX = isMobile 
+    const stemX = isMobile
       ? brainRect.left + (brainRect.width * 0.47) - svgRect.left
       : brainRect.left + brainRect.width * 0.5 - svgRect.left;
 
@@ -62,15 +79,15 @@ const Reviews = () => {
 
       const row = Math.floor(i / 2);
       // Start from brain's bottom/top of spine (higher vertical factor on mobile)
-      const verticalFactor = isMobile 
-        ? 0.25 + (row * 0.22) 
+      const verticalFactor = isMobile
+        ? 0.25 + (row * 0.22)
         : [0.28, 0.44, 0.60][row];
-      
+
       const cardStemY = brainRect.top + brainRect.height * verticalFactor - svgRect.top;
 
       // On mobile, all cards are on the right
       const mobileIsRight = isMobile ? true : !isLeftCard[i];
-      
+
       const dotX = !mobileIsRight
         ? r.right - svgRect.left + (isMobile ? 2 : 6)
         : r.left - svgRect.left - (isMobile ? 2 : 6);
@@ -118,20 +135,40 @@ const Reviews = () => {
     requestAnimationFrame(measurePaths);
   };
 
-  const topReviews =
-    reviews && reviews.length > 0
-      ? reviews.slice(0, 6)
-      : [
-        { id: 1, studentName: 'Aditya Sharma', type: 'MBBS STUDENT', text: "Orion's neural map of medical universities made my decision much clearer. The spinal network of support is real!" },
-        { id: 2, studentName: 'Priya Patel', type: 'PARENT', text: "Seeing the entire structure of medical education through Orion's lens gave us peace of mind." },
-        { id: 3, studentName: 'Rahul Verma', type: 'MBBS STUDENT', text: 'The guidance here is the backbone of my medical career. Truly anatomical excellence.' },
-        { id: 4, studentName: 'Sneha Reddy', type: 'PARENT', text: 'A robust network that connects aspiring doctors to reputable global institutions.' },
-        { id: 5, studentName: 'Vikram Singh', type: 'MBBS STUDENT', text: 'From the brain core to the finest nerve, every detail of the admission process was handled perfectly.' },
-        { id: 6, studentName: 'Ananya Iyer', type: 'PARENT', text: "The structural integrity of Orion's placement system is unmatched in the industry." },
-      ];
+  const topReviews = reviews.slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-white pt-10 md:pt-20 overflow-hidden font-sans relative">
+    <div className="min-h-screen bg-[#e0f2fe] pt-10 md:pt-20 overflow-hidden font-sans relative">
+      {/* Background Pattern - Randomized Dots & Stars */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        {backgroundDots.map((dot) => (
+          <div
+            key={dot.id}
+            className="absolute bg-blue-400 rounded-full"
+            style={{
+              top: dot.top,
+              left: dot.left,
+              width: `${dot.size}px`,
+              height: `${dot.size}px`,
+              opacity: dot.opacity,
+            }}
+          />
+        ))}
+        {/* Animated Stars */}
+        {[...Array(10)].map((_, i) => (
+          <motion.div
+            key={`star-${i}`}
+            animate={{ opacity: [0.1, 0.4, 0.1], scale: [1, 1.2, 1] }}
+            transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut", delay: i * 0.4 }}
+            className="absolute w-1.5 h-1.5 bg-blue-300 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.2)]"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+            }}
+          />
+        ))}
+      </div>
+      <PageTitle title="Reviews" />
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{ backgroundImage: 'linear-gradient(#000 1px,transparent 1px),linear-gradient(90deg,#000 1px,transparent 1px)', backgroundSize: '50px 50px' }}
@@ -145,13 +182,13 @@ const Reviews = () => {
             initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
             className="text-blue-600 text-[8px] md:text-[10px] font-black uppercase tracking-[0.5em] mb-3 block"
           >
-            Anatomical Intelligence
+            Reviews Section
           </motion.span>
           <motion.h1
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
             className="text-2xl md:text-6xl font-black text-navy tracking-tighter"
           >
-            Anatomical <span className="text-red-500">Success</span> Core
+            Parent <span className="text-red-500">Student</span> Reviews
           </motion.h1>
           <div className="w-16 md:w-20 h-1 bg-amber-500 mx-auto mt-4 md:mt-6 rounded-full shadow-lg" />
         </div>

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { getTeam } from '../firebase/firestore';
 import { useFirestore } from '../hooks/useFirestore';
 import TeamCard from '../components/TeamCard';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import { leadershipMembers } from '../data/leadershipData';
+import PageTitle from '../components/PageTitle';
 
 const teamStats = [
   { value: '7+', label: 'Years Experience' },
@@ -16,33 +17,92 @@ const teamStats = [
 const Team = () => {
   const { data: team, loading, error, refetch } = useFirestore(getTeam);
 
+  // Randomized background dots
+  const backgroundDots = React.useMemo(() => {
+    return [...Array(50)].map((_, i) => ({
+      id: i,
+      top: `${Math.random() * 100}%`,
+      left: `${Math.random() * 100}%`,
+      size: Math.random() * 2 + 1,
+      opacity: Math.random() * 0.3 + 0.1,
+    }));
+  }, []);
+
   return (
-    <div className="min-h-screen bg-slate-50 pt-20">
+    <div className="min-h-screen bg-[#e0f2fe] pt-20 relative overflow-hidden">
+      {/* Background Pattern - Randomized Dots & Stars */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        {backgroundDots.map((dot) => (
+          <div
+            key={dot.id}
+            className="absolute bg-blue-400 rounded-full"
+            style={{
+              top: dot.top,
+              left: dot.left,
+              width: `${dot.size}px`,
+              height: `${dot.size}px`,
+              opacity: dot.opacity,
+            }}
+          />
+        ))}
+        {/* Animated Stars */}
+        {[...Array(8)].map((_, i) => (
+          <motion.div
+            key={`star-${i}`}
+            animate={{ opacity: [0.1, 0.6, 0.1], scale: [1, 1.3, 1] }}
+            transition={{ duration: 3 + i, repeat: Infinity, ease: "easeInOut", delay: i * 0.5 }}
+            className="absolute w-1.5 h-1.5 bg-blue-400 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.4)]"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+            }}
+          />
+        ))}
+      </div>
+      <PageTitle title="Team" />
       {/* Header */}
-      <div className="bg-gradient-to-r from-navy to-blue-700 py-12 sm:py-16 px-6 text-center">
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-amber-400 text-xs sm:text-sm font-bold uppercase tracking-widest mb-3"
-        >
-          The People Behind Your Success
-        </motion.p>
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white mb-4"
-        >
-          Meet the Experts
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-blue-200 max-w-xl mx-auto text-xs sm:text-sm"
-        >
-          Our team brings together years of experience, passion, and deep knowledge of international medical education.
-        </motion.p>
+      <div className="relative py-16 sm:py-24 px-6 text-center overflow-hidden bg-blue-600">
+        {/* Background Decorative Blobs for depth */}
+        <div className="absolute top-0 -left-20 w-80 h-80 bg-white/10 rounded-full blur-[100px]" />
+        <div className="absolute bottom-0 -right-20 w-96 h-96 bg-blue-400/20 rounded-full blur-[120px]" />
+
+        {/* Main Linear Gradient - Sky Blue Theme */}
+        <div 
+          className="absolute inset-0 opacity-100" 
+          style={{ background: 'linear-gradient(110deg, #2563eb 0%, #1e3a5f 65%, #1e3a5f 100%)' }} 
+        />
+
+        {/* Distinct Dot Pattern Overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.15]"
+          style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.8) 1.5px, transparent 0)', backgroundSize: '24px 24px' }}
+        />
+
+        <div className="relative z-10">
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-amber-400 text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] mb-4 border border-white/20 bg-white/5 inline-block px-4 py-1.5 rounded-full backdrop-blur-md"
+          >
+            The People Behind Your Success
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-6 tracking-tight"
+          >
+            Meet the Experts
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-blue-100/70 max-w-2xl mx-auto text-sm sm:text-base font-medium leading-relaxed"
+          >
+            Our team brings together years of experience, passion, and deep knowledge of international medical education to guide you every step of the way.
+          </motion.p>
+        </div>
       </div>
 
       {/* Stats bar */}
@@ -59,7 +119,7 @@ const Team = () => {
 
       {/* Team cards */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        
+
         {/* Core Leadership Section */}
         <div className="mb-20">
           <div className="text-center mb-10">
@@ -75,10 +135,10 @@ const Team = () => {
 
         {/* Counseling Section */}
         <motion.div
-           initial={{ opacity: 0, y: 30 }}
-           whileInView={{ opacity: 1, y: 0 }}
-           viewport={{ once: true }}
-           className="my-16 sm:my-24 text-center p-8 sm:p-12 bg-white rounded-3xl border border-blue-100 shadow-xl relative overflow-hidden"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="my-16 sm:my-24 text-center p-8 sm:p-12 bg-white rounded-3xl border border-blue-100 shadow-xl relative overflow-hidden"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl -mr-16 -mt-16" />
           <p className="text-xl sm:text-2xl font-medium text-slate-700 leading-relaxed max-w-4xl mx-auto relative z-10 italic">

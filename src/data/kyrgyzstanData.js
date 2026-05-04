@@ -1,6 +1,5 @@
 // Kyrgyzstan Destination Guide Data
-import ieuImg from '../assets/universities/ieu.png';
-import amuImg from '../assets/universities/amu.png';
+
 
 export const kyrgyzstanOverview = {
   benefits: [
@@ -14,14 +13,14 @@ export const kyrgyzstanOverview = {
     {
       id: 1,
       name: 'International European University (IEU)',
-      image: ieuImg,
+      image: 'https://www.ieukyrgyzstan.com/flex%203',
       description: 'International European University (IEU) is a modern private university in Bishkek offering a globally recognized 6-year MBBS program (5 years academic + 1 year internship) taught entirely in English. It features advanced infrastructure like smart classrooms, simulation centers, and affiliated hospitals for clinical training.',
       highlight: 'As official South India representatives, we provide a "home away from home" with dedicated hostels and authentic Indian mess facilities, fostering a vibrant Maharashtrian student community where traditional festivals are celebrated with enthusiasm.'
     },
     {
       id: 2,
       name: 'Avicenna International Medical University (AMU)',
-      image: amuImg,
+      image: 'https://edu-kac.com/wp-content/uploads/2023/05/AVICENNA-INTERNATIONAL-MEDICAL-UNIVERSITY-bg.jpg',
       description: 'Established in 2019, AMU is a leading private institution in Bishkek known for providing high-quality, affordable medical education. It offers a comprehensive 6-year MBBS program (5.5 years academic + internship) with the entire curriculum taught in English, compliant with international standards.',
       highlight: 'AMU is fully recognized by the NMC (India) and WHO, listed in WDOMS, ensuring the degree is valid for licensing exams like NEXT, USMLE, and PLAB. The campus features advanced simulation centers and a library with over 5,000 medical volumes.'
     }

@@ -23,7 +23,7 @@ const PublicRoute = ({ children }) => {
 
   if (user) {
     // If user is already logged in, redirect them to the dashboard
-    return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to="/admin/home" replace />;
   }
 
   return children;

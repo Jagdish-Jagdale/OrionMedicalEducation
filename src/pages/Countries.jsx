@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, Suspense } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getCountries, getUniversitiesByCountry } from '../firebase/firestore';
 import CountryCard from '../components/CountryCard';
@@ -10,6 +10,7 @@ import KyrgyzstanDetailedGuide from '../components/KyrgyzstanDetailedGuide';
 import GeorgiaDetailedGuide from '../components/GeorgiaDetailedGuide';
 import UzbekistanDetailedGuide from '../components/UzbekistanDetailedGuide';
 import KazakhstanDetailedGuide from '../components/KazakhstanDetailedGuide';
+import PageTitle from '../components/PageTitle';
 
 // Import Flag Images
 import georgiaFlag from '../assets/flags/georgiaflag.png';
@@ -35,8 +36,21 @@ const Countries = () => {
   const [selectedCountry, setSelectedCountry] = useState('russia');
   const [isGlobeLoaded, setIsGlobeLoaded] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  // Randomized background dots
+  const backgroundDots = React.useMemo(() => {
+    return [...Array(80)].map((_, i) => ({
+      id: i,
+      top: `${Math.random() * 100}%`,
+      left: `${Math.random() * 100}%`,
+      size: Math.random() * 2 + 1,
+      opacity: Math.random() * 0.3 + 0.1,
+    }));
+  }, []);
+
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -76,6 +90,30 @@ const Countries = () => {
     fetchData();
   }, [fetchData]);
 
+  // Handle direct navigation via state (e.g., from Footer)
+  useEffect(() => {
+    if (location.state && location.state.country) {
+      const targetCountry = location.state.country;
+      const validCountry = countryMeta.find(m => m.slug === targetCountry);
+      if (validCountry) {
+        setSelectedCountry(targetCountry);
+        // Small delay to ensure DOM is ready for scrolling
+        setTimeout(() => {
+          const el = document.getElementById('guides-section');
+          if (el) {
+            const navOffset = 120;
+            const elementPosition = el.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+            window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+          }
+        }, 100);
+      }
+      
+      // Clear state after handling to prevent repeated scrolling on refresh
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, navigate, location.pathname]);
+
   const handleCountrySelection = (slug) => {
     setSelectedCountry(slug);
     const el = document.getElementById('guides-section');
@@ -92,10 +130,39 @@ const Countries = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white pt-15 sm:pt-20">
+    <div className="min-h-screen bg-[#e0f2fe] pt-15 sm:pt-20">
+      <PageTitle title="Countries" />
       {/* ── INTERACTIVE 3D GLOBE SECTION ─────────────────── */}
-      <div className="relative h-[50vh] sm:h-[85vh] pt-10 sm:pt-0 flex items-center justify-center overflow-hidden border-b border-slate-50 bg-[#fbfcfd]">
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#1e3a5f 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+      <div className="relative h-[50vh] sm:h-[85vh] pt-10 sm:pt-0 flex items-center justify-center overflow-hidden border-b border-slate-50 bg-[#e0f2fe]">
+        {/* Background Pattern - Randomized Dots & Stars */}
+        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+          {backgroundDots.map((dot) => (
+            <div
+              key={dot.id}
+              className="absolute bg-blue-400 rounded-full"
+              style={{
+                top: dot.top,
+                left: dot.left,
+                width: `${dot.size}px`,
+                height: `${dot.size}px`,
+                opacity: dot.opacity,
+              }}
+            />
+          ))}
+          {/* Animated Stars */}
+          {[...Array(12)].map((_, i) => (
+            <motion.div
+              key={`star-${i}`}
+              animate={{ opacity: [0.1, 0.5, 0.1], scale: [1, 1.2, 1] }}
+              transition={{ duration: 5 + i, repeat: Infinity, ease: "easeInOut", delay: i * 0.3 }}
+              className="absolute w-1.5 h-1.5 bg-blue-300 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+              }}
+            />
+          ))}
+        </div>
 
         <div className="relative w-full max-w-7xl h-full flex items-center justify-center">
 
@@ -288,7 +355,7 @@ const Countries = () => {
       </div>
 
       {/* ── COUNTRY INFORMATION PORTAL (Filtered) ──────────── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 sm:py-20 bg-slate-50/50 min-h-[80vh]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 sm:py-20 bg-[#e0f2fe] min-h-[80vh]">
         <motion.div
           id="guides-section"
           initial={{ opacity: 0, y: 30 }}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import PageTitle from '../components/PageTitle';
 import processImage from '../assets/processimage.png';
 import processImage2 from '../assets/processimage2.png';
 import orionLogo from '../assets/orionologo.png';
@@ -134,6 +135,17 @@ const svgHeight = endY + 250; // High buffer to prevent clipping of tilted botto
 const Process = () => {
   const [isMobile, setIsMobile] = useState(false);
 
+  // Randomized background dots
+  const backgroundDots = React.useMemo(() => {
+    return [...Array(60)].map((_, i) => ({
+      id: i,
+      top: `${Math.random() * 100}%`,
+      left: `${Math.random() * 100}%`,
+      size: Math.random() * 2 + 1,
+      opacity: Math.random() * 0.3 + 0.1,
+    }));
+  }, []);
+
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -190,22 +202,69 @@ const Process = () => {
   const svgHeight = endY + (isMobile ? -20 : 40);
 
   return (
-    <div className="min-h-screen bg-white pt-20 overflow-x-hidden">
+    <div className="min-h-screen bg-[#e0f2fe] pt-20 overflow-x-hidden relative">
+      {/* Background Pattern - Randomized Dots & Stars */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        {backgroundDots.map((dot) => (
+          <div
+            key={dot.id}
+            className="absolute bg-blue-400 rounded-full"
+            style={{
+              top: dot.top,
+              left: dot.left,
+              width: `${dot.size}px`,
+              height: `${dot.size}px`,
+              opacity: dot.opacity,
+            }}
+          />
+        ))}
+        {/* Animated Stars */}
+        {[...Array(10)].map((_, i) => (
+          <motion.div
+            key={`star-${i}`}
+            animate={{ opacity: [0.1, 0.5, 0.1], scale: [1, 1.2, 1] }}
+            transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut", delay: i * 0.4 }}
+            className="absolute w-1.5 h-1.5 bg-blue-300 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+            }}
+          />
+        ))}
+      </div>
+      <PageTitle title="Process" />
 
       {/* ── Header Banner ── */}
-      <div className="bg-gradient-to-br from-[#0a1a3a] via-navy to-blue-900 py-10 px-6 text-center relative overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.5) 1px, transparent 0)', backgroundSize: '32px 32px' }}
+      <div className="relative py-16 sm:py-24 px-6 text-center overflow-hidden bg-blue-600">
+        {/* Background Decorative Blobs */}
+        <div className="absolute top-0 -left-20 w-80 h-80 bg-white/10 rounded-full blur-[100px]" />
+        <div className="absolute bottom-0 -right-20 w-96 h-96 bg-blue-400/20 rounded-full blur-[120px]" />
+        
+        {/* Main Linear Gradient - Shifted navy slightly more to the right */}
+        <div 
+          className="absolute inset-0 opacity-100" 
+          style={{ background: 'linear-gradient(110deg, #2563eb 0%, #1e3a5f 65%, #1e3a5f 100%)' }} 
         />
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative z-10">
-          <span className="inline-block text-blue-300 text-xs font-bold uppercase tracking-widest mb-3 border border-blue-400/40 bg-blue-500/10 px-4 py-1.5 rounded-full">
+        
+        {/* Distinct Dot Pattern Overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.15]"
+          style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.8) 1.5px, transparent 0)', backgroundSize: '24px 24px' }}
+        />
+
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.8 }}
+          className="relative z-10"
+        >
+          <span className="inline-block text-blue-100 text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] mb-4 border border-white/20 bg-white/5 px-5 py-2 rounded-full backdrop-blur-md">
             Step by Step
           </span>
-          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2">
-            Simple &amp; <span className="text-blue-300">Transparent</span> Admission Process
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-4 tracking-tight">
+            Simple &amp; Transparent Admission Process
           </h1>
-          <p className="text-slate-400 text-sm max-w-lg mx-auto">
+          <p className="text-blue-100/80 text-sm sm:text-base max-w-2xl mx-auto font-medium leading-relaxed">
             8 clear milestones — from your first consultation to arriving at your university campus abroad.
           </p>
         </motion.div>
@@ -329,7 +388,7 @@ const Process = () => {
 
                   {/* Decorative Medical Images on the opposite side */}
                   <foreignObject
-                    x={isLeft ? nodeX + (isMobile ? 120 : 280) : nodeX - (isMobile ? 240 : 580)}
+                    x={isLeft ? nodeX + (isMobile ? 120 : 330) : nodeX - (isMobile ? 240 : 630)}
                     y={nodeY - (isMobile ? 100 : 180)}
                     width={isMobile ? 180 : 360}
                     height={isMobile ? 180 : 360}

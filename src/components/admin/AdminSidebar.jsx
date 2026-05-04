@@ -1,9 +1,10 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { auth } from '../../firebase/config';
 import { signOut } from 'firebase/auth';
 import toast from 'react-hot-toast';
 import orionLogo from '../../assets/orionologo.png';
+import LogoutModal from './LogoutModal';
 
 const navItems = [
   {
@@ -14,6 +15,13 @@ const navItems = [
         <path d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
+    subItems: [
+      { id: 'hero', label: 'Hero Section' },
+      { id: 'about', label: 'About Us' },
+      { id: 'clinical', label: 'Clinical Training' },
+      { id: 'testimonials', label: 'Testimonials' },
+      { id: 'cta', label: 'CTA Banner' },
+    ]
   },
   {
     label: 'Countries',
@@ -75,8 +83,38 @@ const navItems = [
   },
 ];
 
-const AdminSidebar = ({ isMobileOpen, setMobileOpen, collapsed, setCollapsed }) => {
+const AdminSidebar = ({ isMobileOpen, setMobileOpen, collapsed, setCollapsed, isDirty, dirtySections }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const activeSection = searchParams.get('section') || 'hero';
+
+  const handleNavClick = (e, to) => {
+    if (isDirty) {
+      e.preventDefault();
+      const sectionsList = dirtySections?.length > 0
+        ? ` (${dirtySections.join(', ')})`
+        : '';
+
+      toast.error(`Unsaved changes in${sectionsList}. Please save or discard before leaving.`, {
+        position: 'top-right',
+        duration: 5000,
+        id: 'unsaved-warning',
+        style: {
+          fontSize: '12px',
+          fontWeight: '600',
+          borderRadius: '12px',
+          padding: '12px 16px',
+          maxWidth: '320px',
+          lineHeight: '1.4'
+        }
+      });
+      return false;
+    }
+    if (isMobileOpen) setMobileOpen(false);
+  };
+
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = React.useState(false);
 
   const handleLogout = async () => {
     try {
@@ -93,11 +131,9 @@ const AdminSidebar = ({ isMobileOpen, setMobileOpen, collapsed, setCollapsed }) 
       {/* Brand */}
       <div className={`pb-2 ${collapsed ? 'px-2' : 'px-4'}`}>
         <div className="flex flex-col items-center py-5 gap-2">
-          {/* Logo - horizontal / full width */}
           <div className={`bg-white rounded-xl flex items-center justify-center shadow-sm p-2 border border-slate-50 ${collapsed ? 'w-10 h-10' : 'w-full h-14'}`}>
             <img src={orionLogo} alt="Orion" className="h-full object-contain" />
           </div>
-          {/* Text below logo */}
           {!collapsed && (
             <div className="text-center mt-1">
               <div className="font-bold text-slate-900 text-sm leading-tight">Orion Medical Education</div>
@@ -110,31 +146,71 @@ const AdminSidebar = ({ isMobileOpen, setMobileOpen, collapsed, setCollapsed }) 
 
       {/* Nav */}
       <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto custom-scrollbar">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            onClick={() => isMobileOpen && setMobileOpen(false)}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all group duration-200
-              ${isActive 
-                ? 'bg-blue-600 text-white shadow-xl shadow-blue-200' 
-                : 'text-slate-500 hover:bg-blue-50 hover:text-blue-600'
-              } ${collapsed ? 'justify-center px-0' : ''}`
-            }
-            title={collapsed ? item.label : ''}
-          >
-            <span className="flex-shrink-0">{item.icon}</span>
-            {!collapsed && <span>{item.label}</span>}
-          </NavLink>
-        ))}
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.to;
+          const hasSubItems = item.subItems && item.subItems.length > 0;
+
+          return (
+            <div key={item.to} className="space-y-1">
+              <NavLink
+                to={item.to}
+                onClick={(e) => handleNavClick(e, item.to)}
+                className={() =>
+                  `flex items-center justify-between gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all group duration-200
+                  ${isActive
+                    ? 'bg-blue-600 text-white shadow-xl shadow-blue-200'
+                    : 'text-slate-500 hover:bg-blue-50 hover:text-blue-600'
+                  } ${collapsed ? 'justify-center px-0' : ''}`
+                }
+                title={collapsed ? item.label : ''}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="flex-shrink-0">{item.icon}</span>
+                  {!collapsed && <span>{item.label}</span>}
+                </div>
+                {hasSubItems && !collapsed && (
+                  <svg
+                    className={`w-4 h-4 transition-transform duration-200 ${isActive ? 'rotate-180' : ''}`}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  >
+                    <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                  </svg>
+                )}
+              </NavLink>
+
+              {/* Accordion sub-menu */}
+              {hasSubItems && isActive && !collapsed && (
+                <div className="pl-12 pr-2 space-y-1 animate-in slide-in-from-top-2 duration-300">
+                  {item.subItems.map(sub => {
+                    const isSubActive = activeSection === sub.id;
+                    const subTo = `${item.to}?section=${sub.id}`;
+                    return (
+                      <NavLink
+                        key={sub.id}
+                        to={subTo}
+                        onClick={(e) => handleNavClick(e, subTo)}
+                        className={`block px-4 py-2 rounded-xl text-xs font-bold transition-all
+                          ${isSubActive
+                            ? 'text-blue-600 bg-blue-50/50'
+                            : 'text-slate-400 hover:text-blue-600 hover:bg-slate-50'
+                          }`}
+                      >
+                        {sub.label}
+                      </NavLink>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </nav>
 
       {/* Footer */}
       <div className="p-4 border-t border-slate-100 mb-2">
         <button
-          onClick={handleLogout}
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-slate-500 hover:bg-red-50 hover:text-red-600 transition-all ${collapsed ? 'justify-center px-0' : ''}`}
+          onClick={() => setIsLogoutModalOpen(true)}
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-red-600 bg-red-50/80 hover:bg-red-600 hover:text-white transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-red-200 ${collapsed ? 'justify-center px-0' : ''}`}
           title={collapsed ? 'Logout' : ''}
         >
           <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
@@ -143,6 +219,12 @@ const AdminSidebar = ({ isMobileOpen, setMobileOpen, collapsed, setCollapsed }) 
           {!collapsed && <span>Logout</span>}
         </button>
       </div>
+
+      <LogoutModal 
+        isOpen={isLogoutModalOpen} 
+        onClose={() => setIsLogoutModalOpen(false)} 
+        onConfirm={handleLogout} 
+      />
     </div>
   );
 
@@ -151,7 +233,6 @@ const AdminSidebar = ({ isMobileOpen, setMobileOpen, collapsed, setCollapsed }) 
       {/* Desktop Sidebar */}
       <aside className={`hidden lg:block fixed left-0 top-0 h-screen transition-all duration-300 z-50 ${collapsed ? 'w-20' : 'w-56'}`}>
         {SidebarContent}
-        {/* Collapse toggle (Desktop only) */}
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="absolute -right-3 top-20 w-7 h-7 bg-white border border-slate-200 rounded-full flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm z-50"
