@@ -12,6 +12,7 @@ import {
   orderBy,
   limit,
   serverTimestamp,
+  writeBatch,
 } from 'firebase/firestore';
 import { db } from './config';
 
@@ -30,13 +31,17 @@ export async function getCountries() {
 // ── Universities ────────────────────────────────────────────
 export async function getUniversitiesByCountry(countryId) {
   try {
+    // Simplified query to avoid the need for a composite index
     const q = query(
       collection(db, 'universities'),
-      where('countryId', '==', countryId),
-      orderBy('order', 'asc')
+      where('countryId', '==', countryId)
     );
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    
+    // Sort in memory to bypass Firebase index requirements
+    return snapshot.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
   } catch (err) {
     console.error('getUniversitiesByCountry error:', err);
     throw err;
@@ -278,13 +283,24 @@ export const getAdminCountries = getCountries;
 
 export async function saveAdminCountries(entries) {
   try {
+    const batch = writeBatch(db);
     const snapshot = await getDocs(collection(db, 'countries'));
-    await Promise.all(snapshot.docs.map((d) => deleteDoc(d.ref)));
-    await Promise.all(
-      entries.map((e, i) =>
-        addDoc(collection(db, 'countries'), { ...e, order: i, updatedAt: serverTimestamp() })
-      )
-    );
+    
+    snapshot.docs.forEach((d) => {
+      batch.delete(d.ref);
+    });
+
+    entries.forEach((e, i) => {
+      const newDocRef = doc(collection(db, 'countries'));
+      const { id, ...data } = e;
+      batch.set(newDocRef, { 
+        ...data, 
+        order: i, 
+        updatedAt: serverTimestamp() 
+      });
+    });
+
+    await batch.commit();
   } catch (err) {
     console.error('saveAdminCountries error:', err);
     throw err;

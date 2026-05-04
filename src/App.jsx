@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import CursorPlane from './components/CursorPlane';
 import BackgroundMusic from './components/BackgroundMusic';
+import FloatingWhatsApp from './components/FloatingWhatsApp';
 
 // Lazy-loaded pages
 const Home = lazy(() => import('./pages/Home'));
@@ -65,6 +66,7 @@ const AppContent = () => {
   return (
     <>
       {!isAdmin && <CursorPlane />}
+      {!isAdmin && <FloatingWhatsApp />}
       <BackgroundMusic />
       <ScrollToTop />
       <Suspense fallback={<PageLoader />}>

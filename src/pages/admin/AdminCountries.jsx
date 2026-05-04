@@ -69,16 +69,29 @@ const AdminCountries = () => {
     setIsModalOpen(true);
   };
 
-  const saveModalToState = () => {
+  const saveModalToState = async () => {
     const updated = [...entries];
     if (editIndex === -1) {
       updated.push(tempCountry);
     } else {
       updated[editIndex] = tempCountry;
     }
-    setEntries(updated);
-    setIsModalOpen(false);
-    toast.success(editIndex === -1 ? 'Country added to list!' : 'Changes kept!');
+    
+    setSaving(true);
+    
+    try {
+      await saveAdminCountries(updated);
+      setEntries(updated);
+      setInitialEntries(JSON.parse(JSON.stringify(updated)));
+      setHasChanges(false);
+      setIsModalOpen(false);
+      toast.success(editIndex === -1 ? 'Country created and synced!' : 'Changes synced to database!');
+    } catch (err) {
+      console.error('Immediate Sync Error:', err);
+      toast.error('Failed to sync changes to database. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleTempChange = (field, val) => {
@@ -146,13 +159,18 @@ const AdminCountries = () => {
   };
 
   const handleFinalSave = async () => {
+    if (entries.length === 0) {
+      const confirmWipe = window.confirm('Warning: Your country list is empty. Saving will delete all countries from the database. Proceed?');
+      if (!confirmWipe) return;
+    }
     setSaving(true);
     try {
       await saveAdminCountries(entries);
       setInitialEntries(JSON.parse(JSON.stringify(entries)));
       setHasChanges(false);
       toast.success('All data synced to Database!');
-    } catch {
+    } catch (err) {
+      console.error('Final Save sync error:', err);
       toast.error('Failed to sync. Please try again.');
     } finally {
       setSaving(false);
@@ -491,10 +509,12 @@ const AdminCountries = () => {
                 </button>
                 <button 
                   onClick={saveModalToState}
-                  className="text-white font-black px-10 py-4 rounded-2xl text-[11px] uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-100 hover:-translate-y-0.5 active:scale-95"
+                  disabled={saving}
+                  className="disabled:opacity-50 disabled:cursor-not-allowed text-white font-black px-10 py-4 rounded-2xl text-[11px] uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-100 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
                   style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)' }}
                 >
-                  {editIndex === -1 ? 'Create Country Entry' : 'Update & Keep Changes'}
+                  {saving && <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
+                  {saving ? 'Syncing with DB...' : (editIndex === -1 ? 'Create & Sync to Database' : 'Update & Sync to Database')}
                 </button>
               </div>
             </motion.div>

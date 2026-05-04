@@ -3,6 +3,15 @@ import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { PerspectiveCamera, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 
+// Silence the internal Three.js Clock deprecation warning from @react-three/fiber
+if (typeof window !== 'undefined') {
+  const originalWarn = console.warn;
+  console.warn = (...args) => {
+    if (args[0] && typeof args[0] === 'string' && args[0].includes('THREE.Clock')) return;
+    originalWarn(...args);
+  };
+}
+
 const Earth = () => {
   const earthRef = useRef();
 

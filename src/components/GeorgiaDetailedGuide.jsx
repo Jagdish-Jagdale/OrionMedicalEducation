@@ -19,10 +19,10 @@ const GeorgiaDetailedGuide = () => {
           <div className="mb-6">
             <h2 className="text-3xl font-bold text-navy flex items-center gap-4">
               MBBS in Georgia
-              <img 
-                src={georgiaFlag} 
-                alt="Georgia Flag" 
-                className="w-12 h-8 object-cover rounded-md shadow-md border border-slate-100" 
+              <img
+                src={georgiaFlag}
+                alt="Georgia Flag"
+                className="w-12 h-8 object-cover rounded-md shadow-md border border-slate-100"
               />
             </h2>
             <p className="text-red-700 font-semibold tracking-wide uppercase text-xs mt-2">European Excellence in Medical Training</p>
