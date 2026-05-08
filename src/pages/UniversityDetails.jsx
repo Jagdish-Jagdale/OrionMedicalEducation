@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getUniversityBySlug } from '../firebase/firestore';
@@ -20,6 +20,17 @@ const UniversityDetails = () => {
     () => getUniversityBySlug(slug),
     [slug]
   );
+   const [waNumber, setWaNumber] = useState('');
+
+  useEffect(() => {
+    import('../firebase/firestore').then(({ getHomeContent }) => {
+      getHomeContent().then((data) => {
+        if (data && data.whatsappNumber) {
+          setWaNumber(data.whatsappNumber.replace(/\s+/g, ''));
+        }
+      });
+    });
+  }, []);
 
   const countryAnchor = university?.countryName?.toLowerCase() || '';
 
@@ -186,7 +197,7 @@ const UniversityDetails = () => {
         {/* CTA */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
-            href="https://wa.me/917738230335"
+            href={`https://wa.me/${waNumber}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-8 py-4 rounded-full transition-all text-sm shadow-lg"

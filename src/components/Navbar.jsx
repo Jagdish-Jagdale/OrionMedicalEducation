@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getHomeContent } from '../firebase/firestore';
 
 import orionLogo from '../assets/orionologo.png';
 
@@ -18,11 +19,20 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [logoVisible, setLogoVisible] = useState(true);
+  const [waNumber, setWaNumber] = useState('');
   const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
+    
+    // Fetch global WhatsApp number
+    getHomeContent().then((data) => {
+      if (data && data.whatsappNumber) {
+        setWaNumber(data.whatsappNumber.replace(/\s+/g, ''));
+      }
+    });
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -36,8 +46,12 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-md border-b border-slate-200/60 ${scrolled ? 'shadow-lg' : 'shadow-sm'}`}
-      style={{ background: 'linear-gradient(135deg, #f8f9fc 0%, #eef1f8 40%, #e8ecf4 70%, #f0f2f8 100%)' }}
+      {...(shouldShowSolid ? { 'data-cursor-dark': '' } : {})}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${
+        shouldShowSolid
+          ? 'bg-white/95 backdrop-blur-md border-slate-200/60 shadow-lg' 
+          : 'bg-transparent border-transparent shadow-none'
+      }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
@@ -53,7 +67,7 @@ const Navbar = () => {
                 <img 
                   src={orionLogo} 
                   alt="Orion Medical Education" 
-                  className="h-full w-auto object-contain transition-all duration-300" 
+                  className={`h-full w-auto object-contain transition-all duration-300 ${!shouldShowSolid && 'brightness-0 invert'}`} 
                 />
               </div>
             </motion.div>
@@ -67,16 +81,21 @@ const Navbar = () => {
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`relative px-3 py-2 text-sm font-medium rounded-lg transition-all ${isActive
-                    ? 'text-blue-600'
-                    : 'text-slate-700 hover:text-blue-600 hover:bg-blue-50/60'
-                    }`}
+                  className={`relative px-3 py-2 text-sm font-medium rounded-lg transition-all ${
+                    isActive
+                      ? shouldShowSolid ? 'text-blue-600' : 'text-white'
+                      : shouldShowSolid 
+                        ? 'text-slate-700 hover:text-blue-600 hover:bg-blue-50/60' 
+                        : 'text-white/80 hover:text-white hover:bg-white/10'
+                  }`}
                 >
                   {link.label}
                   {isActive && (
                     <motion.div
                       layoutId="navbar-underline"
-                      className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-blue-600"
+                      className={`absolute bottom-0 left-3 right-3 h-0.5 rounded-full ${
+                        shouldShowSolid ? 'bg-blue-600' : 'bg-white'
+                      }`}
                     />
                   )}
                 </Link>
@@ -87,7 +106,7 @@ const Navbar = () => {
           {/* CTA + Hamburger */}
           <div className="flex items-center gap-3">
             <a
-              href="https://wa.me/917738230335"
+              href={`https://wa.me/${waNumber}`}
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-full transition-all hover:shadow-lg"
@@ -99,7 +118,9 @@ const Navbar = () => {
             </a>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden p-2 rounded-lg transition-colors text-slate-700 hover:bg-slate-100"
+              className={`md:hidden p-2 rounded-lg transition-colors ${
+                shouldShowSolid ? 'text-slate-700 hover:bg-slate-100' : 'text-white hover:bg-white/10'
+              }`}
               aria-label="Toggle menu"
             >
               <div className="w-5 flex flex-col gap-1">
@@ -136,7 +157,7 @@ const Navbar = () => {
                 </Link>
               ))}
               <a
-                href="https://wa.me/917738230335"
+                href={`https://wa.me/${waNumber}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 mt-3 bg-green-500 text-white text-sm font-semibold px-4 py-3 rounded-xl"

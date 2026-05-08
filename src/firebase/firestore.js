@@ -73,53 +73,100 @@ export async function getAllUniversities() {
 }
 
 // ── Team ─────────────────────────────────────────────────────
-export async function getTeam() {
+// ── Unified Team Page Management ──────────────────────────────
+// Structure: 
+// team/hero (doc)
+// team/stats (doc)
+// team/quotes (doc)
+// team/core/members (sub-coll)
+// team/regional/members (sub-coll)
+
+export async function getTeamAllData() {
   try {
-    const q = query(collection(db, 'team'), orderBy('order', 'asc'));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const [heroS, statsS, quotesS, coreS, regionalS] = await Promise.all([
+      getDoc(doc(db, 'team', 'hero')),
+      getDoc(doc(db, 'team', 'stats')),
+      getDoc(doc(db, 'team', 'quotes')),
+      getDocs(query(collection(db, 'team', 'core', 'members'), orderBy('order', 'asc'))),
+      getDocs(query(collection(db, 'team', 'regional', 'members'), orderBy('order', 'asc')))
+    ]);
+
+    return {
+      hero: heroS.exists() ? heroS.data() : null,
+      stats: statsS.exists() ? statsS.data()?.items : null,
+      quotes: quotesS.exists() ? quotesS.data() : null,
+      core: coreS.docs.map(d => ({ id: d.id, ...d.data() })),
+      regional: regionalS.docs.map(d => ({ id: d.id, ...d.data() }))
+    };
   } catch (err) {
-    console.error('getTeam error:', err);
+    console.error('getTeamAllData error:', err);
     throw err;
   }
 }
 
-export async function saveTeam(members) {
+export async function saveTeamAllData({ members, regional, settings }) {
   try {
-    const snapshot = await getDocs(collection(db, 'team'));
-    await Promise.all(snapshot.docs.map((d) => deleteDoc(d.ref)));
-    await Promise.all(
-      members.map((m, i) =>
-        addDoc(collection(db, 'team'), { ...m, order: i, updatedAt: serverTimestamp() })
-      )
-    );
+    const batch = writeBatch(db);
+
+    // 1. Hero (Document)
+    const heroRef = doc(db, 'team', 'hero');
+    batch.set(heroRef, {
+      badge: settings.heroBadge || '',
+      title: settings.heroTitle || '',
+      description: settings.heroDescription || '',
+      updatedAt: serverTimestamp()
+    });
+
+    // 2. Stats (Document)
+    const statsRef = doc(db, 'team', 'stats');
+    batch.set(statsRef, {
+      items: settings.stats || [],
+      updatedAt: serverTimestamp()
+    });
+
+    // 3. Quotes (Document)
+    const quotesRef = doc(db, 'team', 'quotes');
+    batch.set(quotesRef, {
+      quote1: settings.quote1 || '',
+      quote2: settings.quote2 || '',
+      updatedAt: serverTimestamp()
+    });
+
+    // 4. Core Members (Sub-collection)
+    const coreColl = collection(db, 'team', 'core', 'members');
+    const coreSnap = await getDocs(coreColl);
+    coreSnap.docs.forEach(d => batch.delete(d.ref));
+    members.forEach((m, i) => {
+      const mRef = doc(coreColl);
+      batch.set(mRef, { ...m, order: i, updatedAt: serverTimestamp() });
+    });
+
+    // 5. Regional Experts (Sub-collection)
+    const regColl = collection(db, 'team', 'regional', 'members');
+    const regSnap = await getDocs(regColl);
+    regSnap.docs.forEach(d => batch.delete(d.ref));
+    regional.forEach((m, i) => {
+      const mRef = doc(regColl);
+      batch.set(mRef, { ...m, order: i, updatedAt: serverTimestamp() });
+    });
+
+    await batch.commit();
   } catch (err) {
-    console.error('saveTeam error:', err);
+    console.error('saveTeamAllData error:', err);
     throw err;
   }
 }
 
-// ── Reviews ───────────────────────────────────────────────────
 export async function getReviews() {
   try {
     const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    // Filter out the 'header' document if it exists in the collection
+    return snapshot.docs
+      .filter(d => d.id !== 'header')
+      .map((d) => ({ id: d.id, ...d.data() }));
   } catch (err) {
     console.error('getReviews error:', err);
-    throw err;
-  }
-}
-
-export async function addReview(reviewData) {
-  try {
-    const docRef = await addDoc(collection(db, 'reviews'), {
-      ...reviewData,
-      createdAt: serverTimestamp(),
-    });
-    return docRef.id;
-  } catch (err) {
-    console.error('addReview error:', err);
     throw err;
   }
 }
@@ -127,7 +174,13 @@ export async function addReview(reviewData) {
 export async function saveReviews(reviews) {
   try {
     const snapshot = await getDocs(collection(db, 'reviews'));
-    await Promise.all(snapshot.docs.map((d) => deleteDoc(d.ref)));
+    // ONLY delete documents that are NOT the 'header' config
+    const deletePromises = snapshot.docs
+      .filter(d => d.id !== 'header')
+      .map((d) => deleteDoc(d.ref));
+    
+    await Promise.all(deletePromises);
+    
     await Promise.all(
       reviews.map((r) =>
         addDoc(collection(db, 'reviews'), { ...r, createdAt: serverTimestamp() })
@@ -135,6 +188,28 @@ export async function saveReviews(reviews) {
     );
   } catch (err) {
     console.error('saveReviews error:', err);
+    throw err;
+  }
+}
+
+export async function getReviewsHeader() {
+  try {
+    const d = await getDoc(doc(db, 'reviews', 'header'));
+    return d.exists() ? d.data() : { badge: 'Real Feedback', title: 'Parent & Student Reviews' };
+  } catch (err) {
+    console.error('getReviewsHeader error:', err);
+    return { badge: 'Real Feedback', title: 'Parent & Student Reviews' };
+  }
+}
+
+export async function saveReviewsHeader(data) {
+  try {
+    await setDoc(doc(db, 'reviews', 'header'), {
+      ...data,
+      updatedAt: serverTimestamp()
+    });
+  } catch (err) {
+    console.error('saveReviewsHeader error:', err);
     throw err;
   }
 }
@@ -152,26 +227,20 @@ export function subscribeToReviews(callback) {
 // ── Observership ──────────────────────────────────────────────
 export async function getObservership() {
   try {
-    const q = query(collection(db, 'observership'), limit(1));
-    const snapshot = await getDocs(q);
-    if (snapshot.empty) return null;
-    const d = snapshot.docs[0];
-    return { id: d.id, ...d.data() };
+    const d = await getDoc(doc(db, 'observership', 'main'));
+    return d.exists() ? d.data() : null;
   } catch (err) {
     console.error('getObservership error:', err);
     throw err;
   }
 }
 
-export async function saveObservership(programs) {
+export async function saveObservership(data) {
   try {
-    const snapshot = await getDocs(collection(db, 'observership'));
-    await Promise.all(snapshot.docs.map((d) => deleteDoc(d.ref)));
-    await Promise.all(
-      programs.map((p, i) =>
-        addDoc(collection(db, 'observership'), { ...p, order: i, updatedAt: serverTimestamp() })
-      )
-    );
+    await setDoc(doc(db, 'observership', 'main'), {
+      ...data,
+      updatedAt: serverTimestamp()
+    });
   } catch (err) {
     console.error('saveObservership error:', err);
     throw err;
@@ -252,31 +321,60 @@ export function subscribeToHomeContent(callback) {
 }
 
 // ── Process ────────────────────────────────────────────────────
-export async function getProcess() {
+export async function getProcessAllData() {
   try {
-    const q = query(collection(db, 'process'), orderBy('order', 'asc'));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    // 1. Get Header/Footer data from subcollection (process/main/headerfooter)
+    const hfRef = collection(db, 'process', 'main', 'headerfooter');
+    const hfSnap = await getDocs(hfRef);
+    const settings = hfSnap.docs.length > 0 ? hfSnap.docs[0].data() : null;
+
+    // 2. Get Steps from subcollection (process/main/steps)
+    const stepsQ = query(collection(db, 'process', 'main', 'steps'), orderBy('order', 'asc'));
+    const stepsSnap = await getDocs(stepsQ);
+    const steps = stepsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    return { steps, settings };
   } catch (err) {
-    console.error('getProcess error:', err);
+    console.error('getProcessAllData error:', err);
     throw err;
   }
 }
 
-export async function saveProcess(steps) {
+export async function saveProcessAllData(steps, settings) {
   try {
-    const snapshot = await getDocs(collection(db, 'process'));
-    await Promise.all(snapshot.docs.map((d) => deleteDoc(d.ref)));
-    await Promise.all(
-      steps.map((s, i) =>
-        addDoc(collection(db, 'process'), { ...s, order: i, updatedAt: serverTimestamp() })
-      )
-    );
+    const batch = writeBatch(db);
+
+    // 1. Sync Header/Footer (process/main/headerfooter)
+    const hfRef = collection(db, 'process', 'main', 'headerfooter');
+    const hfSnap = await getDocs(hfRef);
+    hfSnap.docs.forEach(d => batch.delete(d.ref));
+    const newHfDoc = doc(hfRef);
+    batch.set(newHfDoc, { ...settings, updatedAt: serverTimestamp() });
+
+    // 2. Sync Steps (process/main/steps)
+    const stepsRef = collection(db, 'process', 'main', 'steps');
+    const stepsSnap = await getDocs(stepsRef);
+    stepsSnap.docs.forEach(d => batch.delete(d.ref));
+    steps.forEach((s, i) => {
+      const newStepDoc = doc(stepsRef);
+      batch.set(newStepDoc, { ...s, order: i + 1, updatedAt: serverTimestamp() });
+    });
+
+    await batch.commit();
   } catch (err) {
-    console.error('saveProcess error:', err);
+    console.error('saveProcessAllData error:', err);
     throw err;
   }
 }
+
+// Deprecated - for backward compatibility if needed temporarily
+export const getProcess = async () => {
+  const data = await getProcessAllData();
+  return data.steps;
+};
+export const saveProcess = async (steps) => {
+  await saveProcessAllData(steps, {});
+};
 
 // ── Admin Countries ────────────────────────────────────────────
 export const getAdminCountries = getCountries;
@@ -307,10 +405,33 @@ export async function saveAdminCountries(entries) {
   }
 }
 
+// ── Contact Page Settings ────────────────────────────────────
+export async function getContactPageData() {
+  try {
+    const d = await getDoc(doc(db, 'contactus', 'main'));
+    return d.exists() ? d.data() : null;
+  } catch (err) {
+    console.error('getContactPageData error:', err);
+    throw err;
+  }
+}
+
+export async function saveContactPageData(data) {
+  try {
+    await setDoc(doc(db, 'contactus', 'main'), {
+      ...data,
+      updatedAt: serverTimestamp()
+    });
+  } catch (err) {
+    console.error('saveContactPageData error:', err);
+    throw err;
+  }
+}
+
 // ── Contact Submissions ────────────────────────────────────────
 export async function getContactSubmissions() {
   try {
-    const q = query(collection(db, 'contacts'), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
     return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (err) {
@@ -318,3 +439,17 @@ export async function getContactSubmissions() {
     throw err;
   }
 }
+
+export async function saveContactSubmission(data) {
+  try {
+    const contactRef = collection(db, 'messages');
+    await addDoc(contactRef, {
+      ...data,
+      createdAt: serverTimestamp()
+    });
+  } catch (err) {
+    console.error('saveContactSubmission error:', err);
+    throw err;
+  }
+}
+

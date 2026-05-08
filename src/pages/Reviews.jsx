@@ -1,31 +1,177 @@
 import React, { useRef, useCallback, useLayoutEffect, useState, useEffect } from 'react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring, useInView, useMotionValueEvent } from 'framer-motion';
 import NeuralReviewCard from '../components/NeuralReviewCard';
 import brainImg from '../assets/reviewimage.png';
 import brainMobileImg from '../assets/brainrightpov.png';
 import PageTitle from '../components/PageTitle';
+import { getReviews, getReviewsHeader } from '../firebase/firestore';
+
+const NeuralNerve = ({ d, index, isMobile, cardRef, isScrollingDown }) => {
+  const isInView = useInView(cardRef, {
+    margin: "-10% 0px -20% 0px",
+    once: false
+  });
+
+  const variants = {
+    hidden: {
+      pathLength: 0,
+      opacity: 0,
+      transition: { duration: 0.8, ease: "easeIn" }
+    },
+    visible: {
+      pathLength: 1,
+      opacity: 1,
+      transition: { 
+        duration: isScrollingDown ? 1.0 : 0, 
+        ease: [0.4, 0, 0.2, 1],
+        delay: 0 
+      }
+    }
+  };
+
+  if (!d) return null;
+  return (
+    <motion.path
+      d={d}
+      stroke="#ef4444"
+      strokeWidth={isMobile ? "2.0" : "4.0"}
+      strokeLinecap="round"
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      variants={variants}
+    />
+  );
+};
+
+const AnimatedCardWrapper = ({ rev, index, total, isMobile, cardRef, isScrollingDown }) => {
+  const isInView = useInView(cardRef, {
+    margin: "-10% 0px -20% 0px",
+    once: false
+  });
+
+  const row = Math.floor(index / 2);
+  const isLeft = index % 2 === 0;
+
+  const desktopOffset = 420 + (row * 320);
+  const topOffset = isMobile ? (150 + (index * 110)) : desktopOffset;
+
+  const variants = {
+    hidden: {
+      opacity: 0,
+      scale: 0.95,
+      x: isLeft ? -20 : 20,
+      y: -20,
+      transition: { duration: 0.6, ease: "easeIn" }
+    },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      x: 0,
+      y: 0,
+      transition: { 
+        duration: isScrollingDown ? 0.8 : 0, 
+        ease: "easeOut",
+        delay: 0
+      }
+    }
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      className={`absolute left-1/2 -translate-y-1/2 ${isMobile ? 'translate-x-[20px] w-[130px]' : (isLeft ? '-translate-x-[calc(100%+140px)] lg:-translate-x-[550px] w-[280px]' : 'translate-x-[140px] lg:translate-x-[270px] w-[280px]')}`}
+      style={{ top: `${topOffset}px` }}
+    >
+      <motion.div
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        variants={variants}
+      >
+        <NeuralReviewCard
+          review={{
+            studentName: rev.name,
+            type: rev.type,
+            text: rev.text,
+            avatar: rev.image
+          }}
+          position="relative"
+          isLeft={!isMobile && isLeft}
+        />
+      </motion.div>
+    </div>
+  );
+};
 
 const Reviews = () => {
-  const reviews = [
-    { id: 1, studentName: 'Aditya Sharma', type: 'MBBS STUDENT', text: "Orion's neural map of medical universities made my decision much clearer. The spinal network of support is real!" },
-    { id: 2, studentName: 'Priya Patel', type: 'PARENT', text: "Seeing the entire structure of medical education through Orion's lens gave us peace of mind." },
-    { id: 3, studentName: 'Rahul Verma', type: 'MBBS STUDENT', text: 'The guidance here is the backbone of my medical career. Truly anatomical excellence.' },
-    { id: 4, studentName: 'Sneha Reddy', type: 'PARENT', text: 'A robust network that connects aspiring doctors to reputable global institutions.' },
-    { id: 5, studentName: 'Vikram Singh', type: 'MBBS STUDENT', text: 'From the brain core to the finest nerve, every detail of the admission process was handled perfectly.' },
-    { id: 6, studentName: 'Ananya Iyer', type: 'PARENT', text: "The structural integrity of Orion's placement system is unmatched in the industry." },
-  ];
+  const [reviews, setReviews] = useState([]);
+  const [header, setHeader] = useState({ badge: '', title: '' });
+  const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const [waNumber, setWaNumber] = useState('');
 
-  /* ── Layout refs ── */
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        const [reviewsData, headerData, homeData] = await Promise.all([
+          getReviews(),
+          getReviewsHeader(),
+          import('../firebase/firestore').then(({ getHomeContent }) => getHomeContent())
+        ]);
+
+        if (homeData && homeData.whatsappNumber) {
+          setWaNumber(homeData.whatsappNumber.replace(/\s+/g, ''));
+        }
+
+        const flattened = [];
+        reviewsData.forEach(item => {
+          if (item.student) {
+            flattened.push({
+              id: `${item.id}-s`,
+              name: item.student.name,
+              type: 'MBBS STUDENT',
+              text: item.student.review,
+              image: item.student.image
+            });
+          }
+          if (item.parent) {
+            flattened.push({
+              id: `${item.id}-p`,
+              name: item.parent.name,
+              type: 'PARENT',
+              text: item.parent.review,
+              image: item.parent.image
+            });
+          }
+        });
+        setReviews(flattened);
+        if (headerData) setHeader(headerData);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAllData();
+  }, []);
+
   const containerRef = useRef(null);
   const svgRef = useRef(null);
   const brainRef = useRef(null);
-  const cardRefs = useRef([]); // 6 card wrappers
 
-  /* ── Dynamically-computed SVG path strings ── */
-  const [pathDefs, setPathDefs] = useState(Array(6).fill(''));
-  const [isMobile, setIsMobile] = useState(false);
+  // Create a stable list of refs for each review
+  const cardRefs = React.useMemo(() => reviews.map(() => React.createRef()), [reviews]);
 
-  // Randomized background dots
+  const { scrollY } = useScroll();
+  const [isScrollingDown, setIsScrollingDown] = useState(true);
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const prev = scrollY.getPrevious() || 0;
+    if (latest > prev) setIsScrollingDown(true);
+    else if (latest < prev) setIsScrollingDown(false);
+  });
+
+  const [pathDefs, setPathDefs] = useState([]);
+
   const backgroundDots = React.useMemo(() => {
     return [...Array(60)].map((_, i) => ({
       id: i,
@@ -36,57 +182,32 @@ const Reviews = () => {
     }));
   }, []);
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start 0.9', 'end 0.1'],
-  });
-
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001
-  });
-
-  const row1NerveProg = useTransform(smoothProgress, [0, 0.12], [0, 1]);
-  const row1CardProg = useTransform(smoothProgress, [0.06, 0.18], [0, 1]);
-
-  const row2NerveProg = useTransform(smoothProgress, [0.20, 0.32], [0, 1]);
-  const row2CardProg = useTransform(smoothProgress, [0.26, 0.38], [0, 1]);
-
-  const row3NerveProg = useTransform(smoothProgress, [0.40, 0.52], [0, 1]);
-  const row3CardProg = useTransform(smoothProgress, [0.46, 0.58], [0, 1]);
-
-  const progressByIndex = [row1NerveProg, row1NerveProg, row2NerveProg, row2NerveProg, row3NerveProg, row3NerveProg];
-  const cardProgressByIndex = [row1CardProg, row1CardProg, row2CardProg, row2CardProg, row3CardProg, row3CardProg];
-  const scaleByIndex = cardProgressByIndex.map(p => useTransform(p, [0, 1], [0.95, 1]));
-
-  const isLeftCard = [true, false, true, false, true, false];
-
   const measurePaths = useCallback(() => {
-    if (!svgRef.current || !brainRef.current) return;
+    if (!svgRef.current || !brainRef.current || cardRefs.length === 0) return;
 
     const svgRect = svgRef.current.getBoundingClientRect();
     const brainRect = brainRef.current.getBoundingClientRect();
 
-    // Target the spine center (roughly 47% from the left edge of the side-profile image)
     const stemX = isMobile
       ? brainRect.left + (brainRect.width * 0.47) - svgRect.left
       : brainRect.left + brainRect.width * 0.5 - svgRect.left;
 
-    const newPaths = cardRefs.current.map((el, i) => {
+    const newPaths = cardRefs.map((ref, i) => {
+      const el = ref.current;
       if (!el) return '';
       const r = el.getBoundingClientRect();
 
       const row = Math.floor(i / 2);
-      // Start from brain's bottom/top of spine (higher vertical factor on mobile)
-      const verticalFactor = isMobile
-        ? 0.25 + (row * 0.22)
-        : [0.28, 0.44, 0.60][row];
+      let verticalFactor = isMobile
+        ? 0.25 + (row * 0.12)
+        : 0.28 + (row * 0.08);
+
+      // Capped to stay within the spine graphic
+      verticalFactor = Math.min(verticalFactor, 0.82);
 
       const cardStemY = brainRect.top + brainRect.height * verticalFactor - svgRect.top;
-
-      // On mobile, all cards are on the right
-      const mobileIsRight = isMobile ? true : !isLeftCard[i];
+      const isLeft = i % 2 === 0;
+      const mobileIsRight = isMobile ? true : !isLeft;
 
       const dotX = !mobileIsRight
         ? r.right - svgRect.left + (isMobile ? 2 : 6)
@@ -99,11 +220,8 @@ const Reviews = () => {
       const endX = dotX;
       const endY = dotY;
 
-      // Smoother, more organic emergence (shortened cp1X to avoid sharp 'elbows')
-      const cp1X = startX + (isMobile ? 40 : (isLeftCard[i] ? -100 : 100));
+      const cp1X = startX + (isMobile ? 40 : (isLeft ? -100 : 100));
       const cp1Y = startY + (isMobile ? 10 : 0);
-
-      // CP2 handles the main curve tension
       const cp2X = isMobile ? (startX + endX) * 0.5 : (startX + endX) / 2;
       const cp2Y = endY - (isMobile ? 20 : 0);
 
@@ -111,7 +229,7 @@ const Reviews = () => {
     });
 
     setPathDefs(newPaths);
-  }, [isMobile]);
+  }, [isMobile, reviews, cardRefs]);
 
   useLayoutEffect(() => {
     measurePaths();
@@ -130,195 +248,104 @@ const Reviews = () => {
     };
   }, [measurePaths]);
 
-  const setCardRef = (i) => (el) => {
-    cardRefs.current[i] = el;
-    requestAnimationFrame(measurePaths);
-  };
+  // Initial measurement once content is ready
+  useEffect(() => {
+    if (reviews.length > 0) {
+      const timer = setTimeout(measurePaths, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [reviews, measurePaths]);
 
-  const topReviews = reviews.slice(0, 6);
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#e0f2fe] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#e0f2fe] pt-10 md:pt-20 overflow-hidden font-sans relative">
-      {/* Background Pattern - Randomized Dots & Stars */}
+      <PageTitle title="Reviews" />
+
       <div className="absolute inset-0 pointer-events-none z-0">
         {backgroundDots.map((dot) => (
-          <div
-            key={dot.id}
-            className="absolute bg-blue-400 rounded-full"
-            style={{
-              top: dot.top,
-              left: dot.left,
-              width: `${dot.size}px`,
-              height: `${dot.size}px`,
-              opacity: dot.opacity,
-            }}
-          />
-        ))}
-        {/* Animated Stars */}
-        {[...Array(10)].map((_, i) => (
-          <motion.div
-            key={`star-${i}`}
-            animate={{ opacity: [0.1, 0.4, 0.1], scale: [1, 1.2, 1] }}
-            transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut", delay: i * 0.4 }}
-            className="absolute w-1.5 h-1.5 bg-blue-300 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.2)]"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-            }}
-          />
+          <div key={dot.id} className="absolute bg-blue-400 rounded-full" style={{ top: dot.top, left: dot.left, width: `${dot.size}px`, height: `${dot.size}px`, opacity: dot.opacity }} />
         ))}
       </div>
-      <PageTitle title="Reviews" />
-      <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style={{ backgroundImage: 'linear-gradient(#000 1px,transparent 1px),linear-gradient(90deg,#000 1px,transparent 1px)', backgroundSize: '50px 50px' }}
-      />
 
       <div className="max-w-7xl mx-auto px-4 py-6 md:py-20 relative overflow-visible" ref={containerRef}>
-
-        {/* ═══ HEADER ═══ */}
         <div className="text-center mb-0 md:mb-16 relative z-40 mt-12 md:mt-0">
-          <motion.span
-            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}
-            className="text-blue-600 text-[8px] md:text-[10px] font-black uppercase tracking-[0.5em] mb-3 block"
-          >
-            Reviews Section
-          </motion.span>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-            className="text-2xl md:text-6xl font-black text-navy tracking-tighter"
-          >
-            Parent <span className="text-red-500">Student</span> Reviews
+          {header.badge && (
+            <motion.span initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="text-blue-600 text-[8px] md:text-[10px] font-black uppercase tracking-[0.5em] mb-3 block">
+              {header.badge}
+            </motion.span>
+          )}
+          <motion.h1 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} className="text-2xl md:text-6xl font-black text-navy tracking-tighter">
+            {header.title}
           </motion.h1>
-          <div className="w-16 md:w-20 h-1 bg-amber-500 mx-auto mt-4 md:mt-6 rounded-full shadow-lg" />
+          {header.title && <div className="w-16 md:w-20 h-1 bg-amber-500 mx-auto mt-4 md:mt-6 rounded-full shadow-lg" />}
         </div>
 
-        {/* ═══ ANIMATED NEURAL MAP ═══ */}
-        <div className="relative mt-4 md:mt-12 min-h-[950px] md:min-h-[1150px] lg:min-h-[1350px]">
-
-          {/* ── Brain & Spine Hub ── */}
+        <div
+          className="relative mt-4 md:mt-12 transition-all duration-500"
+          style={{
+            minHeight: isMobile
+              ? `${Math.max(600, 250 + (reviews.length * 110))}px`
+              : `${Math.max(900, 600 + (Math.ceil(reviews.length / 2) * 320))}px`
+          }}
+        >
           <div className={`absolute top-[20px] md:top-[0px] ${isMobile ? 'left-[-50px] translate-x-0 w-[300px]' : 'left-1/2 -translate-x-1/2 w-full'} flex items-start justify-center pointer-events-none z-20`}>
             <div className={`relative ${isMobile ? 'w-full' : 'w-[320px] md:w-[600px] lg:w-[900px]'}`}>
-              <motion.div
-                animate={{ opacity: [0.1, 0.2, 0.1] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-b from-blue-300 via-blue-100 to-transparent blur-[60px] lg:blur-[160px]"
-              />
-              <motion.img
-                ref={brainRef}
-                src={isMobile ? brainMobileImg : brainImg}
-                alt="Scale and Precision"
-                className="w-full h-auto object-contain relative z-20 scale-100"
-                onLoad={measurePaths}
-              />
+              <motion.img ref={brainRef} src={isMobile ? brainMobileImg : brainImg} alt="Anatomical Hub" className="w-full h-auto object-contain relative z-20" onLoad={measurePaths} />
             </div>
           </div>
 
-          {/* ── SVG nerve network ── */}
-          <svg
-            ref={svgRef}
-            className="absolute inset-0 w-full h-full pointer-events-none z-10"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            {pathDefs.map((d, i) =>
-              d ? (
-                <motion.path
-                  key={i}
-                  d={d}
-                  stroke="#ef4444"
-                  strokeWidth={isMobile ? "2.0" : "4.0"}
-                  strokeLinecap="round"
-                  initial={{ opacity: 0, pathLength: 0 }}
-                  style={{
-                    pathLength: progressByIndex[i],
-                    opacity: progressByIndex[i],
-                    filter: isMobile ? 'none' : 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.4))'
-                  }}
-                />
-              ) : null
-            )}
+          <svg ref={svgRef} className="absolute inset-0 w-full h-full pointer-events-none z-10" fill="none">
+            {pathDefs.map((d, i) => (
+              <NeuralNerve
+                key={i}
+                d={d}
+                index={i}
+                isMobile={isMobile}
+                cardRef={cardRefs[i]}
+                isScrollingDown={isScrollingDown}
+              />
+            ))}
           </svg>
 
-          {/* ── Optimized Card Layout ── */}
           <div className="relative z-30 w-full px-4">
-
-            {/* Row 1 */}
-            <div
-              ref={setCardRef(0)}
-              className={`absolute top-[150px] lg:top-[420px] left-1/2 ${isMobile ? 'translate-x-[20px] w-[130px]' : '-translate-x-[calc(100%+140px)] lg:-translate-x-[550px] w-[280px]'} -translate-y-1/2`}
-            >
-              <motion.div style={{ opacity: cardProgressByIndex[0], scale: scaleByIndex[0] }}>
-                {topReviews[0] && <NeuralReviewCard review={topReviews[0]} position="relative" isLeft={!isMobile} />}
-              </motion.div>
-            </div>
-            <div
-              ref={setCardRef(1)}
-              className={`absolute top-[260px] lg:top-[420px] left-1/2 ${isMobile ? 'translate-x-[20px] w-[130px]' : 'translate-x-[140px] lg:translate-x-[270px] w-[280px]'} -translate-y-1/2`}
-            >
-              <motion.div style={{ opacity: cardProgressByIndex[1], scale: scaleByIndex[0] }}>
-                {topReviews[1] && <NeuralReviewCard review={topReviews[1]} position="relative" isLeft={false} />}
-              </motion.div>
-            </div>
-
-            {/* Row 2 */}
-            <div
-              ref={setCardRef(2)}
-              className={`absolute top-[390px] lg:top-[750px] left-1/2 ${isMobile ? 'translate-x-[20px] w-[130px]' : '-translate-x-[calc(100%+140px)] lg:-translate-x-[550px] w-[280px]'} -translate-y-1/2`}
-            >
-              <motion.div style={{ opacity: cardProgressByIndex[2], scale: scaleByIndex[0] }}>
-                {topReviews[2] && <NeuralReviewCard review={topReviews[2]} position="relative" isLeft={!isMobile} />}
-              </motion.div>
-            </div>
-            <div
-              ref={setCardRef(3)}
-              className={`absolute top-[500px] lg:top-[750px] left-1/2 ${isMobile ? 'translate-x-[20px] w-[130px]' : 'translate-x-[140px] lg:translate-x-[270px] w-[280px]'} -translate-y-1/2`}
-            >
-              <motion.div style={{ opacity: cardProgressByIndex[3], scale: scaleByIndex[0] }}>
-                {topReviews[3] && <NeuralReviewCard review={topReviews[3]} position="relative" isLeft={false} />}
-              </motion.div>
-            </div>
-
-            {/* Row 3 */}
-            <div
-              ref={setCardRef(4)}
-              className={`absolute top-[630px] lg:top-[1080px] left-1/2 ${isMobile ? 'translate-x-[20px] w-[130px]' : '-translate-x-[calc(100%+140px)] lg:-translate-x-[550px] w-[280px]'} -translate-y-1/2`}
-            >
-              <motion.div style={{ opacity: cardProgressByIndex[4], scale: scaleByIndex[0] }}>
-                {topReviews[4] && <NeuralReviewCard review={topReviews[4]} position="relative" isLeft={!isMobile} />}
-              </motion.div>
-            </div>
-            <div
-              ref={setCardRef(5)}
-              className={`absolute top-[740px] lg:top-[1080px] left-1/2 ${isMobile ? 'translate-x-[20px] w-[130px]' : 'translate-x-[140px] lg:translate-x-[270px] w-[280px]'} -translate-y-1/2`}
-            >
-              <motion.div style={{ opacity: cardProgressByIndex[5], scale: scaleByIndex[0] }}>
-                {topReviews[5] && <NeuralReviewCard review={topReviews[5]} position="relative" isLeft={false} />}
-              </motion.div>
-            </div>
-
+            {reviews.map((rev, i) => (
+              <AnimatedCardWrapper
+                key={rev.id}
+                rev={rev}
+                index={i}
+                total={reviews.length}
+                isMobile={isMobile}
+                cardRef={cardRefs[i]}
+                isScrollingDown={isScrollingDown}
+              />
+            ))}
           </div>
         </div>
 
-        {/* ═══ CTA ═══ */}
-        <div className="mt-4 md:mt-8 text-center relative z-40 pb-20">
-          <motion.a
-            href="https://wa.me/917738230335"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-4 bg-red-600 text-white px-8 md:px-14 py-4 md:py-6 rounded-full shadow-3xl hover:bg-red-700 transition-all group active:scale-95"
-          >
-            <span className="w-2 h-2 bg-amber-400 rounded-full group-hover:scale-150 transition-transform" />
-            <span className="text-[10px] md:text-xs font-black tracking-widest uppercase text-white">Sync into the Network</span>
-            <svg className="w-4 h-4 md:w-5 md:h-5 text-amber-400 group-hover:translate-x-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
-              <path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </motion.a>
+        <div className="mt-[-40px] text-center relative z-40 pb-20">
+          {header.footerText && (
+            <motion.a
+              href={`https://wa.me/${waNumber}`}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-4 bg-gradient-to-r from-red-600 to-rose-500 text-white px-10 py-5 rounded-full shadow-3xl hover:shadow-red-200/50 hover:scale-105 transition-all group active:scale-95"
+            >
+              <span className="text-xs font-black tracking-widest uppercase">{header.footerText}</span>
+              <svg className="w-5 h-5 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" /></svg>
+            </motion.a>
+          )}
         </div>
-
       </div>
     </div>
   );
 };
 
 export default Reviews;
+

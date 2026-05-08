@@ -1,219 +1,479 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
-import { getReviews, saveReviews } from '../../firebase/firestore';
+import { getReviews, saveReviews, getReviewsHeader, saveReviewsHeader } from '../../firebase/firestore';
 import { uploadFile } from '../../firebase/storage';
 import toast from 'react-hot-toast';
 import PageTitle from '../../components/PageTitle';
 import DeleteModal from '../../components/admin/DeleteModal';
 
-const emptyReview = { studentName: '', university: '', country: '', reviewText: '', rating: '5', image: '' };
+const emptyReview = { 
+  parent: { name: '', review: '', image: '' },
+  student: { name: '', review: '', image: '' },
+};
 
-const AdminReviews = () => {
-  const [reviews, setReviews] = useState([emptyReview]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+const ReviewModal = ({ isOpen, onClose, review, onSave, index, uploadFile }) => {
+  const [formData, setFormData] = useState(emptyReview);
   const [uploadProgress, setUploadProgress] = useState({});
-  const [hasChanges, setHasChanges] = useState(false);
-  const [initialReviews, setInitialReviews] = useState(null);
-  const [deleteModal, setDeleteModal] = useState({ isOpen: false, index: null, itemName: '' });
 
   useEffect(() => {
-    getReviews().then((data) => {
-      if (data && data.length > 0) setReviews(data);
-      setInitialReviews(data ? JSON.parse(JSON.stringify(data)) : []);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, []);
+    if (review) setFormData(JSON.parse(JSON.stringify(review)));
+    else setFormData(emptyReview);
+  }, [review, isOpen]);
 
-  // Track changes
-  useEffect(() => {
-    if (!loading && initialReviews) {
-      setHasChanges(JSON.stringify(reviews) !== JSON.stringify(initialReviews));
-    }
-  }, [reviews, loading, initialReviews]);
-
-  // Block browser back/refresh
-  useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      if (hasChanges) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasChanges]);
-
-  const handleChange = (i, field, val) => {
-    const updated = [...reviews];
-    updated[i][field] = val;
-    setReviews(updated);
+  const handleChange = (section, field, val) => {
+    setFormData(prev => ({
+      ...prev,
+      [section]: { ...prev[section], [field]: val }
+    }));
   };
 
-  const handleImageUpload = async (i, file) => {
+  const handleImageUpload = async (section, file) => {
     if (!file) return;
-    const path = `reviews/${Date.now()}_${file.name}`;
+    const path = `reviews/${section}s/${Date.now()}_${file.name}`;
     try {
       const url = await uploadFile(file, path, (progress) => {
-        setUploadProgress((prev) => ({ ...prev, [i]: progress }));
+        setUploadProgress(prev => ({ ...prev, [section]: progress }));
       });
-      handleChange(i, 'image', url);
-      setUploadProgress((prev) => ({ ...prev, [i]: null }));
-      toast.success('Image uploaded!');
+      handleChange(section, 'image', url);
+      setUploadProgress(prev => ({ ...prev, [section]: null }));
+      toast.success(`${section === 'parent' ? 'Parent' : 'Student'} image uploaded!`);
     } catch {
       toast.error('Image upload failed.');
-      setUploadProgress((prev) => ({ ...prev, [i]: null }));
+      setUploadProgress(prev => ({ ...prev, [section]: null }));
     }
   };
 
-  const addReview = () => setReviews([...reviews, { ...emptyReview }]);
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="bg-white w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] shadow-2xl relative z-10 flex flex-col">
+        <div className="p-8 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-20">
+          <div>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+              {index !== null ? 'Edit Testimonial' : 'Add New Testimonial'}
+            </h2>
+            <p className="text-slate-500 text-xs font-black uppercase tracking-widest mt-1">Dual Parent-Student Review Format</p>
+          </div>
+          <button onClick={onClose} className="p-3 hover:bg-slate-50 rounded-2xl text-slate-400 transition-all">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
+          </button>
+        </div>
+
+        <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+          {/* Parent Section */}
+          <div className="space-y-8">
+            <div className="flex items-center gap-4 mb-2">
+              <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg>
+              </div>
+              <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest">Parent Details</h4>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Parent Name</label>
+                <input value={formData.parent.name} onChange={(e) => handleChange('parent', 'name', e.target.value)} placeholder="e.g. Mr. Rajesh Kumar" className="w-full bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-blue-500 transition-all" />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Parent Photo</label>
+                <div className="flex items-center gap-4">
+                  <div className="w-20 h-20 bg-slate-100 rounded-3xl overflow-hidden border-4 border-white shadow-lg flex-shrink-0">
+                    {formData.parent.image ? <img src={formData.parent.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-slate-300"><svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div>}
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload('parent', e.target.files[0])} className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
+                    <input value={formData.parent.image} onChange={(e) => handleChange('parent', 'image', e.target.value)} placeholder="Or paste image URL..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-[10px] font-bold focus:outline-none" />
+                  </div>
+                </div>
+                {uploadProgress.parent && <div className="h-1 bg-slate-100 rounded-full mt-2 overflow-hidden"><div className="h-full bg-blue-500 transition-all duration-300" style={{ width: `${uploadProgress.parent}%` }} /></div>}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Parent's Review Text</label>
+                <textarea value={formData.parent.review} onChange={(e) => handleChange('parent', 'review', e.target.value)} rows={4} className="w-full bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-blue-500 transition-all resize-none" />
+              </div>
+            </div>
+          </div>
+
+          {/* Student Section */}
+          <div className="space-y-8 relative">
+            <div className="flex items-center gap-4 mb-2">
+              <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg>
+              </div>
+              <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest">Student Details</h4>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Student Name</label>
+                <input value={formData.student.name} onChange={(e) => handleChange('student', 'name', e.target.value)} placeholder="e.g. Aryan Kumar" className="w-full bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-emerald-500 transition-all" />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Student Photo</label>
+                <div className="flex items-center gap-4">
+                  <div className="w-20 h-20 bg-slate-100 rounded-3xl overflow-hidden border-4 border-white shadow-lg flex-shrink-0">
+                    {formData.student.image ? <img src={formData.student.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-slate-300"><svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div>}
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload('student', e.target.files[0])} className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer" />
+                    <input value={formData.student.image} onChange={(e) => handleChange('student', 'image', e.target.value)} placeholder="Or paste image URL..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-[10px] font-bold focus:outline-none" />
+                  </div>
+                </div>
+                {uploadProgress.student && <div className="h-1 bg-slate-100 rounded-full mt-2 overflow-hidden"><div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${uploadProgress.student}%` }} /></div>}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Student's Review Text</label>
+                <textarea value={formData.student.review} onChange={(e) => handleChange('student', 'review', e.target.value)} rows={4} className="w-full bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-emerald-500 transition-all resize-none" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-8 border-t border-slate-100 bg-slate-50 rounded-b-[2.5rem] flex items-center justify-end gap-4 sticky bottom-0">
+          <button onClick={onClose} className="px-8 py-4 rounded-2xl text-sm font-black uppercase tracking-widest text-slate-500 hover:bg-white hover:text-slate-900 transition-all">
+            Cancel
+          </button>
+          <button 
+            onClick={() => {
+              if(!formData.parent.name || !formData.student.name) {
+                toast.error('Names are mandatory.');
+                return;
+              }
+              onSave(formData);
+            }} 
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-10 py-4 rounded-2xl text-sm transition-all shadow-xl shadow-blue-100 hover:-translate-y-1 active:scale-95"
+          >
+            {index !== null ? 'Update Review' : 'Add to Collection'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const AdminReviews = () => {
+  const [reviews, setReviews] = useState([]);
+  const [header, setHeader] = useState({ badge: 'Real Feedback', title: 'Parent & Student Reviews', footerText: '' });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, index: null, itemName: '' });
+  const [modal, setModal] = useState({ isOpen: false, review: null, index: null });
+  const isFirstLoad = React.useRef(true);
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [reviewsData, headerData] = await Promise.all([
+          getReviews(),
+          getReviewsHeader()
+        ]);
+        
+        const processed = reviewsData.map(rev => ({
+          ...emptyReview,
+          ...rev,
+          parent: rev.parent || { name: rev.studentName || '', review: rev.reviewText || '', image: rev.image || '' },
+          student: rev.student || { name: '', review: '', image: '' }
+        }));
+        
+        setReviews(processed);
+        if (headerData) {
+          setHeader({
+            badge: headerData.badge || 'Real Feedback',
+            title: headerData.title || 'Parent & Student Reviews',
+            footerText: headerData.footerText || ''
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Centralized Change Detection
+  useEffect(() => {
+    if (loading) return;
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+      return;
+    }
+    setIsDirty(true);
+  }, [header, reviews, loading]);
+
+  const addOrUpdateReview = (formData) => {
+    const updated = [...reviews];
+    if (modal.index !== null) {
+      updated[modal.index] = formData;
+    } else {
+      updated.unshift(formData);
+    }
+    setReviews(updated);
+    setModal({ isOpen: false, review: null, index: null });
+    toast.success(modal.index !== null ? 'Entry updated' : 'Entry added');
+  };
 
   const removeReview = (i) => {
-    setDeleteModal({ isOpen: true, index: i, itemName: reviews[i].studentName || `Review #${i + 1}` });
+    setDeleteModal({ isOpen: true, index: i, itemName: reviews[i].parent.name || reviews[i].student.name || `Review #${i + 1}` });
   };
 
   const confirmDeleteReview = () => {
     if (deleteModal.index !== null) {
       setReviews(reviews.filter((_, idx) => idx !== deleteModal.index));
       setDeleteModal({ isOpen: false, index: null, itemName: '' });
+      toast.success('Entry removed');
     }
   };
 
-  const handleSave = async (e) => {
-    e.preventDefault();
-
-    // Validation
-    for (let i = 0; i < reviews.length; i++) {
-      const rev = reviews[i];
-      if (!rev.studentName?.trim() || !rev.university?.trim() || !rev.reviewText?.trim() || !rev.rating) {
-        toast.error(`Review #${i + 1} is incomplete. Name, University, Rating, and Content are required.`, {
-          position: 'top-right',
-          duration: 4000
-        });
-        return;
-      }
-    }
-
+  const handleSave = async () => {
     setSaving(true);
     try {
-      await saveReviews(reviews);
-      toast.success('Reviews saved to Firestore!');
-      setInitialReviews(JSON.parse(JSON.stringify(reviews)));
-      setHasChanges(false);
+      await Promise.all([
+        saveReviews(reviews),
+        saveReviewsHeader(header)
+      ]);
+      toast.success('Reviews and Header updated successfully!');
+      setIsDirty(false);
+      // Reset the gate so further changes can be detected
+      isFirstLoad.current = false; 
     } catch (error) {
-      console.error('Save error:', error);
-      toast.error('Failed to save. Please try again.');
+      console.error(error);
+      toast.error('Failed to sync. Please try again.');
     } finally {
       setSaving(false);
     }
   };
 
+  // Pagination Logic
+  const totalPages = Math.ceil(reviews.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = reviews.slice(indexOfFirstItem, indexOfLastItem);
+
+  const goToNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  const goToPrevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
+
+  const handleHeaderChange = (field, value) => {
+    setHeader(prev => ({ ...prev, [field]: value }));
+    setIsDirty(true);
+  };
+
+  const saveAction = (
+    <button
+      onClick={handleSave}
+      disabled={saving || loading || !isDirty}
+      className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg shadow-lg shadow-blue-200 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 min-w-[100px] text-sm"
+    >
+      {saving ? (
+        <>
+          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          Saving...
+        </>
+      ) : (
+        'Save'
+      )}
+    </button>
+  );
+
   return (
     <>
-      <AdminLayout title="Manage Parent Student Reviews" isDirty={hasChanges}>
+      <AdminLayout title="Reviews Management" isDirty={isDirty} actions={saveAction}>
         <PageTitle title="Admin | Reviews" />
-        <form onSubmit={handleSave} className="space-y-8 max-w-5xl">
-          <div className="flex items-center justify-end gap-3">
-            <button type="button" onClick={addReview} className="flex items-center gap-2 bg-white border border-slate-200 hover:border-amber-500 text-slate-900 hover:text-amber-500 font-bold px-5 py-2.5 rounded-2xl text-sm transition-all shadow-sm hover:shadow-xl active:scale-95">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
-              Add Review
-            </button>
-            <button type="submit" disabled={saving || loading} className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold px-8 py-2.5 rounded-2xl text-sm transition-all shadow-xl shadow-blue-200 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
-              {saving && <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
-              {saving ? 'Saving...' : 'Save Testimonials'}
-            </button>
+        <div className="max-w-7xl mx-auto pb-20">
+          
+          {/* Dashboard Header */}
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 mb-10 bg-white/80 backdrop-blur-md p-10 rounded-[2.5rem] border border-slate-200 shadow-sm">
+            <div className="flex-1 w-full space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 shadow-sm border border-amber-100">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"/></svg>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight">Section Header Branding</h2>
+                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-0.5">Customize public page titles</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Section Badge</label>
+                  <input 
+                    value={header.badge} 
+                    onChange={(e) => handleHeaderChange('badge', e.target.value)} 
+                    placeholder="e.g. Real Feedback" 
+                    className="w-full bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-amber-500 transition-all" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Section Title</label>
+                  <input 
+                    value={header.title} 
+                    onChange={(e) => handleHeaderChange('title', e.target.value)} 
+                    placeholder="e.g. Parent & Student Reviews" 
+                    className="w-full bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-amber-500 transition-all" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">CTA Footer Text</label>
+                  <input 
+                    value={header.footerText} 
+                    onChange={(e) => handleHeaderChange('footerText', e.target.value)} 
+                    placeholder="e.g. Sync into the Network" 
+                    className="w-full bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold focus:outline-none focus:border-amber-500 transition-all" 
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-row lg:flex-col items-center gap-4 w-full lg:w-auto pt-6 lg:pt-0 border-t lg:border-t-0 lg:border-l border-slate-100 lg:pl-10">
+              <button onClick={() => setModal({ isOpen: true, review: null, index: null })} className="flex-1 lg:w-full flex items-center justify-center gap-2 bg-white border border-slate-200 hover:border-blue-500 text-slate-900 hover:text-blue-500 font-bold px-6 py-4 rounded-2xl text-sm transition-all shadow-sm hover:shadow-xl active:scale-95 whitespace-nowrap">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" /></svg>
+                Add Testimonial
+              </button>
+            </div>
           </div>
 
-          {loading ? (
-            <div className="h-48 bg-white rounded-3xl border border-slate-200 animate-pulse" />
-          ) : (
-            <div className="grid grid-cols-1 gap-8">
-              {reviews.map((rev, i) => (
-                <div key={i} className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm transition-all hover:shadow-lg group">
-                  <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center text-white font-black shadow-lg shadow-amber-100 overflow-hidden">
-                        {rev.image ? <img src={rev.image} alt={rev.studentName} className="w-full h-full object-cover" /> : (
-                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="text-slate-900 font-bold text-lg">{rev.studentName || 'Anonymous Student'}</h3>
-                        <p className="text-amber-600 text-[10px] font-black uppercase tracking-widest mt-0.5">Testimonial Entry</p>
-                      </div>
-                    </div>
-                    {reviews.length > 1 && (
-                      <button type="button" onClick={() => removeReview(i)} className="p-2 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-500 transition-all border border-transparent hover:border-red-100">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[
-                      { label: "Student Name", field: "studentName", placeholder: "e.g. Amit Kumar" },
-                      { label: "University", field: "university", placeholder: "e.g. Kazan Federal University" },
-                      { label: "Country", field: "country", placeholder: "e.g. Russia" },
-                      { label: "Rating (1-5)", field: "rating", placeholder: "5" },
-                    ].map(({ label, field, placeholder }) => (
-                      <div key={field}>
-                        <label className="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-widest">{label}</label>
-                        <input value={rev[field]} onChange={(e) => handleChange(i, field, e.target.value)} placeholder={placeholder} className="w-full bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl px-5 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
-                      </div>
-                    ))}
-
-                    {/* Image Upload */}
-                    <div>
-                      <label className="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-widest">Profile Image</label>
-                      <div className="space-y-3">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleImageUpload(i, e.target.files[0])}
-                          className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2 text-sm file:mr-3 file:py-1 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 transition-all cursor-pointer"
-                        />
-                        <div className="flex items-center gap-3">
-                          <div className="h-px bg-slate-100 flex-1" />
-                          <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">OR</span>
-                          <div className="h-px bg-slate-100 flex-1" />
-                        </div>
-                        <input
-                          value={rev.image}
-                          onChange={(e) => handleChange(i, 'image', e.target.value)}
-                          placeholder="Paste Image Link"
-                          className="w-full bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl px-5 py-2.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
-                        />
-                      </div>
-                      {uploadProgress[i] != null && <div className="text-xs font-bold text-blue-600 mt-2 flex items-center gap-2">
-                        <span className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                        Uploading: {uploadProgress[i]}%
-                      </div>}
-                      {rev.image && !uploadProgress[i] && <p className="text-xs text-green-600 mt-2 font-bold flex items-center gap-1.5">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" /></svg>
-                        Image Set
-                      </p>}
-                    </div>
-
-                    <div className="md:col-span-2 lg:col-span-3">
-                      <label className="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-widest">Review Content</label>
-                      <textarea value={rev.reviewText} onChange={(e) => handleChange(i, 'reviewText', e.target.value)} rows={4} placeholder="Write the student's testimonial here..." className="w-full bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl px-5 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none" />
-                    </div>
-                  </div>
+          {/* Table View */}
+          <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
+            {loading ? (
+              <div className="p-20 flex flex-col items-center justify-center gap-4">
+                <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <p className="text-blue-600 font-black text-xs uppercase tracking-widest animate-pulse">Fetching records...</p>
+              </div>
+            ) : reviews.length === 0 ? (
+              <div className="p-20 text-center">
+                <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-slate-300">
+                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
                 </div>
-              ))}
-            </div>
-          )}
-        </form>
+                <h3 className="text-xl font-black text-slate-900">No Testimonials Found</h3>
+                <p className="text-slate-500 text-sm mt-2">Start by adding your first parent-student review pair.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50/50 border-b border-slate-100">
+                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest w-16">Sr. No.</th>
+                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Parent</th>
+                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Student</th>
+                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Feedback Preview</th>
+                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {currentItems.map((rev, i) => {
+                      const actualIndex = indexOfFirstItem + i;
+                      return (
+                        <tr key={actualIndex} className="hover:bg-slate-50/50 transition-colors group">
+                          <td className="px-8 py-6 text-sm font-black text-slate-400">
+                            {(actualIndex + 1).toString().padStart(2, '0')}
+                          </td>
+                          <td className="px-8 py-6">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white shadow-sm flex-shrink-0 bg-slate-100">
+                                {rev.parent.image ? <img src={rev.parent.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-slate-300"><svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div>}
+                              </div>
+                              <div>
+                                <div className="text-sm font-black text-slate-900 leading-none">{rev.parent.name}</div>
+                                <div className="text-[9px] font-black text-blue-500 uppercase tracking-wider mt-1.5">Parent</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-8 py-6">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-2xl overflow-hidden border-2 border-white shadow-sm flex-shrink-0 bg-slate-100">
+                                {rev.student.image ? <img src={rev.student.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-slate-300"><svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div>}
+                              </div>
+                              <div>
+                                <div className="text-sm font-black text-slate-900 leading-none">{rev.student.name}</div>
+                                <div className="text-[9px] font-black text-emerald-500 uppercase tracking-wider mt-1.5">Student</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-8 py-6 max-w-md">
+                            <div className="text-xs text-slate-500 line-clamp-2 italic leading-relaxed">
+                              "{rev.parent.review || rev.student.review}"
+                            </div>
+                          </td>
+                          <td className="px-8 py-6 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <button onClick={() => setModal({ isOpen: true, review: rev, index: actualIndex })} className="p-2.5 rounded-xl text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg>
+                              </button>
+                              <button onClick={() => removeReview(actualIndex)} className="p-2.5 rounded-xl text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-all">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Pagination Controls */}
+            {reviews.length > itemsPerPage && (
+              <div className="px-8 py-6 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, reviews.length)} of {reviews.length} entries
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={goToPrevPage} 
+                    disabled={currentPage === 1}
+                    className="p-2 rounded-xl text-slate-400 hover:bg-white hover:text-blue-600 disabled:opacity-30 disabled:hover:bg-transparent transition-all border border-transparent hover:border-slate-200"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3"/></svg>
+                  </button>
+                  <div className="px-4 py-2 bg-white rounded-xl text-xs font-black text-blue-600 border border-slate-200 shadow-sm">
+                    Page {currentPage} of {totalPages}
+                  </div>
+                  <button 
+                    onClick={goToNextPage} 
+                    disabled={currentPage === totalPages}
+                    className="p-2 rounded-xl text-slate-400 hover:bg-white hover:text-blue-600 disabled:opacity-30 disabled:hover:bg-transparent transition-all border border-transparent hover:border-slate-200"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3"/></svg>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </AdminLayout>
+
+      <ReviewModal 
+        isOpen={modal.isOpen} 
+        onClose={() => setModal({ isOpen: false, review: null, index: null })}
+        review={modal.review}
+        index={modal.index}
+        onSave={addOrUpdateReview}
+        uploadFile={uploadFile}
+      />
+
       <DeleteModal
         isOpen={deleteModal.isOpen}
         onClose={() => setDeleteModal({ isOpen: false, index: null, itemName: '' })}
         onConfirm={confirmDeleteReview}
-        title="Confirm Deletion"
+        title="Remove Review Entry"
         message={
           <>
-            Are you sure you want to delete this item <span className="font-bold text-slate-900">"{deleteModal.itemName}"</span>?
-            <div className="text-slate-400 text-xs mt-2">This action cannot be undone.</div>
+            Are you sure you want to remove the testimonial for <span className="font-bold text-slate-900">"{deleteModal.itemName}"</span>?
+            <div className="text-slate-400 text-xs mt-2 uppercase font-black tracking-tighter italic">This will permanently delete both parent and student feedback from your collection.</div>
           </>
         }
       />

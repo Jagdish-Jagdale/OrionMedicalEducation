@@ -12,6 +12,7 @@ import brainImg from '../assets/brain_final.png';
 import heartImg from '../assets/heart.png';
 import liverImg from '../assets/liver.png';
 import kidneyImg from '../assets/kidney.png';
+import { getProcessAllData } from '../firebase/firestore';
 
 const organImages = [
   { img: eyeImg, title: 'Ophthalmology', baseScale: 0.7 },
@@ -24,116 +25,21 @@ const organImages = [
   { img: kidneyImg, title: 'Nephrology', baseScale: 0.8 }
 ];
 
-
-const steps = [
-  {
-    icon: '🩺',
-    title: 'Career Counseling',
-    description: 'In-depth one-on-one consultation to understand your academic profile, budget, and future goals.',
-    color: '#2DD4BF', // Fresh Teal
-    color2: '#0891B2', // Cyan
-  },
-  {
-    icon: '🏫',
-    title: 'University Selection & Application',
-    description: 'We shortlist the best NMC/WHO-approved universities and submit a flawless application on your behalf.',
-    color: '#38BDF8', // Fresh Sky Blue
-    color2: '#2DD4BF', // Teal
-  },
-  {
-    icon: '📄',
-    title: 'Documentation Support',
-    description: 'Our experts guide you through every document — all notarized and attested correctly.',
-    color: '#818CF8', // Fresh Indigo
-    color2: '#C084FC', // Purple
-  },
-  {
-    icon: '📩',
-    title: 'Admission Letter',
-    description: 'Upon acceptance, we obtain your official admission letter directly from the university.',
-    color: '#C084FC', // Fresh Purple
-    color2: '#F472B6', // Pink
-  },
-  {
-    icon: '🛂',
-    title: 'Visa Processing',
-    description: 'We prepare and submit your student visa application with full documentation coaching.',
-    color: '#F472B6', // Fresh Pink
-    color2: '#FB7185', // Rose
-  },
-  {
-    icon: '✈️',
-    title: 'Air Ticket Assistance',
-    description: 'We help you book the most convenient flights coordinated with university intake dates.',
-    color: '#FB7185', // Fresh Rose
-    color2: '#FB923C', // Orange
-  },
-  {
-    icon: '🎒',
-    title: 'Pre-Departure Guidance',
-    description: 'Briefing on weather, culture, packing essentials — so you arrive confident and prepared.',
-    color: '#FB923C', // Fresh Orange
-    color2: '#F59E0B', // Amber
-  },
-  {
-    icon: '🏥',
-    title: 'Post-Arrival Support',
-    description: 'Our local team receives you at the airport. Hostel, SIM, mess, orientation — covered.',
-    color: '#4ADE80', // Fresh Green
-    color2: '#10B981', // Emerald
-  },
-];
-
-// Stethoscope tube color — Exact match requested by user
+// Stethoscope tube color
 const TUBE_COLOR = '#7e2726';
 
-// SVG layout constants (all in viewBox units)
-const VB_W = 900;
-const STEP_H = 450;    // Significantly increased for a premium, elongated sweep
-const CX = VB_W / 2;  // center X
-const CARD_W = 320;
-const CARD_OFFSET = 200; // Sleeker offset for a more modern look
-
-// Build the SVG path that snakes left and right
-function buildTubePath(numSteps) {
-  const startX = CX - 5; // Perfectly centered alignment
-  const startY = -150; // Deep overlap for zero gap
-  const segments = [];
-  let currX = startX;
-  let currY = startY;
-
-  // Initial drop
-  segments.push(`L ${startX},40`);
-  currY = 40;
-
-  for (let i = 0; i < numSteps; i++) {
-    const isEven = i % 2 === 0;
-    const targetX = isEven ? CX - CARD_OFFSET : CX + CARD_OFFSET; // Consistent: Even is Left, Odd is Right
-    const targetY = startY + (i + 1) * STEP_H;
-
-    // Premium 'S' Curve logic: Handle influence scaled for an elongated, elegant flow
-    const segmentH = targetY - currY;
-    const cpYInfluence = 0.65; // Higher influence for wider, more rounded arcs
-    const cp1Y = currY + segmentH * cpYInfluence;
-    const cp2Y = targetY - segmentH * cpYInfluence;
-    segments.push(`C ${currX},${cp1Y} ${targetX},${cp2Y} ${targetX},${targetY}`);
-
-    currX = targetX;
-    currY = targetY;
-  }
-
-  // Final attachment to the 8 o'clock diaphragm — Absolute precision override
-  const targetX = CX + 120;
-  const finalY = currY - 60; // Elevated to hit the top-right stem tip
-  segments.push(`L ${targetX},${finalY}`);
-  return { path: `M ${startX},${startY} ${segments.join(' ')}`, endY: finalY, startX };
-}
-
-const { path: tubePath, endY, startX: initialX } = buildTubePath(steps.length);
-const svgHeight = endY + 250; // High buffer to prevent clipping of tilted bottom hardware
-
 const Process = () => {
+  const [steps, setSteps] = useState([]);
+  const [settings, setSettings] = useState({
+    heroBadge: '',
+    heroTitle: '',
+    heroSubtitle: '',
+    footerBadge: '',
+    footerTitle: '',
+    footerSubtitle: ''
+  });
   const [isMobile, setIsMobile] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Randomized background dots
   const backgroundDots = React.useMemo(() => {
@@ -147,21 +53,46 @@ const Process = () => {
   }, []);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const { steps: dataSteps, settings: dataSettings } = await getProcessAllData();
+
+        if (dataSteps) {
+          const formattedSteps = dataSteps
+            .sort((a, b) => a.order - b.order)
+            .map((s, i) => ({
+              ...s,
+              color: s.color || ['#2563eb', '#0c4a6e', '#1e1b4b', '#3b0764', '#134e4a', '#064e3b', '#450a0a', '#1c1917'][i % 8],
+              color2: s.color2 || ['#1d4ed8', '#082f49', '#020617', '#1e1b4b', '#064e3b', '#022c22', '#18181b', '#0c0a09'][i % 8],
+              icon: s.icon || ['🩺', '🏫', '📄', '📩', '🛂', '✈️', '🎒', '🏥'][i % 8]
+            }));
+          setSteps(formattedSteps);
+        }
+
+        if (dataSettings) {
+          setSettings(dataSettings);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Responsive Constants
-  const VB_W = isMobile ? 800 : 1000; // Balanced coordinate width
+  const VB_W = isMobile ? 650 : 1000;
   const STEP_H = isMobile ? 380 : 450;
   const CX = VB_W / 2;
   const CARD_OFFSET = isMobile ? 80 : 250;
   const CARD_W = isMobile ? 220 : 480;
   const CARD_H = isMobile ? 500 : 400;
 
-  // Build the SVG path dynamically based on responsive constants
   const buildTubePath = (numSteps) => {
     const startX = CX - 2;
     const startY = -120;
@@ -186,11 +117,8 @@ const Process = () => {
       currY = targetY;
     }
 
-    // Final segment: Curve smoothly into the steeply tilted and lowered stethoscope hardware stem (Bottom Image)
     const finalTargetX = isMobile ? CX + 30 : CX + 75;
     const finalTargetY = currY + (isMobile ? 160 : 235);
-
-    // Smooth transition from the last step node to the hardware
     const cp1Y = currY + 100;
     const cp2Y = finalTargetY - 20;
     segments.push(`C ${currX},${cp1Y} ${finalTargetX},${cp2Y} ${finalTargetX},${finalTargetY}`);
@@ -199,138 +127,76 @@ const Process = () => {
   };
 
   const { path: tubePath, endX, endY } = buildTubePath(steps.length);
-  const svgHeight = endY + (isMobile ? -20 : 40);
+  const svgHeight = isMobile ? 3100 : (endY + 40);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#e0f2fe] flex items-center justify-center pt-20">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-blue-600 font-bold animate-pulse">Loading Roadmap...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#e0f2fe] pt-20 overflow-x-hidden relative">
-      {/* Background Pattern - Randomized Dots & Stars */}
       <div className="absolute inset-0 pointer-events-none z-0">
         {backgroundDots.map((dot) => (
-          <div
-            key={dot.id}
-            className="absolute bg-blue-400 rounded-full"
-            style={{
-              top: dot.top,
-              left: dot.left,
-              width: `${dot.size}px`,
-              height: `${dot.size}px`,
-              opacity: dot.opacity,
-            }}
-          />
-        ))}
-        {/* Animated Stars */}
-        {[...Array(10)].map((_, i) => (
-          <motion.div
-            key={`star-${i}`}
-            animate={{ opacity: [0.1, 0.5, 0.1], scale: [1, 1.2, 1] }}
-            transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut", delay: i * 0.4 }}
-            className="absolute w-1.5 h-1.5 bg-blue-300 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.3)]"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-            }}
-          />
+          <div key={dot.id} className="absolute bg-blue-400 rounded-full" style={{ top: dot.top, left: dot.left, width: `${dot.size}px`, height: `${dot.size}px`, opacity: dot.opacity }} />
         ))}
       </div>
       <PageTitle title="Process" />
 
-      {/* ── Header Banner ── */}
-      <div className="relative py-16 sm:py-24 px-6 text-center overflow-hidden bg-blue-600">
-        {/* Background Decorative Blobs */}
-        <div className="absolute top-0 -left-20 w-80 h-80 bg-white/10 rounded-full blur-[100px]" />
-        <div className="absolute bottom-0 -right-20 w-96 h-96 bg-blue-400/20 rounded-full blur-[120px]" />
-        
-        {/* Main Linear Gradient - Shifted navy slightly more to the right */}
-        <div 
-          className="absolute inset-0 opacity-100" 
-          style={{ background: 'linear-gradient(110deg, #2563eb 0%, #1e3a5f 65%, #1e3a5f 100%)' }} 
-        />
-        
-        {/* Distinct Dot Pattern Overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.15]"
-          style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.8) 1.5px, transparent 0)', backgroundSize: '24px 24px' }}
-        />
+      {/* Header Banner - Standardized to Team Style */}
+      <div className="relative py-16 sm:py-24 px-6 text-center overflow-hidden z-30">
+        {/* Background Layer */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute top-0 -left-20 w-80 h-80 bg-white/10 rounded-full blur-[100px]" />
+          <div className="absolute bottom-0 -right-20 w-96 h-96 bg-blue-400/20 rounded-full blur-[120px]" />
+          <div className="absolute inset-0 opacity-100" style={{ background: 'linear-gradient(110deg, #2563eb 0%, #1e3a5f 65%, #1e3a5f 100%)' }} />
+          {/* Dot Pattern Overlay */}
+          <div className="absolute inset-0 opacity-[0.15]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.8) 1.5px, transparent 0)', backgroundSize: '24px 24px' }} />
+        </div>
 
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: 0.8 }}
-          className="relative z-10"
-        >
-          <span className="inline-block text-blue-100 text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] mb-4 border border-white/20 bg-white/5 px-5 py-2 rounded-full backdrop-blur-md">
-            Step by Step
-          </span>
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-4 tracking-tight">
-            Simple &amp; Transparent Admission Process
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="relative z-10">
+          {settings.heroBadge && (
+            <div className="flex justify-center mb-6">
+              <span className="inline-block text-blue-900 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.25em] border border-white/20 bg-white px-6 py-2.5 rounded-full shadow-2xl">
+                {settings.heroBadge}
+              </span>
+            </div>
+          )}
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-6 tracking-tight">
+            {settings.heroTitle}
           </h1>
           <p className="text-blue-100/80 text-sm sm:text-base max-w-2xl mx-auto font-medium leading-relaxed">
-            8 clear milestones — from your first consultation to arriving at your university campus abroad.
+            {settings.heroSubtitle}
           </p>
         </motion.div>
       </div>
 
-      {/* ── Stethoscope + Tube Roadmap ── */}
-      <div className="relative max-w-4xl mx-auto px-4 pb-0 -mt-24 sm:-mt-32 overflow-visible">
-
-        {/* Stethoscope Image — centered at top */}
-        <div
-          className="flex justify-center pt-32 relative z-20 pointer-events-none"
-          style={{ marginBottom: '-45px' }}
-        >
-          <motion.div
-            initial={{ opacity: 0, y: -30, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            className="relative inline-block"
-          >
-            <img
-              src={processImage}
-              alt="Stethoscope"
-              className="relative z-10 w-48 sm:w-64 md:w-72 lg:w-[300px] h-auto object-contain drop-shadow-2xl brightness-105"
-            />
-            {/* Orion Logo inside Stethoscope Head/Earpieces */}
+      {/* Roadmap */}
+      <div className="relative max-w-4xl mx-auto px-4 pb-0 -mt-24 sm:-mt-32 overflow-visible z-10">
+        <div className="flex justify-center pt-32 relative z-10 pointer-events-none" style={{ marginBottom: '-45px' }}>
+          <motion.div initial={{ opacity: 0, y: -30, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.8 }} className="relative inline-block">
+            <img src={processImage} alt="Stethoscope" className="relative z-10 w-48 sm:w-64 md:w-72 lg:w-[300px] h-auto object-contain drop-shadow-2xl brightness-105" />
             <div className="absolute top-[32%] left-[49%] -translate-x-1/2 -translate-y-1/2 z-20">
-              <img
-                src={orionLogo}
-                alt="Orion Logo"
-                className="w-16 sm:w-20 md:w-24 lg:w-28 h-auto object-contain drop-shadow-xl"
-              />
+              <img src={orionLogo} alt="Orion Logo" className="w-16 sm:w-20 md:w-24 lg:w-28 h-auto object-contain drop-shadow-xl" />
             </div>
           </motion.div>
         </div>
 
-        {/* SVG Tube + Step Cards overlay */}
-        <div
-          className="relative w-full overflow-visible"
-          style={{ height: `${svgHeight}px` }}
-        >
-          {/* ── SVG Tube path ── */}
-          <svg
-            viewBox={`0 0 ${VB_W} ${svgHeight}`}
-            className="absolute inset-0 w-full h-full"
-            preserveAspectRatio="xMidYMin meet"
-            style={{ pointerEvents: 'none', overflow: 'visible' }}
-          >
-            <defs>
-              <linearGradient id="tubeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#7f1d1d" />
-                <stop offset="40%" stopColor="#ef4444" />
-                <stop offset="60%" stopColor="#ef4444" />
-                <stop offset="100%" stopColor="#7f1d1d" />
-              </linearGradient>
-            </defs>
-
-            {/* Tube Borders */}
+        <div className="relative w-full overflow-visible" style={{ height: `${svgHeight}px` }}>
+          <svg viewBox={`0 0 ${VB_W} ${svgHeight}`} className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMin meet" style={{ pointerEvents: 'none', overflow: 'visible' }}>
             <path d={tubePath} fill="none" stroke="#872b2f" strokeWidth={isMobile ? "18" : "24"} strokeLinecap="round" strokeLinejoin="round" />
-            {/* Core Tube */}
             <path d={tubePath} fill="none" stroke={TUBE_COLOR} strokeWidth={isMobile ? "15" : "21"} strokeLinecap="round" strokeLinejoin="round" />
 
-            {/* Step node circles + Info Cards on the tube */}
             {steps.map((step, i) => {
               const isLeft = i % 2 === 0;
               const nodeX = isLeft ? CX - CARD_OFFSET : CX + CARD_OFFSET;
-              const nodeY = -150 + (i + 1) * STEP_H;
+              const nodeY = -120 + (i + 1) * STEP_H;
 
               return (
                 <g key={i}>
@@ -340,92 +206,28 @@ const Process = () => {
                     {i + 1}
                   </text>
 
-                  {/* Info Card via foreignObject */}
-                  <foreignObject
-                    x={isLeft ? nodeX - CARD_W - 20 : nodeX + 20}
-                    y={nodeY - (CARD_H / 2)}
-                    width={CARD_W}
-                    height={CARD_H}
-                    className="overflow-visible"
-                  >
-                    <motion.div
-                      initial={{ opacity: 0, x: isLeft ? -30 : 30 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true, margin: "-20px" }}
-                      className="w-full flex items-center relative h-full"
-                    >
-                      <div
-                        className="rounded-xl sm:rounded-2xl shadow-xl p-3 sm:p-4 hover:shadow-2xl transition-all duration-500 group w-full relative overflow-hidden"
-                        style={{ background: `linear-gradient(135deg, ${step.color} 0%, ${step.color2} 100%)` }}
-                      >
-                        {/* Subtle glassmorphism light effect */}
-                        <div className="absolute top-0 left-0 w-full h-full bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
+                  <foreignObject x={isLeft ? nodeX - CARD_W - 20 : nodeX + 20} y={nodeY - (CARD_H / 2)} width={CARD_W} height={CARD_H} className="overflow-visible">
+                    <motion.div initial={{ opacity: 0, x: isLeft ? -30 : 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-20px" }} className="w-full flex items-center relative h-full">
+                      <div className="rounded-xl sm:rounded-2xl shadow-2xl p-3 sm:p-4 hover:shadow-2xl transition-all duration-500 group w-full relative overflow-hidden border border-white/10" style={{ background: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4)), linear-gradient(135deg, ${step.color} 0%, ${step.color2} 100%)` }}>
+                        {/* Shine Effect */}
+                        <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-white/20 to-transparent opacity-30" />
+                        <div className="absolute -inset-y-12 -inset-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-[200%] transition-transform duration-1000 ease-in-out pointer-events-none" />
                         <div className="flex items-center gap-3 mb-3 relative z-10">
-                          <span
-                            className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center text-sm sm:text-xl bg-white/20 text-white shadow-lg backdrop-blur-sm"
-                          >
+                          <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center text-sm sm:text-xl bg-white/20 text-white shadow-lg backdrop-blur-sm">
                             {step.icon}
                           </span>
                           <h3 className="font-bold text-white text-base sm:text-xl leading-tight tracking-tight">{step.title}</h3>
                         </div>
                         <p className="text-white/90 text-sm sm:text-base leading-relaxed font-medium relative z-10">{step.description}</p>
                       </div>
-
-                      <div
-                        className="absolute top-1/2 -translate-y-1/2"
-                        style={{
-                          [isLeft ? 'right' : 'left']: '-8px',
-                          width: 0,
-                          height: 0,
-                          borderTop: isMobile ? '5px solid transparent' : '6px solid transparent',
-                          borderBottom: isMobile ? '5px solid transparent' : '6px solid transparent',
-                          [isLeft ? 'borderLeft' : 'borderRight']: isMobile ? `8px solid ${step.color}` : `8px solid ${step.color}`,
-                        }}
-                      />
+                      <div className="absolute top-1/2 -translate-y-1/2" style={{ [isLeft ? 'right' : 'left']: '-8px', width: 0, height: 0, borderTop: isMobile ? '5px solid transparent' : '6px solid transparent', borderBottom: isMobile ? '5px solid transparent' : '6px solid transparent', [isLeft ? 'borderLeft' : 'borderRight']: `8px solid ${step.color}` }} />
                     </motion.div>
                   </foreignObject>
 
-                  {/* Decorative Medical Images on the opposite side */}
-                  <foreignObject
-                    x={isLeft ? nodeX + (isMobile ? 120 : 330) : nodeX - (isMobile ? 240 : 630)}
-                    y={nodeY - (isMobile ? 100 : 180)}
-                    width={isMobile ? 180 : 360}
-                    height={isMobile ? 180 : 360}
-                    className="overflow-visible"
-                  >
-                    <motion.div
-                      initial={{ opacity: 0, rotate: 0 }}
-                      whileInView={{ opacity: 0.95, rotate: 0 }}
-                      whileHover="hover"
-                      viewport={{ once: true }}
-                      transition={{ duration: 1, delay: 0.2 }}
-                      className="w-full h-full flex flex-col items-center justify-center cursor-pointer pointer-events-auto group"
-                    >
-                      <motion.img
-                        initial={{ rotate: 0, scale: organImages[i % organImages.length].baseScale }}
-                        animate={{ rotate: 0, scale: organImages[i % organImages.length].baseScale }}
-                        variants={{
-                          hover: { scale: organImages[i % organImages.length].baseScale * 1.18, rotate: 0, y: -8 }
-                        }}
-                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                        src={organImages[i % organImages.length].img}
-                        alt="Medical Icon"
-                        className="w-[85%] h-[85%] object-contain drop-shadow-2xl"
-                        style={{
-                          filter: `drop-shadow(0 0 25px ${step.color}99)`
-                        }}
-                      />
-
-                      {/* Floating Title on Hover */}
-                      <motion.span
-                        variants={{
-                          initial: { opacity: 0, y: 10, scale: 0.8 },
-                          hover: { opacity: 1, y: 0, scale: 1 }
-                        }}
-                        initial="initial"
-                        className="mt-2 text-navy font-black text-[10px] sm:text-[14px] uppercase tracking-widest bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full shadow-lg border border-slate-100 whitespace-nowrap pointer-events-none"
-                      >
+                  <foreignObject x={isLeft ? nodeX + (isMobile ? 120 : 330) : nodeX - (isMobile ? 240 : 630)} y={nodeY - (isMobile ? 100 : 180)} width={isMobile ? 180 : 360} height={isMobile ? 180 : 360} className="overflow-visible">
+                    <motion.div initial={{ opacity: 0, rotate: 0 }} whileInView={{ opacity: 0.95, rotate: 0 }} whileHover="hover" viewport={{ once: true }} transition={{ duration: 1, delay: 0.2 }} className="w-full h-full flex flex-col items-center justify-center cursor-pointer pointer-events-auto group">
+                      <motion.img initial={{ rotate: 0, scale: organImages[i % organImages.length].baseScale }} animate={{ rotate: 0, scale: organImages[i % organImages.length].baseScale }} variants={{ hover: { scale: organImages[i % organImages.length].baseScale * 1.18, rotate: 0, y: -8 } }} transition={{ type: "spring", stiffness: 300, damping: 20 }} src={organImages[i % organImages.length].img} alt="Medical Icon" className="w-[85%] h-[85%] object-contain drop-shadow-2xl" style={{ filter: `drop-shadow(0 0 25px ${step.color}99)` }} />
+                      <motion.span variants={{ initial: { opacity: 0, y: 10, scale: 0.8 }, hover: { opacity: 1, y: 0, scale: 1 } }} initial="initial" className="mt-2 text-navy font-black text-[10px] sm:text-[14px] uppercase tracking-widest bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full shadow-lg border border-slate-100 whitespace-nowrap pointer-events-none">
                         {organImages[i % organImages.length].title}
                       </motion.span>
                     </motion.div>
@@ -434,50 +236,29 @@ const Process = () => {
               );
             })}
 
-            {/* Bottom Stethoscope Head — Centered Docking */}
-            <foreignObject
-              x={endX - (isMobile ? 110 : 230)}
-              y={endY - (isMobile ? 70 : 85)}
-              width={isMobile ? 200 : 300}
-              height={isMobile ? 200 : 300}
-              className="overflow-visible"
-            >
+            <foreignObject x={endX - (isMobile ? 110 : 230)} y={endY - (isMobile ? 70 : 85)} width={isMobile ? 200 : 300} height={isMobile ? 200 : 300} className="overflow-visible">
               <div className="w-full h-full flex items-center justify-center overflow-visible">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  className="relative flex items-center justify-center"
-                >
-                  <img
-                    src={processImage2}
-                    alt="Stethoscope Head"
-                    className={`${isMobile ? 'w-40 rotate-[-160deg]' : 'w-52 rotate-[-130deg]'} h-auto object-contain transform drop-shadow-2xl`}
-                  />
-                  <div className="absolute top-full mt-4 sm:mt-12 left-1/2 -translate-x-1/2">
-                    <span className="text-[#9b1c1c] text-[15px] sm:text-[16px] font-black tracking-[0.2em] uppercase bg-white/95 px-5 sm:px-8 py-2.5 rounded-full shadow-2xl border border-rose-100 whitespace-nowrap">
-                      Your Journey Begins
-                    </span>
-                  </div>
+                <motion.div initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} className="relative flex items-center justify-center">
+                  <img src={processImage2} alt="Stethoscope Head" className={`${isMobile ? 'w-40 rotate-[-160deg]' : 'w-52 rotate-[-130deg]'} h-auto object-contain transform drop-shadow-2xl`} />
+                  {settings.footerBadge && (
+                    <div className="absolute top-full mt-4 sm:mt-12 left-1/2 -translate-x-1/2">
+                      <span className="text-[#9b1c1c] text-[15px] sm:text-[16px] font-black tracking-[0.2em] uppercase bg-white/95 px-5 sm:px-8 py-2.5 rounded-full shadow-2xl border border-rose-100 whitespace-nowrap">
+                        {settings.footerBadge}
+                      </span>
+                    </div>
+                  )}
                 </motion.div>
               </div>
             </foreignObject>
           </svg>
         </div>
 
-        {/* CTA below */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="-mt-[280px] sm:-mt-48 rounded-2xl text-center p-8 text-white shadow-2xl relative z-30 mx-4 flex flex-col items-center justify-center sm:min-h-[180px]"
-          style={{ background: `linear-gradient(135deg, ${TUBE_COLOR}, #ef4444)` }}
-        >
-          <p className="font-bold text-xl mb-1">You've arrived. Your medical journey begins!</p>
-          <p className="text-rose-100 text-sm">We stay with you even after you reach abroad. Your success is our mission.</p>
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="-mt-[280px] sm:-mt-48 rounded-2xl text-center p-8 text-white shadow-2xl relative z-30 mx-4 flex flex-col items-center justify-center sm:min-h-[180px]" style={{ background: `linear-gradient(135deg, ${TUBE_COLOR}, #ef4444)` }}>
+          <p className="font-bold text-xl mb-1">{settings.footerTitle}</p>
+          <p className="text-rose-100 text-sm">{settings.footerSubtitle}</p>
         </motion.div>
-      </div >
-    </div >
+      </div>
+    </div>
   );
 };
 

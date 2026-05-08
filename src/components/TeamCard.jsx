@@ -1,13 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const roleColors = {
-  Director: 'bg-amber-100 text-amber-800',
-  'Branch Head': 'bg-blue-100 text-blue-800',
-  'PR and HR Head': 'bg-purple-100 text-purple-800',
-};
-
 const TeamCard = ({ member, index = 0 }) => {
+  // Support both old and new field names
+  const name = member.name || '';
+  const displayPosition = member.position || member.role || '';
+  const displayImage = member.image || member.imageUrl;
+  const displayDescription = member.description || member.bio || '';
+  const displayExpertise = member.expertise || '';
+  const displayStatus = member.status || '';
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -21,10 +23,10 @@ const TeamCard = ({ member, index = 0 }) => {
         <div className="w-full sm:w-1/3 flex flex-col items-center sm:items-start">
           <div className="relative w-40 h-52 mb-6">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-navy rounded-2xl opacity-10 group-hover:opacity-20 transition-opacity" />
-            {member.imageUrl ? (
+            {displayImage ? (
               <img
-                src={member.imageUrl}
-                alt={member.name}
+                src={displayImage}
+                alt={name}
                 loading="lazy"
                 className="w-full h-full rounded-2xl object-cover ring-4 ring-white shadow-lg group-hover:ring-blue-100 transition-all"
               />
@@ -35,12 +37,12 @@ const TeamCard = ({ member, index = 0 }) => {
                 </svg>
               </div>
             )}
-            <div className="absolute bottom-2 right-2 w-5 h-5 bg-green-400 rounded-full border-2 border-white" />
+            <div className={`absolute bottom-2 right-2 w-5 h-5 rounded-full border-2 border-white shadow-sm ${member.status === 'Inactive' ? 'bg-slate-400' : 'bg-green-400'}`} />
           </div>
           
-          <h3 className="font-bold text-navy text-xl sm:text-2xl mb-1 text-center sm:text-left">{member.name}</h3>
-          <span className={`inline-block text-sm font-bold px-4 py-1.5 rounded-full ${roleColors[member.role] || 'bg-slate-100 text-slate-700'} text-center sm:text-left`}>
-            {member.role}
+          <h3 className="font-bold text-navy text-xl sm:text-2xl mb-1 text-center sm:text-left">{name}</h3>
+          <span className="inline-block text-sm font-bold px-4 py-1.5 rounded-full bg-slate-100 text-slate-700 text-center sm:text-left shadow-sm">
+            {displayPosition}
           </span>
         </div>
 
@@ -51,17 +53,17 @@ const TeamCard = ({ member, index = 0 }) => {
             <span className="text-blue-600 font-bold uppercase tracking-wider text-xs">Profile Overview</span>
           </div>
           <p className="text-slate-600 text-base sm:text-lg leading-relaxed font-medium">
-            {member.description}
+            {displayDescription}
           </p>
           
-          <div className="mt-8 grid grid-cols-2 gap-4">
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
               <p className="text-xs text-slate-400 uppercase tracking-widest mb-1">Status</p>
-              <p className="text-sm font-bold text-navy">Verified Authority</p>
+              <p className="text-sm font-bold text-navy">{displayStatus}</p>
             </div>
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
               <p className="text-xs text-slate-400 uppercase tracking-widest mb-1">Expertise</p>
-              <p className="text-sm font-bold text-navy">Medical Education</p>
+              <p className="text-sm font-bold text-navy">{displayExpertise}</p>
             </div>
           </div>
         </div>

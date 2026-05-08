@@ -1,49 +1,23 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { getObservership } from '../firebase/firestore';
 import { useFirestore } from '../hooks/useFirestore';
 import PageTitle from '../components/PageTitle';
 
-const highlightCards = [
-  {
-    icon: '🏥',
-    title: 'Elite Clinical Exposure',
-    desc: 'Train alongside renowned specialists in real hospital environments. Our program provides unmatched hands-on clinical training.',
-  },
-  {
-    icon: '🔬',
-    title: 'Advanced Specializations',
-    desc: 'Choose from cutting-edge specializations including Oncology, Critical Care & ICU, and Tele-ICU programs.',
-  },
-  {
-    icon: '🏅',
-    title: 'Professional Recognition',
-    desc: 'Receive internationally recognized certificates from partner hospitals upon successful completion.',
-  },
-];
-
-const whyCards = [
-  {
-    icon: '📋',
-    title: 'Structured Program',
-    desc: 'Well-organized curriculum with clear learning objectives, structured rotations, and mentorship.',
-  },
-  {
-    icon: '🤝',
-    title: 'Top Hospital Partnerships',
-    desc: 'Exclusively partnered with leading Indian and international hospitals for genuine clinical experience.',
-  },
-  {
-    icon: '🌍',
-    title: 'Global Exposure',
-    desc: 'Connect with medical professionals globally, building a network that supports your career for life.',
-  },
-];
-
 const Observership = () => {
-  const { data: observership, loading, error } = useFirestore(getObservership);
+   const { data: observership, loading } = useFirestore(getObservership);
+   const [waNumber, setWaNumber] = useState('');
 
-  // Randomized background dots
+   useEffect(() => {
+     import('../firebase/firestore').then(({ getHomeContent }) => {
+       getHomeContent().then((data) => {
+         if (data && data.whatsappNumber) {
+           setWaNumber(data.whatsappNumber.replace(/\s+/g, ''));
+         }
+       });
+     });
+   }, []);
+
   const backgroundDots = React.useMemo(() => {
     return [...Array(40)].map((_, i) => ({
       id: i,
@@ -54,210 +28,135 @@ const Observership = () => {
     }));
   }, []);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#e0f2fe] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  const content = observership || {};
+  const sectionIcons = ['🏥', '🔬', '🏅', '📋', '🤝', '🌍'];
+
   return (
-    <div className="min-h-screen bg-[#e0f2fe] pt-20 relative overflow-hidden">
-      {/* Background Pattern - Randomized Dots & Stars */}
+    <div className="min-h-screen bg-[#e0f2fe] pt-20 relative overflow-hidden font-sans">
       <div className="absolute inset-0 pointer-events-none z-0">
         {backgroundDots.map((dot) => (
-          <div
-            key={dot.id}
-            className="absolute bg-blue-400 rounded-full"
-            style={{
-              top: dot.top,
-              left: dot.left,
-              width: `${dot.size}px`,
-              height: `${dot.size}px`,
-              opacity: dot.opacity,
-            }}
-          />
-        ))}
-        {/* Animated Stars */}
-        {[...Array(6)].map((_, i) => (
-          <motion.div
-            key={`star-${i}`}
-            animate={{ opacity: [0.1, 0.6, 0.1], scale: [1, 1.4, 1] }}
-            transition={{ duration: 3 + i, repeat: Infinity, ease: "easeInOut", delay: i * 0.5 }}
-            className="absolute w-1 h-1 bg-blue-400 rounded-full"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-            }}
-          />
+          <div key={dot.id} className="absolute bg-blue-400 rounded-full" style={{ top: dot.top, left: dot.left, width: `${dot.size}px`, height: `${dot.size}px`, opacity: dot.opacity }} />
         ))}
       </div>
+      
       <PageTitle title="Observership" />
-      {/* Header */}
-      <div className="bg-gradient-to-r from-navy to-blue-700 py-16 px-4 text-center">
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-amber-400 text-sm font-bold uppercase tracking-widest mb-3"
-        >
-          Clinical Observership
-        </motion.p>
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-3xl sm:text-5xl font-bold text-white mb-4 leading-tight"
-        >
-          Orion Medical Education:<br />
-          <span className="text-amber-300">Clinical Observership Program</span>
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-blue-200 max-w-2xl mx-auto text-sm leading-relaxed"
-        >
-          Bridging the gap between theoretical knowledge and real-world clinical practice through our exclusive hospital observership program.
-        </motion.p>
-      </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
-        {/* Overview */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="bg-white rounded-3xl p-8 sm:p-12 shadow-md border border-slate-100"
-        >
-          <h2 className="text-2xl font-bold text-navy mb-4">Program Overview</h2>
-          <p className="text-slate-600 leading-relaxed">
-            {observership?.description ||
-              `The Orion Medical Education Clinical Observership Program is a prestigious initiative designed to give MBBS students and graduates a firsthand experience of advanced medical practice in India's top hospitals. This program bridges the gap between theoretical knowledge and real-world clinical practice, offering participants exposure to cutting-edge medical technologies and techniques under the mentorship of renowned specialists.`}
-          </p>
-          {observership?.duration && (
-            <div className="mt-6 inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                <circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" strokeLinecap="round" />
-              </svg>
-              Duration: {observership.duration}
+      {/* Header Banner - Standardized to Team Style */}
+      <div className="relative py-16 sm:py-24 px-6 text-center overflow-hidden">
+        {/* Background Layer */}
+        <div className="absolute inset-0 z-0">
+           <div className="absolute top-0 -left-20 w-80 h-80 bg-white/10 rounded-full blur-[100px]" />
+           <div className="absolute bottom-0 -right-20 w-96 h-96 bg-blue-400/20 rounded-full blur-[120px]" />
+           <div className="absolute inset-0 opacity-100" style={{ background: 'linear-gradient(110deg, #2563eb 0%, #1e3a5f 65%, #1e3a5f 100%)' }} />
+           {/* Dot Pattern Overlay */}
+           <div className="absolute inset-0 opacity-[0.15]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.8) 1.5px, transparent 0)', backgroundSize: '24px 24px' }} />
+        </div>
+        
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="relative z-10">
+          {content.mainHeading && (
+            <div className="flex justify-center mb-6">
+               <span className="inline-block text-amber-400 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.25em] border border-white/20 bg-white/10 px-6 py-2.5 rounded-full backdrop-blur-md shadow-2xl">
+                  {content.mainHeading}
+               </span>
             </div>
           )}
-        </motion.section>
+          
+          <h1 className="text-3xl sm:text-5xl font-black text-white mb-6 leading-tight tracking-normal">
+            {content.mainSubheading?.includes(':') ? (
+              <>
+                {content.mainSubheading.split(':')[0]}:<br />
+                <span className="text-white opacity-90">{content.mainSubheading.split(':')[1]}</span>
+              </>
+            ) : (
+              content.mainSubheading
+            )}
+          </h1>
+          
+          <p className="text-blue-100/80 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed font-medium">
+            {content.mainDescription}
+          </p>
+        </motion.div>
+      </div>
 
-        {/* Highlight cards */}
-        <section>
-          <h2 className="text-2xl font-bold text-navy text-center mb-8">Program Highlights</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {highlightCards.map((card, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all border border-slate-100 hover:border-blue-200"
-              >
-                <div className="text-4xl mb-4">{card.icon}</div>
-                <h3 className="font-bold text-navy text-lg mb-2 group-hover:text-blue-700 transition-colors">{card.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">{card.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </section>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16 relative z-10">
+        {content.introTitle && (
+          <motion.section initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-white rounded-3xl p-8 sm:p-12 shadow-md border border-slate-100">
+            <h2 className="text-2xl font-bold text-[#1e3a5f] mb-4">{content.introTitle}</h2>
+            <p className="text-slate-600 leading-relaxed font-medium">
+              {content.introDescription}
+            </p>
+          </motion.section>
+        )}
 
-        {/* Specializations */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="bg-gradient-to-br from-navy to-blue-700 rounded-3xl p-8 sm:p-12 text-white"
-        >
-          <h2 className="text-2xl font-bold mb-2">Available Specializations</h2>
-          <p className="text-blue-200 text-sm mb-8">Gain exposure in the most in-demand medical disciplines.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {[
-              { name: 'Oncology', desc: 'Cancer diagnosis, treatment protocols, and modern therapies' },
-              { name: 'Critical Care & ICU', desc: 'Life support systems, ventilator management, emergency response' },
-              { name: 'Tele-ICU', desc: 'Remote intensive care monitoring using cutting-edge technology' },
-              { name: 'General Medicine', desc: 'Comprehensive internal medicine rounds with senior consultants' },
-              { name: 'Surgery', desc: 'Observe live surgical procedures across multiple specialties' },
-              { name: 'Radiology & Imaging', desc: 'Advanced diagnostic imaging interpretation and reporting' },
-            ].map((spec, i) => (
-              <div key={i} className="flex items-start gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                <svg className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                <div>
-                  <p className="font-semibold text-white text-sm">{spec.name}</p>
-                  <p className="text-blue-200 text-xs mt-0.5">{spec.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.section>
-
-        {/* Why Choose */}
-        <section>
-          <h2 className="text-2xl font-bold text-navy text-center mb-8">Why Choose Our Observership?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {whyCards.map((card, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="text-center bg-white rounded-2xl p-6 shadow-md border border-slate-100"
-              >
-                <div className="text-4xl mb-4">{card.icon}</div>
-                <h3 className="font-bold text-navy mb-2">{card.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">{card.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        {/* Hospital Partners */}
-        {observership?.partnerHospitals && observership.partnerHospitals.length > 0 && (
+        {content.points?.length > 0 && (
           <section>
-            <h2 className="text-2xl font-bold text-navy text-center mb-8">Our Hospital Partners</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {observership.partnerHospitals.map((hospital, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
-                  className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-shadow"
-                >
-                  {hospital.logoUrl ? (
-                    <img src={hospital.logoUrl} alt={hospital.name} loading="lazy" className="h-12 object-contain" />
-                  ) : (
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                        <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </div>
-                  )}
-                  <p className="text-xs font-semibold text-navy text-center">{hospital.name}</p>
+            <h2 className="text-2xl font-bold text-[#1e3a5f] text-center mb-8">{content.pointsTitle}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {content.points.map((point, i) => (
+                <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="group bg-white rounded-2xl p-6 shadow-md border border-slate-100 hover:border-blue-200 transition-all hover:shadow-xl">
+                  <div className="text-4xl mb-4">{sectionIcons[i % 3]}</div>
+                  <h3 className="font-bold text-[#1e3a5f] text-lg mb-2 group-hover:text-blue-700 transition-colors">{point.pointText}</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed">{point.description}</p>
                 </motion.div>
               ))}
             </div>
           </section>
         )}
 
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center bg-amber-50 border border-amber-200 rounded-3xl p-10"
-        >
-          <h2 className="text-2xl font-bold text-navy mb-3">Interested in the Observership Program?</h2>
-          <p className="text-slate-500 text-sm mb-6">Limited seats available each batch. Contact us now to register your interest.</p>
-          <a
-            href="https://wa.me/917738230335?text=I%20am%20interested%20in%20the%20Orion%20Observership%20Program"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-8 py-4 rounded-full transition-all text-sm shadow-lg"
-          >
-            Enquire on WhatsApp
-          </a>
-        </motion.div>
+        {content.gridItems?.length > 0 && (
+          <motion.section initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-gradient-to-br from-[#1e3a5f] to-blue-700 rounded-3xl p-8 sm:p-12 text-white">
+            <h2 className="text-2xl font-bold mb-2">{content.gridTitle}</h2>
+            <p className="text-blue-200 text-sm mb-8">{content.gridDescription}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {content.gridItems.map((item, i) => (
+                <div key={i} className="flex items-start gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                  <svg className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <p className="font-semibold text-white text-sm">{item.title}</p>
+                    <p className="text-blue-200 text-xs mt-0.5">{item.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.section>
+        )}
+
+        {content.bottomItems?.length > 0 && (
+          <section>
+            <h2 className="text-2xl font-bold text-[#1e3a5f] text-center mb-8">{content.bottomTitle}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {content.bottomItems.map((item, i) => (
+                <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="text-center bg-white rounded-2xl p-6 shadow-md border border-slate-100">
+                  <div className="text-4xl mb-4">{sectionIcons[(i % 3) + 3]}</div>
+                  <h3 className="font-bold text-[#1e3a5f] mb-2">{item.title}</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed">{item.description}</p>
+                </motion.div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {content.finalTitle && (
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center bg-amber-50 border border-amber-200 rounded-3xl p-10">
+            <h2 className="text-2xl font-bold text-[#1e3a5f] mb-3">{content.finalTitle}</h2>
+            <p className="text-slate-500 text-sm mb-6">{content.finalDescription}</p>
+            <a href={`https://wa.me/${waNumber}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold px-8 py-4 rounded-full transition-all text-sm shadow-lg shadow-green-100 hover:scale-105 active:scale-95">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              {content.finalButtonLabel}
+            </a>
+          </motion.div>
+        )}
+
       </div>
     </div>
   );

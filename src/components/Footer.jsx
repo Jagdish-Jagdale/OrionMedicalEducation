@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { getHomeContent, getContactPageData } from '../firebase/firestore';
 import orionLogo from '../assets/orionfullrmbg.png';
 import russiaFlag from '../assets/flags/russiaflag.png';
 import georgiaFlag from '../assets/flags/georgiaflag.png';
@@ -11,6 +12,23 @@ import uzbekistanFlag from '../assets/flags/uzbekistanflag.png';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [waNumber, setWaNumber] = useState('');
+  const [contactData, setContactData] = useState(null);
+  const [countryCount, setCountryCount] = useState('4');
+
+  useEffect(() => {
+    getHomeContent().then((data) => {
+      if (data && data.whatsappNumber) {
+        setWaNumber(data.whatsappNumber.replace(/\s+/g, ''));
+      }
+      if (data && data.aboutStat3Count) {
+        setCountryCount(data.aboutStat3Count);
+      }
+    });
+    getContactPageData().then((data) => {
+      if (data) setContactData(data);
+    });
+  }, []);
 
   const marqueeData = [
     { country: "RUSSIA", accent: "text-blue-700", flagUrl: russiaFlag },
@@ -23,18 +41,28 @@ const Footer = () => {
   return (
     <footer className="bg-gradient-to-br from-[#0a1a3a] via-[#1e3a6e] to-[#2563eb] text-white mt-16 shadow-[0_-4px_30px_rgba(0,0,0,0.6)] border-t border-white/10 relative overflow-hidden">
       {/* Running Marquee / Special Offers Stripe */}
+      <style>
+        {`
+          @keyframes marquee {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0); }
+          }
+          .marquee-container {
+            display: flex;
+            width: fit-content;
+            animation: marquee 35s linear infinite;
+            will-change: transform;
+          }
+          @media (max-width: 768px) {
+            .marquee-container {
+              animation: marquee 40s linear infinite;
+            }
+          }
+        `}
+      </style>
       <div className="bg-white border-b border-white/10 overflow-hidden py-5">
-        <motion.div
-          initial={{ x: "-50%" }}
-          animate={{ x: "0%" }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          className="flex whitespace-nowrap gap-6 items-center"
-        >
-          {[1, 2, 3, 4].map((set) => (
+        <div className="marquee-container flex whitespace-nowrap items-center">
+          {[1, 2, 3, 4, 5, 6].map((set) => (
             <div key={set} className="flex gap-6 items-center pr-6">
               {marqueeData.map((item, idx) => (
                 <React.Fragment key={idx}>
@@ -56,7 +84,7 @@ const Footer = () => {
               ))}
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pt-6 pb-12">
@@ -69,16 +97,16 @@ const Footer = () => {
               </div>
             </div>
             <p className="text-slate-400 text-sm leading-relaxed mb-4">
-              Your trusted custodian in the MBBS abroad journey. Guiding students to top medical universities across 4 countries.
+              Your trusted custodian in the MBBS abroad journey. Guiding students to top medical universities across {countryCount} countries.
             </p>
             <div className="flex items-center gap-3">
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 hover:bg-red-600 rounded-lg flex items-center justify-center transition-colors">
+              <a href={contactData?.youtube || "https://youtube.com"} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 hover:bg-red-600 rounded-lg flex items-center justify-center transition-colors">
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z" /></svg>
               </a>
-              <a href="https://www.instagram.com/orionmedicaleducation/" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 hover:bg-pink-600 rounded-lg flex items-center justify-center transition-colors">
+              <a href={contactData?.instagram || "https://www.instagram.com/orionmedicaleducation/"} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 hover:bg-pink-600 rounded-lg flex items-center justify-center transition-colors">
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" /></svg>
               </a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-colors">
+              <a href={contactData?.facebook || "https://facebook.com"} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-colors">
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
               </a>
             </div>
@@ -137,27 +165,35 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start gap-2 text-slate-400 text-sm">
                 <svg className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" strokeLinecap="round" strokeLinejoin="round" /><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                1st Floor, Bagga House, Prabhat Rd, next to Deccan Police Station, Deccan Gymkhana, Pune, Maharashtra 411004
+                {contactData?.address || '1st Floor, Bagga House, Prabhat Rd, next to Deccan Police Station, Deccan Gymkhana, Pune, Maharashtra 411004'}
               </li>
-              <li className="flex items-center gap-2 text-slate-400 text-sm">
-                <svg className="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                +91 77382 30335
-              </li>
-              <li className="flex items-center gap-2 text-slate-400 text-sm">
-                <svg className="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                +91 96840 20344
-              </li>
-              <li className="flex items-center gap-2 text-slate-400 text-sm">
-                <svg className="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                info@orionmedicaleducation.com
-              </li>
-              <li className="flex items-center gap-2 text-slate-400 text-sm">
-                <svg className="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                admission@orionmedicaleducation.com
-              </li>
+              {contactData?.phone1 && (
+                <li className="flex items-center gap-2 text-slate-400 text-sm">
+                  <svg className="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  <a href={`tel:${contactData.phone1.replace(/\s+/g, '')}`} className="hover:text-amber-400 transition-colors">{contactData.phone1}</a>
+                </li>
+              )}
+              {contactData?.phone2 && (
+                <li className="flex items-center gap-2 text-slate-400 text-sm">
+                  <svg className="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  <a href={`tel:${contactData.phone2.replace(/\s+/g, '')}`} className="hover:text-amber-400 transition-colors">{contactData.phone2}</a>
+                </li>
+              )}
+              {contactData?.email1 && (
+                <li className="flex items-center gap-2 text-slate-400 text-sm">
+                  <svg className="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  <a href={`mailto:${contactData.email1}`} className="hover:text-amber-400 transition-colors">{contactData.email1}</a>
+                </li>
+              )}
+              {contactData?.email2 && (
+                <li className="flex items-center gap-2 text-slate-400 text-sm">
+                  <svg className="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  <a href={`mailto:${contactData.email2}`} className="hover:text-amber-400 transition-colors">{contactData.email2}</a>
+                </li>
+              )}
             </ul>
             <a
-              href="https://wa.me/917738230335"
+              href={`https://wa.me/${waNumber}`}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-5 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-normal px-4 py-2.5 rounded-xl transition-all"
@@ -172,15 +208,7 @@ const Footer = () => {
           <p className="text-slate-500 text-sm">
             © {currentYear} Orion Medical Education. All rights reserved.
           </p>
-          <Link
-            to="/privacy-policy"
-            className="text-slate-400 hover:text-amber-400 text-sm transition-colors flex items-center gap-1.5"
-          >
-            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-              <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Privacy Policy
-          </Link>
+
           <p className="text-slate-400 text-xs italic">
             Your Dream. Our Responsibility.
           </p>

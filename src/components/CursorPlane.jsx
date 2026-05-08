@@ -11,6 +11,7 @@ const CursorPlane = () => {
     const [isClicking, setIsClicking] = useState(false);
     const [isMovingLeft, setIsMovingLeft] = useState(false);
     const [isDarkTheme, setIsDarkTheme] = useState(true); // Default to dark (white cursor)
+    const [navbarScrolled, setNavbarScrolled] = useState(false);
     
     const mouseX = useMotionValue(-100);
     const mouseY = useMotionValue(-100);
@@ -33,45 +34,76 @@ const CursorPlane = () => {
     const angleOffset = useRef(0);
     const lastThemeCheck = useRef(0);
 
-    // Helpers for background detection
-    const getBackgroundColor = (el) => {
-        // Check if cursor is over a video/img or inside a dark-themed container
-        const originEl = el;
-        if (originEl && (originEl.tagName === 'VIDEO' || originEl.tagName === 'IMG' || originEl.closest('video, .dark-cursor-zone'))) {
-            return 'rgb(30, 30, 30)'; // Dark — use white cursor
+    // Track navbar scroll state directly
+    useEffect(() => {
+        const handleNavScroll = () => setNavbarScrolled(window.scrollY > 20);
+        window.addEventListener('scroll', handleNavScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleNavScroll);
+    }, []);
+
+    // Theme detection: scroll-aware + element-aware
+    const getIsDarkTheme = (x, y) => {
+        const NAVBAR_HEIGHT = 80;
+
+        // --- Navbar zone (top 80px): read data-cursor-dark directly from nav element ---
+        if (y <= NAVBAR_HEIGHT) {
+            const nav = document.querySelector('nav');
+            const navIsWhite = nav && nav.hasAttribute('data-cursor-dark');
+            return !navIsWhite; // white cursor when nav is blue, black cursor when nav is white
         }
 
-        while (el && el !== document.body) {
-            const style = window.getComputedStyle(el);
-            const bg = style.backgroundColor;
+        // --- Below navbar: check the element under cursor ---
+        const el = document.elementFromPoint(x, y);
+        if (!el) return !navbarScrolled;
+
+        // Explicit light override
+        if (el.closest('[data-cursor-dark]')) return false;
+
+        // Video / image / dark zone
+        if (el.tagName === 'VIDEO' || el.tagName === 'IMG' || el.closest('.dark-cursor-zone')) return true;
+
+        // Walk up the DOM looking for a meaningful background
+        let node = el;
+        while (node && node !== document.body) {
+            const style = window.getComputedStyle(node);
+            const bg  = style.backgroundColor;
             const bgi = style.backgroundImage;
 
-            // Gradient detection: treat as light background for black cursor
-            if (bgi && bgi.includes('gradient')) return 'rgb(230, 235, 245)'; 
-            
-            if (bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent' && bg !== '') return bg;
-            el = el.parentElement;
+            if (bgi && bgi.includes('gradient')) {
+                // Average the RGB stops of the gradient to detect dark vs light
+                const stops = bgi.match(/rgba?\([^)]+\)/g) || [];
+                if (stops.length > 0) {
+                    let sum = 0;
+                    stops.forEach(c => {
+                        const p = c.match(/\d+/g);
+                        if (p && p.length >= 3) {
+                            sum += (parseInt(p[0]) * 299 + parseInt(p[1]) * 587 + parseInt(p[2]) * 114) / 1000;
+                        }
+                    });
+                    return (sum / stops.length) < 160;
+                }
+            }
+
+            if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+                const p = bg.match(/\d+/g);
+                if (p && p.length >= 3) {
+                    const brightness = (parseInt(p[0]) * 299 + parseInt(p[1]) * 587 + parseInt(p[2]) * 114) / 1000;
+                    return brightness < 160;
+                }
+            }
+            node = node.parentElement;
         }
-        return window.getComputedStyle(document.body).backgroundColor || 'rgb(230, 235, 245)';
+
+        // Default: hero section before any scroll = white cursor
+        return window.scrollY < 20;
     };
 
-    const checkIsDark = (color) => {
-        const rgb = color.match(/\d+/g);
-        if (!rgb || rgb.length < 3) return true;
-        // Perceived brightness formula
-        const brightness = (parseInt(rgb[0]) * 299 + parseInt(rgb[1]) * 587 + parseInt(rgb[2]) * 114) / 1000;
-        return brightness < 160; 
-    };
 
     useEffect(() => {
         const updateTheme = (x, y) => {
             const now = Date.now();
-            if (now - lastThemeCheck.current > 100) {
-                const el = document.elementFromPoint(x, y);
-                if (el) {
-                    const bgColor = getBackgroundColor(el);
-                    setIsDarkTheme(checkIsDark(bgColor));
-                }
+            if (now - lastThemeCheck.current > 80) {
+                setIsDarkTheme(getIsDarkTheme(x, y));
                 lastThemeCheck.current = now;
             }
         };

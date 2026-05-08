@@ -6,6 +6,7 @@ const NeuralReviewCard = ({ review, position, isLeft, style }) => {
       style={style}
       className={`${position} z-30 w-full p-2 lg:p-5 bg-white rounded-lg lg:rounded-3xl border border-slate-100 shadow-[0_10px_40px_rgba(0,0,0,0.04)] group hover:shadow-[0_20px_50px_rgba(239,68,68,0.1)] transition-all border-l-[3px] lg:border-l-4 ${isLeft ? 'border-l-red-500' : 'border-l-amber-500'}`}
     >
+
       <div className="flex items-center gap-1.5 lg:gap-3 mb-1 lg:mb-4">
         <div className="w-6 h-6 lg:w-11 lg:h-11 rounded-md border border-slate-100 p-0.5 overflow-hidden flex-shrink-0 group-hover:border-red-400 transition-colors shadow-sm">
           <img 

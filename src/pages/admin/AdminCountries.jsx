@@ -7,24 +7,27 @@ import PageTitle from '../../components/PageTitle';
 import DeleteModal from '../../components/admin/DeleteModal';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const emptyUniversity = { 
-  name: '', 
-  image: '', 
-  description: '', 
-  highlightText: '', 
-  points: ['', '', ''] 
+const emptyUniversity = {
+  name: '',
+  image: '',
+  description: '',
+  highlightText: '',
+  points: ['', '', '']
 };
 
-const emptyCountry = { 
-  name: '', 
-  flag: '', 
-  title: '', 
-  subtitle: '', 
-  description: '', 
-  whyChooseUs: ['', '', ''], 
-  globalRecognitionDescription: '', 
-  globalRecognition: ['', '', ''], 
-  universities: [] 
+const emptyCountry = {
+  name: '',
+  flag: '',
+  title: '',
+  subtitle: '',
+  description: '',
+  whyChooseUs: ['', '', ''],
+  recognitionTitle: 'Global Recognition',
+  globalRecognitionDescription: '',
+  globalRecognition: ['', '', ''],
+  universitiesTitle: 'Universities Registry',
+  flagPosition: 'top left',
+  universities: []
 };
 
 const AdminCountries = () => {
@@ -76,9 +79,9 @@ const AdminCountries = () => {
     } else {
       updated[editIndex] = tempCountry;
     }
-    
+
     setSaving(true);
-    
+
     try {
       await saveAdminCountries(updated);
       setEntries(updated);
@@ -119,16 +122,16 @@ const AdminCountries = () => {
   };
 
   const addUniversity = () => {
-    setTempCountry(prev => ({ 
-      ...prev, 
-      universities: [...(prev.universities || []), JSON.parse(JSON.stringify(emptyUniversity))] 
+    setTempCountry(prev => ({
+      ...prev,
+      universities: [...(prev.universities || []), JSON.parse(JSON.stringify(emptyUniversity))]
     }));
   };
 
   const removeUniversityLocal = (uniIdx) => {
-    setTempCountry(prev => ({ 
-      ...prev, 
-      universities: prev.universities.filter((_, i) => i !== uniIdx) 
+    setTempCountry(prev => ({
+      ...prev,
+      universities: prev.universities.filter((_, i) => i !== uniIdx)
     }));
   };
 
@@ -177,11 +180,28 @@ const AdminCountries = () => {
     }
   };
 
+  const saveAction = (
+    <button
+      onClick={handleFinalSave}
+      disabled={saving || loading || !hasChanges}
+      className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg shadow-lg shadow-blue-200 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 min-w-[100px] text-sm"
+    >
+      {saving ? (
+        <>
+          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          Saving...
+        </>
+      ) : (
+        'Save'
+      )}
+    </button>
+  );
+
   return (
     <>
-      <AdminLayout title="Destination Management" isDirty={hasChanges}>
+      <AdminLayout title="Destination Management" isDirty={hasChanges} actions={saveAction}>
         <PageTitle title="Admin | Countries" />
-        
+
         <div className="space-y-6">
           {/* Header Controls */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
@@ -190,21 +210,12 @@ const AdminCountries = () => {
               <p className="text-slate-500 text-xs font-medium">Manage destinations and university details</p>
             </div>
             <div className="flex items-center gap-3">
-              <button 
+              <button
                 onClick={openAddModal}
                 className="flex items-center gap-2 bg-slate-50 hover:bg-white border border-slate-200 hover:border-blue-600 text-slate-900 hover:text-blue-600 font-bold px-6 py-3 rounded-2xl text-sm transition-all shadow-sm hover:shadow-xl active:scale-95"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
                 Add New Country
-              </button>
-              <button 
-                onClick={handleFinalSave}
-                disabled={saving || loading || !hasChanges}
-                className="disabled:opacity-50 disabled:cursor-not-allowed text-white font-black px-8 py-3 rounded-2xl text-[11px] uppercase tracking-widest transition-all shadow-xl shadow-blue-200 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)' }}
-              >
-                {saving && <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
-                {saving ? 'Syncing...' : 'Save All Changes'}
               </button>
             </div>
           </div>
@@ -235,15 +246,15 @@ const AdminCountries = () => {
                       </td>
                     </tr>
                   ) : entries.map((country, i) => (
-                    <tr 
-                      key={i} 
+                    <tr
+                      key={i}
                       onClick={() => openEditModal(i)}
                       className="group hover:bg-blue-50/30 cursor-pointer transition-colors"
                     >
                       <td className="px-8 py-5">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shadow-inner group-hover:border-blue-200 group-hover:bg-blue-50 transition-all">
-                            {country.flag ? <img src={country.flag} alt="" className="w-full h-full object-cover" /> : <span className="text-slate-300 font-black">#{(i+1)}</span>}
+                            {country.flag ? <img src={country.flag} alt="" className="w-full h-full object-cover" /> : <span className="text-slate-300 font-black">#{(i + 1)}</span>}
                           </div>
                           <div>
                             <p className="text-slate-900 font-black text-sm">{country.name || 'Untitled Country'}</p>
@@ -261,17 +272,17 @@ const AdminCountries = () => {
                       </td>
                       <td className="px-8 py-5 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button 
+                          <button
                             onClick={(e) => { e.stopPropagation(); openEditModal(i); }}
                             className="p-2.5 rounded-xl text-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm hover:shadow-lg active:scale-90"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"/></svg>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
                           </button>
-                          <button 
+                          <button
                             onClick={(e) => { e.stopPropagation(); removeEntry(i); }}
                             className="p-2.5 rounded-xl text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-sm hover:shadow-lg active:scale-90"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"/></svg>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
                           </button>
                         </div>
                       </td>
@@ -288,15 +299,15 @@ const AdminCountries = () => {
       <AnimatePresence>
         {isModalOpen && tempCountry && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 lg:p-8">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsModalOpen(false)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" 
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
             />
-            
-            <motion.div 
+
+            <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -306,181 +317,206 @@ const AdminCountries = () => {
               <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                 <div className="flex items-center gap-5">
                   <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-xl shadow-blue-200">
-                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg>
+                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
                   </div>
                   <div>
-                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">{editIndex === -1 ? 'Add New Client' : `Edit ${tempCountry.name}`}</h2>
+                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">{editIndex === -1 ? 'Add New Country' : `Edit ${tempCountry.name}`}</h2>
                     <p className="text-slate-500 text-[11px] font-black uppercase tracking-widest mt-1">Configure Destination Details</p>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => setIsModalOpen(false)}
                   className="p-3 rounded-2xl hover:bg-slate-100 text-slate-400 transition-colors"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3"/></svg>
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" /></svg>
                 </button>
               </div>
 
               {/* Modal Content */}
               <div className="flex-1 overflow-y-auto p-8 sm:p-10 space-y-12">
-                
-                {/* Top Row: Flag & Country Identity */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-                  <div className="md:col-span-4 lg:col-span-3">
-                    <div className="bg-slate-50 p-4 rounded-3xl border border-slate-100 flex flex-col items-center gap-4">
-                      <div className="w-20 h-20 rounded-2xl bg-white border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0 relative group">
-                        {tempCountry.flag ? (
-                          <img src={tempCountry.flag} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg>
-                        )}
-                        <label className="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg>
-                          <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e.target.files[0], 'flags', (url) => handleTempChange('flag', url), 'modal_flag')} className="hidden" />
-                        </label>
+
+                {/* 1. Identity & Hero Card */}
+                <div className="bg-slate-50/50 rounded-[2rem] p-8 border border-slate-100 space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                    <div className="md:col-span-4 lg:col-span-3">
+                      <div className="bg-white p-4 rounded-3xl border border-slate-100 flex flex-col items-center gap-4 shadow-sm">
+                        <div className="w-20 h-20 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0 relative group">
+                          {tempCountry.flag ? (
+                            <img src={tempCountry.flag} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
+                          )}
+                          <label className="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
+                            <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e.target.files[0], 'flags', (url) => handleTempChange('flag', url), 'modal_flag')} className="hidden" />
+                          </label>
+                        </div>
+                        <div className="w-full space-y-2">
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center block">Flag Image URL</label>
+                          <input value={tempCountry.flag} onChange={(e) => handleTempChange('flag', e.target.value)} placeholder="URL..." className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[10px] font-bold outline-none focus:border-blue-500" />
+                          {uploadProgress['modal_flag'] && <div className="h-1 bg-blue-100 rounded-full overflow-hidden"><div className="h-full bg-blue-600 transition-all" style={{ width: `${uploadProgress['modal_flag']}%` }}></div></div>}
+                        </div>
+                        
+                        <div className="w-full space-y-1.5 pt-2 border-t border-slate-100">
+                          <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest text-center block">Flag & Name Position</label>
+                          <select 
+                            value={tempCountry.flagPosition || 'top left'} 
+                            onChange={(e) => handleTempChange('flagPosition', e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-[10px] font-black uppercase tracking-wider outline-none focus:border-blue-500 cursor-pointer hover:bg-slate-50 transition-colors"
+                          >
+                            <option value="top left">Top Left</option>
+                            <option value="top right">Top Right</option>
+                            <option value="bottom">Bottom</option>
+                            <option value="bottom left">Bottom Left</option>
+                            <option value="bottom right">Bottom Right</option>
+                          </select>
+                        </div>
                       </div>
-                      <div className="w-full space-y-2">
-                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center block">Flag Image URL</label>
-                        <input value={tempCountry.flag} onChange={(e) => handleTempChange('flag', e.target.value)} placeholder="URL..." className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[10px] font-bold outline-none focus:border-blue-500" />
-                        {uploadProgress['modal_flag'] && <div className="h-1 bg-blue-100 rounded-full overflow-hidden"><div className="h-full bg-blue-600 transition-all" style={{ width: `${uploadProgress['modal_flag']}%` }}></div></div>}
+                    </div>
+
+                    <div className="md:col-span-8 lg:col-span-9 grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Country Name *</label>
+                        <input value={tempCountry.name} onChange={(e) => handleTempChange('name', e.target.value)} placeholder="e.g. Russia" className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Hero Title</label>
+                        <input value={tempCountry.title} onChange={(e) => handleTempChange('title', e.target.value)} placeholder="e.g. Study MBBS in Russia" className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all" />
+                      </div>
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Subtitle</label>
+                        <input value={tempCountry.subtitle} onChange={(e) => handleTempChange('subtitle', e.target.value)} placeholder="e.g. World Class Medical Education" className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all" />
+                      </div>
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Country Description</label>
+                        <textarea value={tempCountry.description} onChange={(e) => handleTempChange('description', e.target.value)} rows={3} placeholder="Tell about the country's education..." className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all resize-none" />
                       </div>
                     </div>
                   </div>
 
-                  <div className="md:col-span-8 lg:col-span-9 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Country Name *</label>
-                      <input value={tempCountry.name} onChange={(e) => handleTempChange('name', e.target.value)} placeholder="e.g. Russia" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all" />
+                  <hr className="border-slate-100" />
+                  
+                  {/* Why Choose Us within first card */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Why Choose Us Section</label>
+                      <button onClick={() => addPointToTemp('whyChooseUs')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:bg-blue-50 px-4 py-2 rounded-lg transition-all">+ Add Point</button>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Hero Title</label>
-                      <input value={tempCountry.title} onChange={(e) => handleTempChange('title', e.target.value)} placeholder="e.g. Study MBBS in Russia" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all" />
-                    </div>
-                    <div className="md:col-span-2 space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Subtitle</label>
-                      <input value={tempCountry.subtitle} onChange={(e) => handleTempChange('subtitle', e.target.value)} placeholder="e.g. World Class Medical Education" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all" />
-                    </div>
-                    <div className="md:col-span-2 space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Country Description</label>
-                      <textarea value={tempCountry.description} onChange={(e) => handleTempChange('description', e.target.value)} rows={3} placeholder="Tell about the country's education..." className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all resize-none" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {tempCountry.whyChooseUs?.map((point, pIdx) => (
+                        <div key={pIdx} className="relative group">
+                          <input value={point} onChange={(e) => handleTempArrayChange('whyChooseUs', pIdx, e.target.value)} placeholder={`Point ${pIdx + 1}`} className="w-full bg-white border border-slate-200 rounded-xl px-5 py-3.5 text-xs font-bold outline-none focus:border-blue-500 transition-all pr-12" />
+                          <button onClick={() => removePointFromTemp('whyChooseUs', pIdx)} className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100">
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
 
-                <hr className="border-slate-50" />
-
-                {/* 3. Global Recognition */}
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Global Recognition Overview</label>
-                    <textarea value={tempCountry.globalRecognitionDescription} onChange={(e) => handleTempChange('globalRecognitionDescription', e.target.value)} rows={3} placeholder="Intro text for recognition section..." className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all resize-none" />
+                {/* 2. Secondary Information Card */}
+                <div className="bg-slate-50/50 rounded-[2rem] p-8 border border-slate-100 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Section Title</label>
+                      <input value={tempCountry.recognitionTitle || ''} onChange={(e) => handleTempChange('recognitionTitle', e.target.value)} placeholder="e.g. Global Recognition" className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Section Description</label>
+                      <textarea value={tempCountry.globalRecognitionDescription} onChange={(e) => handleTempChange('globalRecognitionDescription', e.target.value)} rows={1} placeholder="Intro text for this section..." className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all resize-none" />
+                    </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {[0, 1, 2].map((idx) => (
                       <div key={idx} className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Recognition Point {idx+1}</label>
-                        <textarea value={tempCountry.globalRecognition?.[idx] || ''} onChange={(e) => handleTempArrayChange('globalRecognition', idx, e.target.value)} rows={3} placeholder="..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:border-blue-500 transition-all resize-none" />
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Point {idx + 1}</label>
+                        <input value={tempCountry.globalRecognition?.[idx] || ''} onChange={(e) => handleTempArrayChange('globalRecognition', idx, e.target.value)} placeholder="..." className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:border-blue-500 transition-all" />
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <hr className="border-slate-50" />
-
-                {/* 4. Why Choose Us */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Why Choose Us / Key Benefits</label>
-                    <button onClick={() => addPointToTemp('whyChooseUs')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:bg-blue-50 px-4 py-2 rounded-lg transition-all">+ Add Benefit Point</button>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {tempCountry.whyChooseUs?.map((point, pIdx) => (
-                      <div key={pIdx} className="relative group">
-                        <input value={point} onChange={(e) => handleTempArrayChange('whyChooseUs', pIdx, e.target.value)} placeholder={`Benefit ${pIdx + 1}`} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-5 py-3.5 text-xs font-bold outline-none focus:border-blue-500 transition-all pr-12" />
-                        <button onClick={() => removePointFromTemp('whyChooseUs', pIdx)} className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100">
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"/></svg>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <hr className="border-slate-50" />
-
-                {/* 5. Universities Section */}
-                <div className="space-y-8">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-sm font-black text-slate-900 uppercase tracking-[0.2em] flex items-center gap-3">
-                        <span className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white text-xs shadow-lg shadow-blue-100">🎓</span> Universities Registry
-                      </h3>
-                      <p className="text-slate-400 text-[10px] font-medium mt-1">Manage individual medical institutions in this country.</p>
+                {/* 3. Universities Registry Card */}
+                <div className="bg-white rounded-[2rem] p-8 border-2 border-slate-100 space-y-8 shadow-sm">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-slate-50">
+                    <div className="flex-1 w-full space-y-2">
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Registry Heading</label>
+                      <input 
+                        value={tempCountry.universitiesTitle || ''} 
+                        onChange={(e) => handleTempChange('universitiesTitle', e.target.value)} 
+                        placeholder="e.g. Universities Registry" 
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 text-lg font-black tracking-tight focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all" 
+                      />
                     </div>
-                    <button onClick={addUniversity} className="bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest px-5 py-2.5 rounded-xl hover:bg-blue-600 transition-all shadow-lg active:scale-95 flex items-center gap-2">
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3"/></svg>
-                      Register New Uni
+                    <button onClick={addUniversity} className="bg-blue-600 text-white text-[10px] font-black uppercase tracking-[0.1em] px-8 py-5 rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 active:scale-95 flex items-center gap-3 self-end md:self-center">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" /></svg>
+                      Add University
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-6">
+                  <div className="grid grid-cols-1 gap-12">
                     {tempCountry.universities?.map((uni, uIdx) => (
-                      <div key={uIdx} className="bg-slate-50 rounded-[2rem] p-6 sm:p-8 border border-slate-100 relative group/uni">
-                        <button 
+                      <div key={uIdx} className="bg-slate-50 rounded-[2.5rem] p-8 sm:p-10 border border-slate-200 relative group/uni shadow-sm hover:shadow-md transition-shadow">
+                        <button
                           onClick={() => removeUniversityLocal(uIdx)}
-                          className="absolute top-4 right-4 p-2 text-slate-300 hover:text-red-500 opacity-0 group-hover/uni:opacity-100 transition-all"
+                          className="absolute top-6 right-6 p-3 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-2xl opacity-0 group-hover/uni:opacity-100 transition-all"
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"/></svg>
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" /></svg>
                         </button>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
                           {/* Uni Left: Meta */}
-                          <div className="md:col-span-3 space-y-4">
-                            <div className="w-full h-40 rounded-2xl bg-white border border-slate-200 overflow-hidden relative group/img">
+                          <div className="md:col-span-4 lg:col-span-3 space-y-4">
+                            <div className="w-full h-48 rounded-3xl bg-white border-2 border-dashed border-slate-200 overflow-hidden relative group/img">
                               {uni.image ? (
                                 <img src={uni.image} alt="" className="w-full h-full object-cover" />
                               ) : (
                                 <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-2">
-                                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg>
-                                  <span className="text-[10px] font-black uppercase tracking-widest">No Image</span>
+                                  <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
+                                  <span className="text-[10px] font-black uppercase tracking-widest">Upload Image</span>
                                 </div>
                               )}
                               <label className="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity cursor-pointer">
-                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg>
+                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
                                 <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e.target.files[0], 'universities', (url) => handleUniChange(uIdx, 'image', url), `uni_${uIdx}_img`)} className="hidden" />
                               </label>
                             </div>
                             {uploadProgress[`uni_${uIdx}_img`] && <div className="h-1 bg-blue-100 rounded-full overflow-hidden"><div className="h-full bg-blue-600 transition-all" style={{ width: `${uploadProgress[`uni_${uIdx}_img`]}%` }}></div></div>}
-                            <input value={uni.image} onChange={(e) => handleUniChange(uIdx, 'image', e.target.value)} placeholder="Direct Image URL" className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold outline-none" />
+                            <div className="space-y-1.5">
+                              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">University Image URL</label>
+                              <input value={uni.image} onChange={(e) => handleUniChange(uIdx, 'image', e.target.value)} placeholder="Direct URL..." className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold outline-none focus:border-blue-500" />
+                            </div>
                           </div>
 
                           {/* Uni Right: Info */}
-                          <div className="md:col-span-9 grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="md:col-span-8 lg:col-span-9 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">University Name</label>
-                              <input value={uni.name} onChange={(e) => handleUniChange(uIdx, 'name', e.target.value)} placeholder="e.g. Kazan Federal University" className="w-full bg-white border border-slate-200 rounded-xl px-5 py-3 text-xs font-bold outline-none focus:border-blue-500 transition-all" />
+                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Name of University</label>
+                              <input value={uni.name} onChange={(e) => handleUniChange(uIdx, 'name', e.target.value)} placeholder="e.g. Kazan Federal University" className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-blue-500 transition-all" />
                             </div>
                             <div className="space-y-2">
-                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Highlight Badge</label>
-                              <input value={uni.highlightText} onChange={(e) => handleUniChange(uIdx, 'highlightText', e.target.value)} placeholder="e.g. 150+ Years Old" className="w-full bg-blue-50 text-blue-700 border border-blue-100 rounded-xl px-5 py-3 text-xs font-black outline-none transition-all placeholder:text-blue-300" />
+                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">University Highlight</label>
+                              <textarea value={uni.highlightText} onChange={(e) => handleUniChange(uIdx, 'highlightText', e.target.value)} rows={2} placeholder="e.g. 150+ Years Old medical tradition..." className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-blue-500 transition-all resize-none" />
                             </div>
                             <div className="md:col-span-2 space-y-2">
-                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Description</label>
-                              <textarea value={uni.description} onChange={(e) => handleUniChange(uIdx, 'description', e.target.value)} rows={3} placeholder="Detailed intro about the campus, history..." className="w-full bg-white border border-slate-200 rounded-xl px-5 py-3 text-xs font-bold outline-none focus:border-blue-500 transition-all resize-none" />
+                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Information</label>
+                              <textarea value={uni.description} onChange={(e) => handleUniChange(uIdx, 'description', e.target.value)} rows={4} placeholder="Detailed intro about campus life, academics..." className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-blue-500 transition-all resize-none" />
                             </div>
-                            
-                            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
                               {[0, 1, 2].map((pIdx) => (
-                                <div key={pIdx} className="space-y-1.5">
-                                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">USP {pIdx+1}</label>
-                                  <input 
-                                    value={uni.points?.[pIdx] || ''} 
+                                <div key={pIdx} className="space-y-2">
+                                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Point {pIdx + 1}</label>
+                                  <input
+                                    value={uni.points?.[pIdx] || ''}
                                     onChange={(e) => {
                                       const ps = [...uni.points];
                                       ps[pIdx] = e.target.value;
                                       handleUniChange(uIdx, 'points', ps);
-                                    }} 
-                                    placeholder="Key benefit..." 
-                                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold outline-none focus:border-blue-500" 
+                                    }}
+                                    placeholder="Key benefit..."
+                                    className="w-full bg-white border border-slate-200 rounded-xl px-5 py-3 text-xs font-bold outline-none focus:border-blue-500 transition-all"
                                   />
                                 </div>
                               ))}
@@ -501,13 +537,13 @@ const AdminCountries = () => {
 
               {/* Modal Footer */}
               <div className="p-8 border-t border-slate-100 flex items-center justify-end gap-4 bg-slate-50/50">
-                <button 
+                <button
                   onClick={() => setIsModalOpen(false)}
                   className="px-8 py-3 text-sm font-black text-slate-400 uppercase tracking-widest hover:text-slate-600 transition-colors"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   onClick={saveModalToState}
                   disabled={saving}
                   className="disabled:opacity-50 disabled:cursor-not-allowed text-white font-black px-10 py-4 rounded-2xl text-[11px] uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-100 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
@@ -522,9 +558,9 @@ const AdminCountries = () => {
         )}
       </AnimatePresence>
 
-      <DeleteModal 
-        isOpen={deleteModal.isOpen} 
-        onClose={() => setDeleteModal({ isOpen: false, countryIndex: null, uniIndex: null, itemName: '' })} 
+      <DeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, countryIndex: null, uniIndex: null, itemName: '' })}
         onConfirm={confirmDelete}
         title="Confirm Deletion"
         message={

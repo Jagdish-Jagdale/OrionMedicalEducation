@@ -21,12 +21,12 @@ const WelcomeBanner = () => {
             document.body.style.overflow = 'hidden';
 
             // Sequence Timing:
-            // 0-1.5: Black
-            // 1.5-4.5: Logo phase
-            // 5.0: Fade out to home
+            // 0-1.0: Gradient Background Reveal
+            // 1.0-4.0: Logo phase (2s full visibility)
+            // 4.5: Fade out to home
             const timer = setTimeout(() => {
                 handleClose();
-            }, 5000);
+            }, 4500);
 
             return () => {
                 clearTimeout(timer);
@@ -87,7 +87,7 @@ const WelcomeBanner = () => {
                     className="fixed inset-0 z-[100] overflow-hidden flex items-center justify-center"
                     style={{ background: 'linear-gradient(135deg, #f8f9fc 0%, #eef1f8 40%, #e8ecf4 70%, #f0f2f8 100%)' }}
                 >
-                    {/* ── STAGE 1: LOGO REVEAL (1.5s - 4.5s) ────────────────── */}
+                    {/* ── STAGE 1: LOGO REVEAL (1.0s - 4.0s) ────────────────── */}
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{
@@ -95,9 +95,9 @@ const WelcomeBanner = () => {
                             scale: [0.95, 1, 1, 1.05],
                         }}
                         transition={{
-                            times: [0, 0.3, 0.7, 1],
+                            times: [0, 0.166, 0.833, 1],
                             duration: 3,
-                            delay: 1.5,
+                            delay: 1,
                             ease: "easeInOut"
                         }}
                         className="absolute z-20 pointer-events-none"

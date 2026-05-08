@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AdminSidebar from './AdminSidebar';
 
-const AdminLayout = ({ children, title, isDirty, dirtySections, onNavigate }) => {
+const AdminLayout = ({ children, title, isDirty, dirtySections, onNavigate, actions }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isMobileOpen, setMobileOpen] = useState(false);
 
@@ -40,8 +40,8 @@ const AdminLayout = ({ children, title, isDirty, dirtySections, onNavigate }) =>
             <h1 className="text-slate-900 font-bold text-xl tracking-tight">{title}</h1>
           </div>
 
-          <div className="flex items-center gap-3 invisible">
-            {/* User section removed per request */}
+          <div className="flex items-center gap-3">
+            {actions}
           </div>
         </header>
 

@@ -20,10 +20,10 @@ import uzbekistanFlag from '../assets/flags/uzbekistanflag.png';
 import kazakhstanFlag from '../assets/flags/kazakhstanflag.png';
 
 const countryMeta = [
-  { key: 'georgia', label: 'GEORGIA', slug: 'georgia', flag: georgiaFlag, pos: { top: '24%', left: '70%', dtTop: '18%', dtLeft: '82%' } },
-  { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: uzbekistanFlag, pos: { top: '92%', left: '50%', dtTop: '97%', dtLeft: '50%' } },
-  { key: 'kazakhstan', label: 'KAZAKHSTAN', slug: 'kazakhstan', flag: kazakhstanFlag, pos: { top: '76%', left: '70%', dtTop: '82%', dtLeft: '82%' } },
   { key: 'russia', label: 'RUSSIA', slug: 'russia', flag: russiaFlag, pos: { top: '24%', left: '30%', dtTop: '18%', dtLeft: '18%' } },
+  { key: 'georgia', label: 'GEORGIA', slug: 'georgia', flag: georgiaFlag, pos: { top: '24%', left: '70%', dtTop: '18%', dtLeft: '82%' } },
+  { key: 'kazakhstan', label: 'KAZAKHSTAN', slug: 'kazakhstan', flag: kazakhstanFlag, pos: { top: '76%', left: '70%', dtTop: '82%', dtLeft: '82%' } },
+  { key: 'uzbekistan', label: 'UZBEKISTAN', slug: 'uzbekistan', flag: uzbekistanFlag, pos: { top: '92%', left: '50%', dtTop: '97%', dtLeft: '50%' } },
   { key: 'kyrgyzstan', label: 'KYRGYZSTAN', slug: 'kyrgyzstan', flag: kyrgyzstanFlag, pos: { top: '76%', left: '30%', dtTop: '82%', dtLeft: '18%' } },
 ];
 
@@ -99,7 +99,7 @@ const Countries = () => {
         setSelectedCountry(targetCountry);
         // Small delay to ensure DOM is ready for scrolling
         setTimeout(() => {
-          const el = document.getElementById('guides-section');
+          const el = document.getElementById(targetCountry);
           if (el) {
             const navOffset = 120;
             const elementPosition = el.getBoundingClientRect().top;
@@ -108,7 +108,7 @@ const Countries = () => {
           }
         }, 100);
       }
-      
+
       // Clear state after handling to prevent repeated scrolling on refresh
       navigate(location.pathname, { replace: true, state: {} });
     }
@@ -116,7 +116,7 @@ const Countries = () => {
 
   const handleCountrySelection = (slug) => {
     setSelectedCountry(slug);
-    const el = document.getElementById('guides-section');
+    const el = document.getElementById(slug);
     if (el) {
       const navOffset = 100;
       const elementPosition = el.getBoundingClientRect().top;
@@ -133,7 +133,7 @@ const Countries = () => {
     <div className="min-h-screen bg-[#e0f2fe] pt-15 sm:pt-20">
       <PageTitle title="Countries" />
       {/* ── INTERACTIVE 3D GLOBE SECTION ─────────────────── */}
-      <div className="relative h-[50vh] sm:h-[85vh] pt-10 sm:pt-0 flex items-center justify-center overflow-hidden border-b border-slate-50 bg-[#e0f2fe]">
+      <div className="relative h-[50vh] sm:h-[85vh] pt-10 sm:pt-0 pb-8 sm:pb-10 flex items-center justify-center border-b border-slate-50 bg-[#e0f2fe]">
         {/* Background Pattern - Randomized Dots & Stars */}
         <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
           {backgroundDots.map((dot) => (
@@ -180,16 +180,16 @@ const Countries = () => {
             </defs>
             {countryMeta.map((country, i) => {
               // Responsive layout overrides for iPad/Tablets to prevent clipping and pull cards closer
-              const finalTop = isMobile 
-                ? country.pos.top 
-                : (isTablet 
-                    ? (country.slug === 'uzbekistan' ? '80%' : (parseFloat(country.pos.top) < 50 ? '28%' : '72%'))
-                    : country.pos.dtTop);
-              const finalLeft = isMobile 
-                ? country.pos.left 
-                : (isTablet 
-                    ? (country.slug === 'uzbekistan' ? '50%' : (parseFloat(country.pos.left) < 50 ? '26%' : '74%'))
-                    : country.pos.dtLeft);
+              const finalTop = isMobile
+                ? country.pos.top
+                : (isTablet
+                  ? (country.slug === 'uzbekistan' ? '80%' : (parseFloat(country.pos.top) < 50 ? '28%' : '72%'))
+                  : country.pos.dtTop);
+              const finalLeft = isMobile
+                ? country.pos.left
+                : (isTablet
+                  ? (country.slug === 'uzbekistan' ? '50%' : (parseFloat(country.pos.left) < 50 ? '26%' : '74%'))
+                  : country.pos.dtLeft);
 
               const x2_raw = parseFloat(finalLeft);
               const y2_raw = parseFloat(finalTop);
@@ -222,7 +222,7 @@ const Countries = () => {
               let x_end_final = x2_raw;
 
               if (isVerticalStraight) {
-                const vertOffset = isExtraSmall ? 2.0 : (isMediumMobile ? 1.0 : (isTablet ? 0.0 : 7.80));
+                const vertOffset = isExtraSmall ? 2.0 : (isMediumMobile ? 1.0 : (isTablet ? 5.0 : 10.0));
                 y_start_final = isTop ? y_start - vertOffset : y_start + vertOffset;
                 // Tiny balanced offset to prevent browser rendering glitch on vertical lines
                 x_start_final += 0.05;
@@ -300,16 +300,16 @@ const Countries = () => {
                 transition={{ duration: 0.6, delay: 0.5 + i * 0.15 }}
                 className="absolute z-40"
                 style={{
-                  top: isMobile 
-                    ? meta.pos.top 
-                    : (isTablet 
-                        ? (meta.slug === 'uzbekistan' ? '80%' : (isTop ? '28%' : '72%'))
-                        : meta.pos.dtTop),
-                  left: isMobile 
-                    ? meta.pos.left 
-                    : (isTablet 
-                        ? (meta.slug === 'uzbekistan' ? '50%' : (isLeft ? '26%' : '74%'))
-                        : meta.pos.dtLeft),
+                  top: isMobile
+                    ? meta.pos.top
+                    : (isTablet
+                      ? (meta.slug === 'uzbekistan' ? '80%' : (isTop ? '28%' : '72%'))
+                      : meta.pos.dtTop),
+                  left: isMobile
+                    ? meta.pos.left
+                    : (isTablet
+                      ? (meta.slug === 'uzbekistan' ? '50%' : (isLeft ? '26%' : '74%'))
+                      : meta.pos.dtLeft),
                 }}
               >
                 <div className="relative w-0 h-0">
@@ -367,8 +367,8 @@ const Countries = () => {
           <h2 className="text-3xl font-bold text-navy mt-2">Detailed Destination Guides</h2>
         </motion.div>
 
-        <div className="space-y-6 sm:space-y-10">
-          {countryMeta.filter(m => m.slug === selectedCountry).map((meta) => {
+        <div className="space-y-16 sm:space-y-24">
+          {countryMeta.map((meta) => {
             const country = countries.find(c => c.slug === meta.slug || (c.name && c.name.toLowerCase() === meta.slug));
             const universities = country ? universitiesMap[country.id] || [] : [];
 
@@ -376,9 +376,10 @@ const Countries = () => {
               <motion.section
                 key={meta.slug}
                 id={meta.slug}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="min-h-[500px]"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                className="scroll-mt-32"
               >
                 {loading ? (
                   <div className="space-y-6">

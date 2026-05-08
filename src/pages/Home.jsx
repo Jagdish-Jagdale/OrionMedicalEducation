@@ -42,22 +42,22 @@ const slideUp = {
 };
 
 const HeroSkeleton = () => (
-  <section className="relative min-h-screen flex items-center overflow-hidden bg-slate-50">
+  <section className="relative min-h-screen flex items-center overflow-hidden" style={{ background: 'linear-gradient(to left, #112e51, #2052c1)' }}>
     <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 py-24 sm:py-32 grid lg:grid-cols-2 gap-12 items-center w-full">
       <div className="space-y-6 animate-pulse">
-        <div className="h-20 w-48 bg-slate-200 rounded-2xl" />
-        <div className="h-10 w-32 bg-blue-100 rounded-full" />
+        <div className="h-20 w-48 bg-white/10 rounded-2xl" />
+        <div className="h-10 w-32 bg-amber-400/20 rounded-full" />
         <div className="space-y-3">
-          <div className="h-16 w-full bg-slate-200 rounded-2xl" />
-          <div className="h-16 w-3/4 bg-slate-200 rounded-2xl" />
+          <div className="h-16 w-full bg-white/10 rounded-2xl" />
+          <div className="h-16 w-3/4 bg-white/10 rounded-2xl" />
         </div>
-        <div className="h-24 w-full bg-slate-100 rounded-2xl" />
+        <div className="h-24 w-full bg-white/5 rounded-2xl" />
         <div className="flex gap-4">
-          <div className="h-14 w-40 bg-blue-200 rounded-full" />
-          <div className="h-14 w-40 bg-green-200 rounded-full" />
+          <div className="h-14 w-40 bg-white/20 rounded-full" />
+          <div className="h-14 w-40 bg-green-500/20 rounded-full" />
         </div>
       </div>
-      <div className="aspect-video bg-slate-200 rounded-[2rem] animate-pulse" />
+      <div className="aspect-video bg-white/10 rounded-[2rem] animate-pulse" />
     </div>
   </section>
 );
@@ -143,6 +143,19 @@ const ensureAbsoluteUrl = (url) => {
   }
   return `https://${url}`;
 };
+
+// ─── Precomputed 60-point sine-curve keyframes for buttery smooth plane arc ───
+const PLANE_N = 60;
+const PLANE_TIMES    = Array.from({ length: PLANE_N + 1 }, (_, i) => i / PLANE_N);
+const PLANE_LEFT     = Array.from({ length: PLANE_N + 1 }, (_, i) => `${2 + (i / PLANE_N) * 89}%`);
+const PLANE_Y        = Array.from({ length: PLANE_N + 1 }, (_, i) => {
+  const t = i / PLANE_N;
+  return -120 * Math.sin(t * Math.PI); // single arc height for all screen sizes
+});
+const PLANE_ROTATE   = Array.from({ length: PLANE_N + 1 }, (_, i) => {
+  const t = i / PLANE_N;
+  return -28 * Math.sin(2 * t * Math.PI);
+});
 
 const Home = () => {
   const [content, setContent] = useState(null);
@@ -244,39 +257,43 @@ const Home = () => {
       ) : (
         <>
           {/* ── Hero Section ────────────────────────────────── */}
-          <section className="relative min-h-screen flex items-center overflow-hidden" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fb 25%, #f3f4f6 50%, #f8f9fb 75%, #ffffff 100%)' }}>
-            <div className="absolute top-1/4 -right-20 w-96 h-96 bg-blue-400/8 rounded-full blur-3xl" />
-            <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.3) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+          <section className="relative min-h-screen flex items-center overflow-hidden" style={{ background: 'linear-gradient(to left, #112e51, #2052c1)' }}>
+            <div className="absolute top-0 -left-20 w-80 h-80 bg-white/10 rounded-full blur-[100px]" />
+            <div className="absolute bottom-0 -right-20 w-96 h-96 bg-blue-400/20 rounded-full blur-[120px]" />
 
-            <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 py-24 sm:py-32 grid lg:grid-cols-2 gap-12 items-center">
+
+
+
+            <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 pt-20 pb-28 sm:py-32 grid lg:grid-cols-2 gap-12 items-center">
               <motion.div
                 variants={staggerContainer}
                 initial="initial"
                 animate="animate"
                 className="text-center lg:text-left"
               >
-                <motion.div variants={slideUp} className="mb-8 flex justify-center lg:justify-start">
+                <motion.div variants={slideUp} className="mb-4 sm:mb-8 flex justify-center lg:justify-start">
                   <img
                     src={orionLogo}
                     alt="Orion Medical Education"
-                    className="h-16 sm:h-20 w-auto object-contain"
+                    className="h-16 sm:h-20 w-auto object-contain brightness-0 invert"
                     fetchPriority="high"
                   />
                 </motion.div>
                 {hero.badge && (
-                  <motion.div variants={slideUp} className="inline-flex items-center gap-2 bg-blue-600/10 backdrop-blur-sm text-blue-700 text-[10px] sm:text-xs font-bold px-4 py-2 rounded-full border border-blue-200/40 mb-6">
-                    <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                  <motion.div variants={slideUp} className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-amber-400 text-[10px] sm:text-xs font-bold px-4 py-2 rounded-full border border-white/20 mb-6">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
                     {hero.badge}
                   </motion.div>
                 )}
-                <motion.h1 variants={slideUp} className="text-3xl sm:text-5xl lg:text-6xl font-bold text-navy leading-[1.1] tracking-tight">{hero.heading}</motion.h1>
-                {hero.company && <motion.p variants={slideUp} className="mt-4 text-lg sm:text-xl font-semibold text-blue-700">{hero.company}</motion.p>}
-                {hero.desc && <motion.p variants={slideUp} className="mt-6 text-slate-600 text-sm sm:text-base leading-relaxed max-w-lg mx-auto lg:mx-0">{hero.desc}</motion.p>}
-                <motion.div variants={slideUp} className="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                  {hero.btn1 && <Link to="/countries" className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold px-8 py-4 rounded-full transition-all text-sm shadow-xl shadow-blue-500/30">{hero.btn1}</Link>}
-                  {hero.btn2 && <a href={ensureAbsoluteUrl(waNumber ? `https://wa.me/${waNumber}` : '')} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-semibold px-8 py-4 rounded-full transition-all text-sm shadow-xl shadow-green-500/30">{hero.btn2}</a>}
+                <motion.h1 variants={slideUp} className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight">{hero.heading}</motion.h1>
+                {hero.company && <motion.p variants={slideUp} className="mt-4 text-lg sm:text-xl font-bold text-amber-400">{hero.company}</motion.p>}
+                {hero.desc && <motion.p variants={slideUp} className="mt-6 text-blue-100/80 text-sm sm:text-base leading-relaxed max-w-lg mx-auto lg:mx-0">{hero.desc}</motion.p>}
+                <motion.div variants={slideUp} className="mt-8 flex flex-row gap-3 justify-center lg:justify-start">
+                  {hero.btn1 && <Link to="/countries" className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 sm:px-8 py-3 sm:py-4 rounded-full transition-all text-xs sm:text-sm shadow-xl shadow-blue-900/30 flex-1 sm:flex-none">{hero.btn1}</Link>}
+                  {hero.btn2 && <a href={ensureAbsoluteUrl(waNumber ? `https://wa.me/${waNumber}` : '')} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-400 text-white font-bold px-5 sm:px-8 py-3 sm:py-4 rounded-full transition-all text-xs sm:text-sm shadow-xl shadow-green-500/30 flex-1 sm:flex-none">{hero.btn2}</a>}
                 </motion.div>
               </motion.div>
+
               <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1, delay: 0.5 }} className="relative w-full aspect-video rounded-[2rem] overflow-hidden shadow-2xl border border-white/10">
                 <video
                   src={heroVideo}
@@ -288,6 +305,60 @@ const Home = () => {
                   fetchPriority="high"
                 />
               </motion.div>
+            </div>
+
+            {/* Hero Bottom Structure - MBBS on left, ABROAD on right, Flying Plane between */}
+            <div className="absolute bottom-0 inset-x-0 z-20 px-6 sm:px-12 lg:px-[12%]">
+              <div className="relative w-full flex items-end justify-between pb-6">
+                {/* MBBS Text */}
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, delay: 1.2 }}
+                  className="text-base sm:text-xl lg:text-3xl font-black text-white italic tracking-tighter uppercase select-none opacity-40 hover:opacity-100 transition-opacity"
+                >
+                  MBBS
+                </motion.div>
+
+                {/* ABROAD Text */}
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, delay: 1.2 }}
+                  className="text-base sm:text-xl lg:text-3xl font-black text-white italic tracking-tighter uppercase select-none opacity-40 hover:opacity-100 transition-opacity"
+                >
+                  ABROAD
+                </motion.div>
+              </div>
+
+              {/* Flying Airplane - Framer Motion smooth arc between MBBS and ABROAD */}
+              <div className="absolute inset-x-0 bottom-[72px] sm:bottom-[108px] z-30 pointer-events-none overflow-visible px-6 sm:px-12 lg:px-[12%]">
+                <div className="relative w-full h-0">
+                  <motion.img
+                    src={airplaneImg}
+                    alt="airplane"
+                    initial={{ left: "0%", y: 0, rotate: 0 }}
+                    animate={{
+                      left:   PLANE_LEFT,
+                      y:      PLANE_Y,
+                      rotate: PLANE_ROTATE,
+                    }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 12,
+                      ease: "linear",
+                      times: PLANE_TIMES,
+                      repeatDelay: 2.5,
+                    }}
+                    className="w-10 sm:w-12 lg:w-16 h-auto object-contain"
+                    style={{
+                      position: 'absolute',
+                      transform: 'translateY(-50%)',
+                      filter: 'brightness(0) invert(1) drop-shadow(0 0 8px rgba(255,255,255,0.9)) drop-shadow(0 0 16px rgba(255,255,255,0.5))',
+                    }}
+                  />
+                </div>
+              </div>
             </div>
           </section>
 
@@ -321,28 +392,16 @@ const Home = () => {
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.8 }}
-                    className="relative py-10 px-6 sm:px-12 rounded-[3.5rem] overflow-hidden mb-20 shadow-2xl border border-white/10 group/container min-h-[350px] flex items-center justify-center bg-black"
+                    className="relative py-10 px-6 sm:px-12 rounded-[3.5rem] overflow-hidden mb-20 shadow-2xl border border-white/10 group/container min-h-[350px] flex items-center justify-center"
+                    style={{ background: 'linear-gradient(to left, #112e51, #2052c1)' }}
                   >
-                    {/* Background Layer with blurred fit */}
-                    <div className="absolute inset-0 z-0">
-                      <img
-                        src={aboutBg}
-                        alt=""
-                        className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-30"
-                      />
-                      <img
-                        src={aboutBg}
-                        alt="Orion About Background"
-                        className="relative w-full h-full object-contain transform group-hover/container:scale-105 transition-transform duration-[3s] ease-out opacity-60"
-                      />
-                      <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
-                    </div>
-
                     {/* Background decoration */}
                     <div className="absolute inset-0 pointer-events-none z-[1]">
                       <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 rounded-full blur-[120px] -mr-20 -mt-20" />
                       <div className="absolute bottom-0 left-0 w-1/2 h-full bg-white/5 rounded-full blur-[120px] -ml-20 -mb-20" />
+                      <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.8) 1.5px, transparent 0)', backgroundSize: '32px 32px' }} />
                     </div>
+
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10" style={{ perspective: '1200px' }}>
                       {focusCards.map((card, i) => (
@@ -360,17 +419,17 @@ const Home = () => {
                           viewport={{ once: true }}
                           transition={{
                             initial: { delay: i * 0.15, duration: 0.8 },
-                            default: { type: 'spring', stiffness: 200, damping: 25 }
+                            default: { type: 'spring', stiffness: 400, damping: 30 }
                           }}
-                          className="group relative bg-gradient-to-br from-white/30 to-white/5 backdrop-blur-2xl rounded-[2.5rem] py-5 px-6 border border-white/40 shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:shadow-[0_30px_70px_rgba(0,0,0,0.3)] overflow-hidden cursor-pointer max-w-[340px] mx-auto"
+                          className="group relative bg-gradient-to-br from-white/30 to-white/5 backdrop-blur-2xl rounded-3xl py-5 px-6 border border-white/40 shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:shadow-[0_30px_70px_rgba(0,0,0,0.3)] overflow-hidden cursor-pointer max-w-[340px] mx-auto"
                           style={{ transformStyle: 'preserve-3d' }}
                         >
                           {/* Inner glow for glass depth */}
-                          <div className="absolute inset-0 border border-white/20 rounded-[2.5rem] pointer-events-none" />
+                          <div className="absolute inset-0 border border-white/20 rounded-3xl pointer-events-none" />
 
                           {/* Diagonal Shine Effect */}
                           <div className="absolute inset-0 pointer-events-none">
-                            <div className="absolute top-0 -left-[150%] w-[100%] h-full bg-gradient-to-r from-transparent via-white/60 to-transparent skew-x-[-25deg] group-hover:left-[150%] transition-all duration-[1500ms] ease-in-out" />
+                            <div className="absolute top-0 -left-[150%] w-[100%] h-full bg-gradient-to-r from-transparent via-white/60 to-transparent skew-x-[-25deg] group-hover:left-[150%] transition-all duration-0 group-hover:duration-[1500ms] ease-in-out" />
                           </div>
 
                           <div
@@ -437,10 +496,10 @@ const Home = () => {
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
                     {stats.filter(s => s.value).map((stat, i) => (
-                      <StatCounter 
-                        key={i} 
-                        value={stat.value} 
-                        label={stat.label} 
+                      <StatCounter
+                        key={i}
+                        value={stat.value}
+                        label={stat.label}
                         delay={i * 0.1}
                       />
                     ))}
@@ -517,6 +576,7 @@ const Home = () => {
                     {reviews.length > 0 ? (
                       <Swiper
                         modules={[Autoplay, Pagination, Navigation]} spaceBetween={30} slidesPerView={1} loop={reviews.length > 3}
+                        speed={1200}
                         autoplay={{ delay: 5000, disableOnInteraction: false }} pagination={{ clickable: true, dynamicBullets: true }}
                         navigation={{ prevEl: '.review-prev', nextEl: '.review-next' }}
                         breakpoints={{ 640: { slidesPerView: 1 }, 768: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } }}
@@ -547,7 +607,7 @@ const Home = () => {
                     {cta.desc && <p className="text-slate-600 mb-8">{cta.desc}</p>}
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                       {cta.btn1 && <Link to="/contact" className="inline-flex items-center justify-center gap-2 bg-navy hover:bg-blue-800 text-white font-semibold px-8 py-4 rounded-full transition-all text-sm">{cta.btn1}</Link>}
-                      {cta.btn2 && <Link to="/countries" className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-navy font-semibold px-8 py-4 rounded-full transition-all text-sm border border-slate-200">{cta.btn2}</Link>}
+                      {cta.btn2 && <Link to="/countries" className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-full transition-all text-sm shadow-lg shadow-blue-900/20">{cta.btn2}</Link>}
                     </div>
                   </motion.div>
                 </div>

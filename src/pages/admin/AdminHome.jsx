@@ -179,7 +179,7 @@ const AdminHome = () => {
   };
 
   const addTestimonial = () => {
-    setReviews([{ studentName: '', university: '', rating: 5, reviewText: '', image: '' }, ...reviews]);
+    setReviews([{ studentName: '', university: '', rating: '', reviewText: '', image: '' }, ...reviews]);
   };
 
   const removeTestimonial = (index) => {
@@ -232,26 +232,34 @@ const AdminHome = () => {
     }
   };
 
+  const saveAction = (
+    <button
+      onClick={handleSave}
+      disabled={saving || loading}
+      className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg shadow-lg shadow-blue-200 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 min-w-[100px] text-sm"
+    >
+      {saving ? (
+        <>
+          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          Saving...
+        </>
+      ) : (
+        'Save'
+      )}
+    </button>
+  );
+
   return (
     <>
       <AdminLayout 
-      title={`Home / ${activeSection.charAt(0).toUpperCase() + activeSection.slice(1).replace('-', ' ')}`} 
-      isDirty={hasUnsavedChanges}
-      dirtySections={dirtySections}
-    >
-      <PageTitle title={`Admin | Home / ${activeSection.charAt(0).toUpperCase() + activeSection.slice(1).replace('-', ' ')}`} />
-      <div className="max-w-4xl">
-        <form onSubmit={handleSave} className="space-y-8">
-          <div className="flex items-center justify-end">
-            <button
-              type="submit"
-              disabled={saving || loading}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold px-8 py-2.5 rounded-2xl text-sm transition-all shadow-xl shadow-blue-200 hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-2"
-            >
-              {saving && <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
-              {saving ? 'Saving...' : 'Save All Changes'}
-            </button>
-          </div>
+        title={`Home / ${activeSection.charAt(0).toUpperCase() + activeSection.slice(1).replace('-', ' ')}`} 
+        isDirty={hasUnsavedChanges}
+        dirtySections={dirtySections}
+        actions={saveAction}
+      >
+        <PageTitle title={`Admin | Home / ${activeSection.charAt(0).toUpperCase() + activeSection.slice(1).replace('-', ' ')}`} />
+        <div className="max-w-4xl">
+          <form onSubmit={handleSave} className="space-y-8">
 
           {loading ? (
             <div className="space-y-4">

@@ -1,148 +1,235 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { getObservership, saveObservership } from '../../firebase/firestore';
-import { uploadFile } from '../../firebase/storage';
 import toast from 'react-hot-toast';
 import PageTitle from '../../components/PageTitle';
 
-const emptyProgram = { title: '', hospital: '', location: '', duration: '', price: '', description: '', image: '' };
-
 const AdminObservership = () => {
-  const [programs, setPrograms] = useState([emptyProgram]);
+  const [data, setData] = useState({
+    // Section 1: Header
+    mainHeading: '',
+    mainSubheading: '',
+    mainDescription: '',
+    
+    // Section 2: Intro Card
+    introTitle: '',
+    introDescription: '',
+    
+    // Section 3: Points Card (3 items)
+    pointsTitle: '',
+    points: [
+      { pointText: '', description: '' },
+      { pointText: '', description: '' },
+      { pointText: '', description: '' },
+    ],
+    
+    // Section 4: Grid Card (6 items)
+    gridTitle: '',
+    gridDescription: '',
+    gridItems: Array(6).fill(0).map(() => ({ title: '', description: '' })),
+    
+    // Section 5: Bottom Cards (3 items)
+    bottomTitle: '',
+    bottomItems: Array(3).fill(0).map(() => ({ title: '', description: '' })),
+    
+    // Section 6: Final Card
+    finalTitle: '',
+    finalDescription: '',
+    finalButtonLabel: '',
+  });
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState({});
 
   useEffect(() => {
-    // getObservership returns first doc only; fetch all
-    const fetchAll = async () => {
+    const fetchData = async () => {
       try {
-        const { getDocs, collection, query, orderBy } = await import('firebase/firestore');
-        const { db } = await import('../../firebase/config');
-        const q = query(collection(db, 'observership'), orderBy('order', 'asc'));
-        const snap = await getDocs(q);
-        const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        if (data.length > 0) setPrograms(data);
-      } catch {}
-      setLoading(false);
+        const result = await getObservership();
+        if (result) {
+          // Merge with initial state to ensure all fields exist
+          setData(prev => ({ ...prev, ...result }));
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchAll();
+    fetchData();
   }, []);
 
-  const handleChange = (i, field, val) => {
-    const updated = [...programs];
-    updated[i][field] = val;
-    setPrograms(updated);
+  const handleChange = (field, val) => {
+    setData(prev => ({ ...prev, [field]: val }));
   };
 
-  const handleImageUpload = async (i, file) => {
-    if (!file) return;
-    const path = `observership/${Date.now()}_${file.name}`;
-    try {
-      const url = await uploadFile(file, path, (progress) => {
-        setUploadProgress((prev) => ({ ...prev, [i]: progress }));
-      });
-      handleChange(i, 'image', url);
-      setUploadProgress((prev) => ({ ...prev, [i]: null }));
-      toast.success('Image uploaded!');
-    } catch {
-      toast.error('Image upload failed.');
-      setUploadProgress((prev) => ({ ...prev, [i]: null }));
-    }
+  const handleNestedChange = (listName, index, field, val) => {
+    const updatedList = [...data[listName]];
+    updatedList[index][field] = val;
+    setData(prev => ({ ...prev, [listName]: updatedList }));
   };
-
-  const addProgram = () => setPrograms([...programs, { ...emptyProgram }]);
-  const removeProgram = (i) => setPrograms(programs.filter((_, idx) => idx !== i));
 
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
-      await saveObservership(programs);
-      toast.success('Observership programs saved to Firestore!');
+      await saveObservership(data);
+      toast.success('Observership content updated!');
     } catch {
-      toast.error('Failed to save. Please try again.');
+      toast.error('Failed to save changes.');
     } finally {
       setSaving(false);
     }
   };
 
-  return (
-    <AdminLayout title="Manage Observership Programs">
-      <PageTitle title="Admin | Observership" />
-      <form onSubmit={handleSave} className="space-y-8 max-w-5xl">
-        <div className="flex items-center justify-end gap-3">
-          <button type="button" onClick={addProgram} className="flex items-center gap-2 bg-white border border-slate-200 hover:border-blue-500 text-slate-900 hover:text-blue-500 font-bold px-5 py-2.5 rounded-2xl text-sm transition-all shadow-sm hover:shadow-xl active:scale-95">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"/></svg>
-            Add Program
-          </button>
-          <button type="submit" disabled={saving || loading} className="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold px-8 py-2.5 rounded-2xl text-sm transition-all shadow-xl shadow-blue-200 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
-            {saving && <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
-            {saving ? 'Saving...' : 'Save All Programs'}
-          </button>
+  if (loading) {
+    return (
+      <AdminLayout title="Manage Observership">
+        <div className="flex items-center justify-center h-64">
+          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
         </div>
+      </AdminLayout>
+    );
+  }
 
-        {loading ? (
-          <div className="h-48 bg-white rounded-3xl border border-slate-200 animate-pulse" />
-        ) : (
-          <div className="grid grid-cols-1 gap-8">
-            {programs.map((prog, i) => (
-              <div key={i} className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm transition-all hover:shadow-lg group">
-                <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-500 rounded-2xl flex items-center justify-center text-white font-black shadow-lg shadow-blue-100 overflow-hidden">
-                      {prog.image ? <img src={prog.image} alt={prog.title} className="w-full h-full object-cover" /> : (
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"/></svg>
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="text-slate-900 font-bold text-lg">{prog.title || 'New Program'}</h3>
-                      <p className="text-blue-500 text-[10px] font-black uppercase tracking-widest mt-0.5">Clinical Training Entry</p>
-                    </div>
-                  </div>
-                  {programs.length > 1 && (
-                    <button type="button" onClick={() => removeProgram(i)} className="p-2 rounded-xl text-red-400 hover:bg-red-50 hover:text-red-500 transition-all border border-transparent hover:border-red-100">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg>
-                    </button>
-                  )}
-                </div>
+  const saveAction = (
+    <button
+      onClick={handleSave}
+      disabled={saving}
+      className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg shadow-lg shadow-blue-200 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 min-w-[100px] text-sm"
+    >
+      {saving ? (
+        <>
+          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          Saving...
+        </>
+      ) : (
+        'Save'
+      )}
+    </button>
+  );
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[
-                    { label: "Program Title", field: "title", placeholder: "e.g. Clinical Observership in Internal Medicine" },
-                    { label: "Hospital / Institution", field: "hospital", placeholder: "e.g. Kazan State Medical University Hospital" },
-                    { label: "Location", field: "location", placeholder: "e.g. Kazan, Russia" },
-                    { label: "Duration", field: "duration", placeholder: "e.g. 4-8 Weeks" },
-                    { label: "Estimated Fees", field: "price", placeholder: "e.g. $1,200" },
-                  ].map(({ label, field, placeholder }) => (
-                    <div key={field}>
-                      <label className="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-widest">{label}</label>
-                      <input value={prog[field]} onChange={(e) => handleChange(i, field, e.target.value)} placeholder={placeholder} className="w-full bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl px-5 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" />
-                    </div>
-                  ))}
+  return (
+    <AdminLayout title="Manage Observership Page" actions={saveAction}>
+      <PageTitle title="Admin | Observership" />
+      <form onSubmit={handleSave} className="space-y-10 max-w-6xl pb-20">
 
-                  {/* Image Upload */}
-                  <div>
-                    <label className="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-widest">Program Image</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload(i, e.target.files[0])}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 text-sm file:mr-3 file:py-1 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all"
-                    />
-                    {uploadProgress[i] != null && <div className="text-xs font-bold text-blue-600 mt-1">{uploadProgress[i]}%</div>}
-                    {prog.image && <p className="text-xs text-green-600 mt-1 font-medium">✓ Uploaded</p>}
-                  </div>
+        {/* 1. Header Section */}
+        <section className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+          <h3 className="text-blue-600 font-black text-xs uppercase tracking-widest mb-6">Section 1: Page Header</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="md:col-span-1">
+              <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Main Heading</label>
+              <input value={data.mainHeading} onChange={(e) => handleChange('mainHeading', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 focus:ring-2 focus:ring-blue-500/20 outline-none" />
+            </div>
+            <div className="md:col-span-1">
+              <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Subheading</label>
+              <input value={data.mainSubheading} onChange={(e) => handleChange('mainSubheading', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 focus:ring-2 focus:ring-blue-500/20 outline-none" />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Main Description</label>
+              <textarea value={data.mainDescription} onChange={(e) => handleChange('mainDescription', e.target.value)} rows={3} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 focus:ring-2 focus:ring-blue-500/20 outline-none resize-none" />
+            </div>
+          </div>
+        </section>
 
-                  <div className="md:col-span-2 lg:col-span-3">
-                    <label className="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-widest">Program Description</label>
-                    <textarea value={prog.description} onChange={(e) => handleChange(i, 'description', e.target.value)} rows={4} placeholder="Highlight clinical exposure, mentorship, and eligibility..." className="w-full bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl px-5 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none" />
-                  </div>
-                </div>
+        {/* 2. Intro Card */}
+        <section className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+          <h3 className="text-blue-600 font-black text-xs uppercase tracking-widest mb-6">Section 2: Introduction Card</h3>
+          <div className="space-y-6">
+            <div>
+              <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Card Title</label>
+              <input value={data.introTitle} onChange={(e) => handleChange('introTitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 focus:ring-2 focus:ring-blue-500/20 outline-none" />
+            </div>
+            <div>
+              <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Card Description</label>
+              <textarea value={data.introDescription} onChange={(e) => handleChange('introDescription', e.target.value)} rows={3} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 focus:ring-2 focus:ring-blue-500/20 outline-none resize-none" />
+            </div>
+          </div>
+        </section>
+
+        {/* 3. Points Card (3 Items) */}
+        <section className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+          <h3 className="text-blue-600 font-black text-xs uppercase tracking-widest mb-6">Section 3: Process Steps</h3>
+          <div className="mb-6">
+            <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Section Title</label>
+            <input value={data.pointsTitle} onChange={(e) => handleChange('pointsTitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 focus:ring-2 focus:ring-blue-500/20 outline-none font-bold" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {data.points.map((point, i) => (
+              <div key={i} className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                <span className="text-blue-600 font-black text-lg mb-4 block">0{i+1}</span>
+                <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Point {i+1} Text</label>
+                <input value={point.pointText} onChange={(e) => handleNestedChange('points', i, 'pointText', e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 mb-4 focus:ring-2 focus:ring-blue-500/20 outline-none" />
+                <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Description</label>
+                <textarea value={point.description} onChange={(e) => handleNestedChange('points', i, 'description', e.target.value)} rows={3} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500/20 outline-none resize-none" />
               </div>
             ))}
           </div>
-        )}
+        </section>
+
+        {/* 4. Grid Card (6 Items) */}
+        <section className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+          <h3 className="text-blue-600 font-black text-xs uppercase tracking-widest mb-6">Section 4: Highlights Grid</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div>
+              <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Grid Main Title</label>
+              <input value={data.gridTitle} onChange={(e) => handleChange('gridTitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 focus:ring-2 focus:ring-blue-500/20 outline-none" />
+            </div>
+            <div>
+              <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Grid Main Description</label>
+              <textarea value={data.gridDescription} onChange={(e) => handleChange('gridDescription', e.target.value)} rows={1} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 focus:ring-2 focus:ring-blue-500/20 outline-none resize-none" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {data.gridItems.map((item, i) => (
+              <div key={i} className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Item {i+1} Title</label>
+                <input value={item.title} onChange={(e) => handleNestedChange('gridItems', i, 'title', e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 mb-4 focus:ring-2 focus:ring-blue-500/20 outline-none font-bold" />
+                <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Item {i+1} Description</label>
+                <textarea value={item.description} onChange={(e) => handleNestedChange('gridItems', i, 'description', e.target.value)} rows={3} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500/20 outline-none resize-none" />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 5. Bottom Items (3 Cards) */}
+        <section className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+          <h3 className="text-blue-600 font-black text-xs uppercase tracking-widest mb-6">Section 5: Feature Cards</h3>
+          <div className="mb-6">
+            <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Section Title</label>
+            <input value={data.bottomTitle} onChange={(e) => handleChange('bottomTitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 focus:ring-2 focus:ring-blue-500/20 outline-none" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {data.bottomItems.map((item, i) => (
+              <div key={i} className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Card {i+1} Title</label>
+                <input value={item.title} onChange={(e) => handleNestedChange('bottomItems', i, 'title', e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 mb-4 focus:ring-2 focus:ring-blue-500/20 outline-none font-bold" />
+                <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Card {i+1} Description</label>
+                <textarea value={item.description} onChange={(e) => handleNestedChange('bottomItems', i, 'description', e.target.value)} rows={3} className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500/20 outline-none resize-none" />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 6. Final Card */}
+        <section className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+          <h3 className="text-blue-600 font-black text-xs uppercase tracking-widest mb-6">Section 6: Final Call-to-Action</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Final Title</label>
+              <input value={data.finalTitle} onChange={(e) => handleChange('finalTitle', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 focus:ring-2 focus:ring-blue-500/20 outline-none" />
+            </div>
+            <div>
+              <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Button Label</label>
+              <input value={data.finalButtonLabel} onChange={(e) => handleChange('finalButtonLabel', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 focus:ring-2 focus:ring-blue-500/20 outline-none" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-slate-700 text-[10px] font-black uppercase mb-2">Final Description</label>
+            <textarea value={data.finalDescription} onChange={(e) => handleChange('finalDescription', e.target.value)} rows={2} className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3 focus:ring-2 focus:ring-blue-500/20 outline-none resize-none" />
+          </div>
+        </section>
+
       </form>
     </AdminLayout>
   );

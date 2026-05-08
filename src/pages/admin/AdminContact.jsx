@@ -1,158 +1,416 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import AdminLayout from '../../components/admin/AdminLayout';
-import { getContactSubmissions } from '../../firebase/firestore';
-import { deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../../firebase/config';
+import { getContactPageData, saveContactPageData } from '../../firebase/firestore';
 import toast from 'react-hot-toast';
 import PageTitle from '../../components/PageTitle';
 
 const AdminContact = () => {
-  const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const fetchSubmissions = async () => {
+  // Page Settings State
+  const [settings, setSettings] = useState({
+    header: '',
+    subheader: '',
+    description: '',
+    // Card 1
+    officeTitle: '',
+    address: '',
+    officeTagline: '',
+    // Card 2
+    phoneTitle: '',
+    phone1: '',
+    phone2: '',
+    phoneTagline: '',
+    // Card 3
+    emailTitle: '',
+    email1: '',
+    email2: '',
+    emailTagline: '',
+    // Card 4
+    websiteTitle: '',
+    websiteLink: '',
+    websiteTagline: '',
+    // Social
+    youtube: '',
+    instagram: '',
+    facebook: '',
+    // Authorized Partner Card
+    partnerTitle: '',
+    partnerDescription: '',
+    // WhatsApp
+    whatsappTitle: '',
+    whatsappDescription: '',
+    whatsappButtonLabel: '',
+    whatsappPhone: '',
+    // Phone CTA
+    ctaTitle: '',
+    ctaButtonLabel: ''
+  });
+
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await getContactSubmissions();
-      setSubmissions(data);
-    } catch {
-      toast.error('Failed to load contact submissions.');
+      const pageData = await getContactPageData();
+      if (pageData) {
+        // Migration: if whatsappPhone is empty but ctaPhone exists, use it
+        const initialData = { ...pageData };
+        if (!initialData.whatsappPhone && initialData.ctaPhone) {
+          initialData.whatsappPhone = initialData.ctaPhone;
+        }
+        setSettings(prev => ({ ...prev, ...initialData }));
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to load settings.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchSubmissions();
+    fetchData();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this submission?')) return;
+  const handleSaveSettings = async () => {
+    setSaving(true);
     try {
-      await deleteDoc(doc(db, 'contacts', id));
-      setSubmissions((prev) => prev.filter((s) => s.id !== id));
-      toast.success('Submission deleted.');
-    } catch {
-      toast.error('Failed to delete.');
+      await saveContactPageData(settings);
+      toast.success('Contact settings saved!');
+    } catch (err) {
+      toast.error('Failed to save settings.');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleExportCSV = () => {
-    const headers = ['Name', 'Email', 'Phone', 'Subject', 'Message', 'Date'];
-    const rows = submissions.map((s) => [
-      s.name, s.email, s.phone, s.subject, s.message,
-      s.createdAt?.toDate ? s.createdAt.toDate().toLocaleString() : ''
-    ]);
-    const csv = [headers, ...rows].map((r) => r.map((v) => `"${String(v || '').replace(/"/g, '""')}"`).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'contact_submissions.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success('CSV exported!');
-  };
+  if (loading) {
+    return (
+      <AdminLayout title="Contact Page Editor">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      </AdminLayout>
+    );
+  }
 
-  const formatDate = (ts) => {
-    if (!ts) return '—';
-    if (ts?.toDate) return ts.toDate().toLocaleString();
-    return String(ts);
-  };
+  const saveAction = (
+    <button
+      onClick={handleSaveSettings}
+      disabled={saving}
+      className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg shadow-lg shadow-blue-200 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 min-w-[100px] text-sm"
+    >
+      {saving ? (
+        <>
+          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          Saving...
+        </>
+      ) : (
+        'Save'
+      )}
+    </button>
+  );
 
   return (
-    <AdminLayout title="Contact Submissions">
-      <PageTitle title="Admin | Contacts" />
-      <div className="space-y-6">
-        {/* Header Stats */}
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white border border-slate-200 p-6 rounded-3xl shadow-sm">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-100">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"/></svg>
+    <AdminLayout title="Contact Page Editor" actions={saveAction}>
+      <PageTitle title="Admin | Contact Editor" />
+
+      <div className="space-y-8 pb-32">
+        {/* Header Section */}
+        <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
+          <h3 className="text-xl font-black text-slate-900 border-b pb-4">Main Page Header</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Heading</label>
+              <input
+                type="text"
+                value={settings.header}
+                onChange={e => setSettings({ ...settings, header: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 focus:bg-white focus:ring-4 focus:ring-blue-50 transition-all outline-none font-bold text-slate-700"
+                placeholder="e.g. Contact Us"
+              />
             </div>
-            <div>
-              <h3 className="text-slate-900 font-bold text-lg">Inbound Leads</h3>
-              <p className="text-slate-500 text-xs font-medium uppercase tracking-wider">
-                {loading ? 'Loading...' : `Total: ${submissions.length} Submissions`}
-              </p>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Subheading</label>
+              <input
+                type="text"
+                value={settings.subheader}
+                onChange={e => setSettings({ ...settings, subheader: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 focus:bg-white focus:ring-4 focus:ring-blue-50 transition-all outline-none font-bold text-slate-700"
+                placeholder="e.g. Get in touch"
+              />
+            </div>
+            <div className="md:col-span-2 space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Description</label>
+              <textarea
+                value={settings.description}
+                onChange={e => setSettings({ ...settings, description: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-3xl px-5 py-4 h-32 focus:bg-white focus:ring-4 focus:ring-blue-50 transition-all outline-none font-medium text-slate-600 leading-relaxed"
+                placeholder="Header description..."
+              />
             </div>
           </div>
-          <button
-            onClick={handleExportCSV}
-            disabled={loading || submissions.length === 0}
-            className="w-full sm:w-auto bg-slate-900 disabled:opacity-50 text-white font-bold px-6 py-3 rounded-2xl text-xs hover:bg-slate-800 transition-all active:scale-95"
-          >
-            Export to CSV
-          </button>
         </div>
 
-        {/* Submissions List */}
-        {loading ? (
-          <div className="space-y-4">
-            {[1,2,3].map(i => <div key={i} className="h-36 bg-white rounded-3xl border border-slate-200 animate-pulse" />)}
+        {/* Contact Info Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Card 1: Office */}
+          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-4">
+            <h4 className="font-black text-slate-900 uppercase tracking-widest text-xs flex items-center gap-2">
+              <span className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">1</span>
+              Office Address Card
+            </h4>
+            <input
+              type="text"
+              placeholder="Card Title (e.g. Main Office)"
+              value={settings.officeTitle}
+              onChange={e => setSettings({ ...settings, officeTitle: e.target.value })}
+              className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm font-bold"
+            />
+            <textarea
+              placeholder="Address"
+              value={settings.address}
+              onChange={e => setSettings({ ...settings, address: e.target.value })}
+              className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm h-24"
+            />
+            <input
+              type="text"
+              placeholder="Tagline"
+              value={settings.officeTagline}
+              onChange={e => setSettings({ ...settings, officeTagline: e.target.value })}
+              className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm"
+            />
           </div>
-        ) : submissions.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-3xl border border-slate-200">
-            <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg>
-            </div>
-            <p className="text-slate-400 font-semibold">No contact submissions yet.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4">
-            {submissions.map((sub) => (
-              <div key={sub.id} className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-md transition-all group">
-                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
-                  <div className="flex-1 space-y-4">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="bg-blue-50 text-blue-600 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border border-blue-100">New Lead</span>
-                      <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{formatDate(sub.createdAt)}</span>
-                    </div>
-                    <div>
-                      <h4 className="text-slate-900 font-black text-xl mb-1">{sub.name}</h4>
-                      <div className="flex flex-wrap gap-x-6 gap-y-2 text-slate-500 text-sm font-medium">
-                        <div className="flex items-center gap-2">
-                          <svg className="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg>
-                          {sub.email}
-                        </div>
-                        {sub.phone && (
-                          <div className="flex items-center gap-2">
-                            <svg className="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg>
-                            {sub.phone}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    {sub.subject && (
-                      <p className="text-slate-600 text-sm font-semibold">📌 {sub.subject}</p>
-                    )}
-                    {sub.message && (
-                      <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 italic text-slate-700 text-sm leading-relaxed">
-                        <p className="font-bold text-slate-400 not-italic text-[10px] uppercase tracking-widest mb-2">Message</p>
-                        "{sub.message}"
-                      </div>
-                    )}
-                  </div>
 
-                  <div className="flex flex-row lg:flex-col gap-2">
-                    <a
-                      href={`mailto:${sub.email}?subject=Re: ${sub.subject || 'Your Inquiry'}`}
-                      className="flex-1 lg:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-2xl text-xs transition-all shadow-lg shadow-blue-100 active:scale-95 text-center"
-                    >
-                      Reply Email
-                    </a>
-                    <button
-                      onClick={() => handleDelete(sub.id)}
-                      className="flex-1 lg:flex-none bg-white border border-slate-200 hover:border-red-500 text-slate-600 hover:text-red-500 font-bold px-6 py-3 rounded-2xl text-xs transition-all active:scale-95"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+          {/* Card 2: Phone */}
+          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-4">
+            <h4 className="font-black text-slate-900 uppercase tracking-widest text-xs flex items-center gap-2">
+              <span className="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">2</span>
+              Phone Contacts Card
+            </h4>
+            <input
+              type="text"
+              placeholder="Card Title (e.g. Call Us)"
+              value={settings.phoneTitle}
+              onChange={e => setSettings({ ...settings, phoneTitle: e.target.value })}
+              className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm font-bold"
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                type="text"
+                placeholder="Number 1"
+                value={settings.phone1}
+                onChange={e => setSettings({ ...settings, phone1: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm"
+              />
+              <input
+                type="text"
+                placeholder="Number 2"
+                value={settings.phone2}
+                onChange={e => setSettings({ ...settings, phone2: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm"
+              />
+            </div>
+            <input
+              type="text"
+              placeholder="Tagline"
+              value={settings.phoneTagline}
+              onChange={e => setSettings({ ...settings, phoneTagline: e.target.value })}
+              className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm"
+            />
           </div>
-        )}
+
+          {/* Card 3: Email */}
+          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-4">
+            <h4 className="font-black text-slate-900 uppercase tracking-widest text-xs flex items-center gap-2">
+              <span className="w-8 h-8 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center">3</span>
+              Email Support Card
+            </h4>
+            <input
+              type="text"
+              placeholder="Card Title (e.g. Email Us)"
+              value={settings.emailTitle}
+              onChange={e => setSettings({ ...settings, emailTitle: e.target.value })}
+              className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm font-bold"
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                type="text"
+                placeholder="Email 1"
+                value={settings.email1}
+                onChange={e => setSettings({ ...settings, email1: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm"
+              />
+              <input
+                type="text"
+                placeholder="Email 2"
+                value={settings.email2}
+                onChange={e => setSettings({ ...settings, email2: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm"
+              />
+            </div>
+            <input
+              type="text"
+              placeholder="Tagline"
+              value={settings.emailTagline}
+              onChange={e => setSettings({ ...settings, emailTagline: e.target.value })}
+              className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm"
+            />
+          </div>
+
+          {/* Card 4: Website */}
+          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-4">
+            <h4 className="font-black text-slate-900 uppercase tracking-widest text-xs flex items-center gap-2">
+              <span className="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center">4</span>
+              Website/Online Card
+            </h4>
+            <input
+              type="text"
+              placeholder="Card Title (e.g. Visit Website)"
+              value={settings.websiteTitle}
+              onChange={e => setSettings({ ...settings, websiteTitle: e.target.value })}
+              className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm font-bold"
+            />
+            <input
+              type="text"
+              placeholder="Website Link"
+              value={settings.websiteLink}
+              onChange={e => setSettings({ ...settings, websiteLink: e.target.value })}
+              className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm"
+            />
+            <input
+              type="text"
+              placeholder="Tagline"
+              value={settings.websiteTagline}
+              onChange={e => setSettings({ ...settings, websiteTagline: e.target.value })}
+              className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm"
+            />
+          </div>
+        </div>
+
+        {/* Social Network Card */}
+        <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
+          <h3 className="text-xl font-black text-slate-900 border-b pb-4">Social Links</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">YouTube Link</label>
+              <input
+                type="text"
+                value={settings.youtube}
+                onChange={e => setSettings({ ...settings, youtube: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Instagram Link</label>
+              <input
+                type="text"
+                value={settings.instagram}
+                onChange={e => setSettings({ ...settings, instagram: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Facebook Link</label>
+              <input
+                type="text"
+                value={settings.facebook}
+                onChange={e => setSettings({ ...settings, facebook: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Authorized Partner Card */}
+        <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
+          <h3 className="text-xl font-black text-slate-900 border-b pb-4 text-amber-600">Authorized Partner Card</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Card Title</label>
+              <input
+                type="text"
+                value={settings.partnerTitle}
+                onChange={e => setSettings({ ...settings, partnerTitle: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm"
+                placeholder="e.g. 100% Authorized Partner"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Card Description</label>
+              <textarea
+                value={settings.partnerDescription}
+                onChange={e => setSettings({ ...settings, partnerDescription: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm h-24"
+                placeholder="Partner card description..."
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* WhatsApp Card */}
+        <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
+          <div className="flex items-center justify-between border-b pb-4">
+            <h3 className="text-xl font-black text-green-600">WhatsApp Section</h3>
+            <Link to="/admin?section=hero" className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 underline transition-colors">
+              Manage Number in Home Settings
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">WhatsApp Title</label>
+              <input
+                type="text"
+                value={settings.whatsappTitle}
+                onChange={e => setSettings({ ...settings, whatsappTitle: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm font-bold"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Button Label</label>
+              <input
+                type="text"
+                value={settings.whatsappButtonLabel}
+                onChange={e => setSettings({ ...settings, whatsappButtonLabel: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm"
+              />
+            </div>
+            <div className="md:col-span-2 space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Description</label>
+              <textarea
+                value={settings.whatsappDescription}
+                onChange={e => setSettings({ ...settings, whatsappDescription: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm h-20"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Call Section */}
+        <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
+          <h3 className="text-xl font-black text-slate-900 border-b pb-4 text-blue-600">Bottom Call Section</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Title</label>
+              <input
+                type="text"
+                value={settings.ctaTitle}
+                onChange={e => setSettings({ ...settings, ctaTitle: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Button Label</label>
+              <input
+                type="text"
+                value={settings.ctaButtonLabel}
+                onChange={e => setSettings({ ...settings, ctaButtonLabel: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </AdminLayout>
   );
