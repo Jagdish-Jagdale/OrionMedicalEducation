@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getHomeContent, getContactPageData } from '../firebase/firestore';
+import { getCountries, getHomeContent, getContactPageData } from '../firebase/firestore';
 import orionLogo from '../assets/orionfullrmbg.png';
-import russiaFlag from '../assets/flags/russiaflag.png';
-import georgiaFlag from '../assets/flags/georgiaflag.png';
-import kazakhstanFlag from '../assets/flags/kazakhstanflag.png';
-import kyrgyzstanFlag from '../assets/flags/kyrgyzstanflag.png';
-import uzbekistanFlag from '../assets/flags/uzbekistanflag.png';
 
 
 const Footer = () => {
@@ -15,8 +10,24 @@ const Footer = () => {
   const [waNumber, setWaNumber] = useState('');
   const [contactData, setContactData] = useState(null);
   const [countryCount, setCountryCount] = useState('4');
+  const [marqueeData, setMarqueeData] = useState([]);
+  const [footerCountries, setFooterCountries] = useState([]);
 
   useEffect(() => {
+    getCountries().then((countries) => {
+      if (countries && countries.length > 0) {
+        setFooterCountries(countries);
+        setCountryCount(countries.length.toString());
+        const colors = ['text-blue-700', 'text-red-600', 'text-blue-400', 'text-orange-600', 'text-cyan-600'];
+        const mapped = countries.map((c, i) => ({
+          title: c.title || `MBBS in ${c.name}`,
+          accent: colors[i % colors.length],
+          flagUrl: c.flag
+        }));
+        setMarqueeData(mapped);
+      }
+    });
+
     getHomeContent().then((data) => {
       if (data && data.whatsappNumber) {
         setWaNumber(data.whatsappNumber.replace(/\s+/g, ''));
@@ -29,14 +40,6 @@ const Footer = () => {
       if (data) setContactData(data);
     });
   }, []);
-
-  const marqueeData = [
-    { country: "RUSSIA", accent: "text-blue-700", flagUrl: russiaFlag },
-    { country: "GEORGIA", accent: "text-red-600", flagUrl: georgiaFlag },
-    { country: "KAZAKHSTAN", accent: "text-blue-400", flagUrl: kazakhstanFlag },
-    { country: "KYRGYZSTAN", accent: "text-orange-600", flagUrl: kyrgyzstanFlag },
-    { country: "UZBEKISTAN", accent: "text-cyan-600", flagUrl: uzbekistanFlag },
-  ];
 
   return (
     <footer className="bg-gradient-to-br from-[#0a1a3a] via-[#1e3a6e] to-[#2563eb] text-white mt-16 shadow-[0_-4px_30px_rgba(0,0,0,0.6)] border-t border-white/10 relative overflow-hidden">
@@ -67,10 +70,7 @@ const Footer = () => {
               {marqueeData.map((item, idx) => (
                 <React.Fragment key={idx}>
                   <span className="font-bold tracking-[0.25em] text-xs uppercase font-inter flex items-center gap-1.5">
-                    <span>
-                      <span className="text-black">MBBS IN </span>
-                      <span className={item.accent}>{item.country}</span>
-                    </span>
+                    <span className={item.accent}>{item.title}</span>
                     <span className="inline-flex items-center ml-2 h-4">
                       <img
                         src={item.flagUrl}
@@ -138,21 +138,15 @@ const Footer = () => {
           <div>
             <h4 className="font-normal text-white mb-5 text-sm uppercase tracking-wider">Countries</h4>
             <ul className="space-y-2">
-              {[
-                { label: 'Kyrgyzstan', anchor: 'kyrgyzstan' },
-                { label: 'Russia', anchor: 'russia' },
-                { label: 'Georgia', anchor: 'georgia' },
-                { label: 'Kazakhstan', anchor: 'kazakhstan' },
-                { label: 'Uzbekistan', anchor: 'uzbekistan' },
-              ].map((c) => (
-                <li key={c.anchor}>
+              {footerCountries.map((c) => (
+                <li key={c.id}>
                   <Link
                     to="/countries"
-                    state={{ country: c.anchor }}
+                    state={{ country: c.name?.toLowerCase() || '' }}
                     className="text-slate-400 hover:text-amber-400 text-sm transition-colors flex items-center gap-1.5"
                   >
                     <span className="w-1 h-1 rounded-full bg-blue-500 flex-shrink-0" />
-                    {c.label}
+                    {c.name}
                   </Link>
                 </li>
               ))}

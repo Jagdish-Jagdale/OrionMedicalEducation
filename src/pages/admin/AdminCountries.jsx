@@ -21,12 +21,17 @@ const emptyCountry = {
   title: '',
   subtitle: '',
   description: '',
-  whyChooseUs: ['', '', ''],
+  whyChooseUs: ['', '', '', '', ''],
   recognitionTitle: 'Global Recognition',
   globalRecognitionDescription: '',
   globalRecognition: ['', '', ''],
-  universitiesTitle: 'Universities Registry',
-  flagPosition: 'top left',
+  services: [
+    { title: '', description: '' },
+    { title: '', description: '' },
+    { title: '', description: '' }
+  ],
+  universitiesTitle: 'Top Medical Institutions',
+  countryCardPosition: '',
   universities: []
 };
 
@@ -73,11 +78,20 @@ const AdminCountries = () => {
   };
 
   const saveModalToState = async () => {
+    // Clean up redundant fields
+    const { 
+      countrycardpostion, 
+      countryCardPositionClasses, 
+      flagPosition, 
+      flagPositionClasses,
+      ...cleanedCountry 
+    } = tempCountry;
+
     const updated = [...entries];
     if (editIndex === -1) {
-      updated.push(tempCountry);
+      updated.push(cleanedCountry);
     } else {
-      updated[editIndex] = tempCountry;
+      updated[editIndex] = cleanedCountry;
     }
 
     setSaving(true);
@@ -358,17 +372,42 @@ const AdminCountries = () => {
                         </div>
                         
                         <div className="w-full space-y-1.5 pt-2 border-t border-slate-100">
-                          <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest text-center block">Flag & Name Position</label>
+                          <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest text-center block">Country Card Position</label>
                           <select 
-                            value={tempCountry.flagPosition || 'top left'} 
-                            onChange={(e) => handleTempChange('flagPosition', e.target.value)}
-                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-[10px] font-black uppercase tracking-wider outline-none focus:border-blue-500 cursor-pointer hover:bg-slate-50 transition-colors"
+                            value={tempCountry.countryCardPosition || ''} 
+                            onChange={(e) => {
+                              const label = e.target.value;
+                              setTempCountry(prev => ({
+                                ...prev,
+                                countryCardPosition: label
+                              }));
+                            }}
+                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-[10px] font-black uppercase tracking-wider outline-none focus:border-blue-500 cursor-pointer hover:bg-slate-50 transition-all"
                           >
-                            <option value="top left">Top Left</option>
-                            <option value="top right">Top Right</option>
-                            <option value="bottom">Bottom</option>
-                            <option value="bottom left">Bottom Left</option>
-                            <option value="bottom right">Bottom Right</option>
+                            {(() => {
+                              const usedPositions = entries
+                                .filter((_, idx) => idx !== editIndex)
+                                .map(c => (c.countryCardPosition || c.countrycardpostion || '').toLowerCase())
+                                .filter(Boolean);
+                              
+                              return [
+                                { val: '', label: 'Select Location' },
+                                { val: 'top left', label: 'Top Left' },
+                                { val: 'top right', label: 'Top Right' },
+                                { val: 'bottom', label: 'Bottom' },
+                                { val: 'bottom left', label: 'Bottom Left' },
+                                { val: 'bottom right', label: 'Bottom Right' }
+                              ]
+                              .map(pos => (
+                                <option 
+                                  key={pos.val} 
+                                  value={pos.val} 
+                                  disabled={pos.val !== '' && usedPositions.includes(pos.val.toLowerCase())}
+                                >
+                                  {pos.label}
+                                </option>
+                              ));
+                            })()}
                           </select>
                         </div>
                       </div>
@@ -415,7 +454,54 @@ const AdminCountries = () => {
                   </div>
                 </div>
 
-                {/* 2. Secondary Information Card */}
+                {/* 2. Services Registry Card */}
+                <div className="bg-slate-50/50 rounded-[2rem] p-8 border border-slate-100 space-y-6">
+                  <div>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Our Services</h3>
+                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-0.5">Define your destination-specific support</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                    {[0, 1, 2].map((idx) => (
+                      <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-100 space-y-4 shadow-sm hover:shadow-md transition-all group">
+                        <div className="border-b border-slate-50 pb-3">
+                          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Service {idx + 1}</span>
+                        </div>
+                        <div className="space-y-4">
+                          <div className="space-y-1.5">
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Service Title</label>
+                            <input 
+                              value={tempCountry.services?.[idx]?.title || ''} 
+                              onChange={(e) => {
+                                const srvs = [...(tempCountry.services || [{title:'',description:''},{title:'',description:''},{title:'',description:''}])];
+                                srvs[idx] = { ...srvs[idx], title: e.target.value };
+                                handleTempChange('services', srvs);
+                              }}
+                              placeholder="e.g. Visa Support" 
+                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:bg-white focus:border-blue-500 transition-all" 
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Description</label>
+                            <textarea 
+                              value={tempCountry.services?.[idx]?.description || ''} 
+                              onChange={(e) => {
+                                const srvs = [...(tempCountry.services || [{title:'',description:''},{title:'',description:''},{title:'',description:''}])];
+                                srvs[idx] = { ...srvs[idx], description: e.target.value };
+                                handleTempChange('services', srvs);
+                              }}
+                              rows={3}
+                              placeholder="Explain the service..." 
+                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-[11px] font-medium outline-none focus:bg-white focus:border-blue-500 transition-all resize-none leading-relaxed" 
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. Secondary Information Card */}
                 <div className="bg-slate-50/50 rounded-[2rem] p-8 border border-slate-100 space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
@@ -545,7 +631,7 @@ const AdminCountries = () => {
                 </button>
                 <button
                   onClick={saveModalToState}
-                  disabled={saving}
+                  disabled={saving || !tempCountry.name}
                   className="disabled:opacity-50 disabled:cursor-not-allowed text-white font-black px-10 py-4 rounded-2xl text-[11px] uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-100 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
                   style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)' }}
                 >

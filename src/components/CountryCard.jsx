@@ -28,9 +28,9 @@ const CountryCard = ({ country, universities = [] }) => {
     'bottom': 'items-end justify-center text-center',
     'bottom left': 'items-end justify-start',
     'bottom right': 'items-end justify-end text-right',
-  }[country.flagPosition || 'top left'];
+  }[country.countryCardPosition || country.countrycardpostion || 'top left'];
 
-  const flexDir = (country.flagPosition?.includes('right')) ? 'flex-row-reverse' : 'flex-row';
+  const flexDir = (country.countryCardPosition || country.countrycardpostion)?.includes('right') ? 'flex-row-reverse' : 'flex-row';
 
   return (
     <motion.div

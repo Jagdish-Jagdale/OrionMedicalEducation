@@ -51,7 +51,7 @@ const Team = () => {
     }));
   }, []);
 
-  if (loading) return <LoadingSkeleton count={3} type="team" />;
+  if (loading) return <LoadingSkeleton type="teampage" />;
 
   return (
     <div className="min-h-screen bg-[#e0f2fe] pt-20 relative overflow-hidden">

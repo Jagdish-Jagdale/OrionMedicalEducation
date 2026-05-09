@@ -1,0 +1,337 @@
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { getHomeContent } from '../firebase/firestore';
+
+const DynamicCountryGuide = ({ country, universities: propUnis = [] }) => {
+  const [waNumber, setWaNumber] = useState('');
+
+  // Use universities from props, or fallback to country.universities
+  const universities = propUnis.length > 0 ? propUnis : (country?.universities || []);
+
+  // Dynamic Theme Mapping
+  const getTheme = () => {
+    const name = country?.name?.toLowerCase() || '';
+    
+    // RED THEME (Georgia & Kyrgyzstan)
+    if (name.includes('georgia') || name.includes('kyrgyzstan')) {
+      return {
+        text: 'text-red-600',
+        bg: 'bg-red-600',
+        bgLight: 'bg-red-50/50',
+        border: 'border-red-100/50',
+        borderFocus: 'border-red-200',
+        shadow: 'shadow-red-600/20',
+        hoverShadow: 'hover:shadow-[0_0_50px_rgba(220,38,38,0.4)]',
+        gradient: 'from-red-600 via-red-700 to-red-900',
+        accent: 'bg-amber-500',
+        accentBorder: 'border-amber-500',
+        accentShadow: 'shadow-amber-500/20'
+      };
+    }
+
+    // TEAL/GREEN THEME (Uzbekistan)
+    if (name.includes('uzbekistan')) {
+      return {
+        text: 'text-teal-600',
+        bg: 'bg-teal-600',
+        bgLight: 'bg-teal-50/50',
+        border: 'border-teal-100/50',
+        borderFocus: 'border-teal-200',
+        shadow: 'shadow-teal-600/20',
+        hoverShadow: 'hover:shadow-[0_0_50px_rgba(13,148,136,0.4)]',
+        gradient: 'from-teal-600 via-teal-700 to-teal-900',
+        accent: 'bg-amber-500',
+        accentBorder: 'border-amber-500',
+        accentShadow: 'shadow-amber-500/20'
+      };
+    }
+
+    // SKY/CYAN THEME (Kazakhstan)
+    if (name.includes('kazakhstan')) {
+      return {
+        text: 'text-sky-600',
+        bg: 'bg-sky-600',
+        bgLight: 'bg-sky-50/50',
+        border: 'border-sky-100/50',
+        borderFocus: 'border-sky-200',
+        shadow: 'shadow-sky-600/20',
+        hoverShadow: 'hover:shadow-[0_0_50px_rgba(2,132,199,0.4)]',
+        gradient: 'from-sky-600 via-sky-700 to-sky-900',
+        accent: 'bg-amber-500',
+        accentBorder: 'border-amber-500',
+        accentShadow: 'shadow-amber-500/20'
+      };
+    }
+
+    // DEFAULT BLUE THEME (Russia & others)
+    return {
+      text: 'text-blue-600',
+      bg: 'bg-blue-600',
+      bgLight: 'bg-blue-50/50',
+      border: 'border-blue-100/50',
+      borderFocus: 'border-blue-200',
+      shadow: 'shadow-blue-600/20',
+      hoverShadow: 'hover:shadow-[0_0_50px_rgba(37,99,235,0.4)]',
+      gradient: 'from-blue-600 via-blue-700 to-navy',
+      accent: 'bg-amber-500',
+      accentBorder: 'border-amber-500',
+      accentShadow: 'shadow-amber-500/20'
+    };
+  };
+
+  const theme = getTheme();
+
+  useEffect(() => {
+    getHomeContent().then((data) => {
+      if (data && data.whatsappNumber) {
+        setWaNumber(data.whatsappNumber.replace(/\s+/g, ''));
+      }
+    });
+  }, []);
+
+  if (!country) return null;
+
+  return (
+    <div className="space-y-10 sm:space-y-16 pt-2 pb-10 sm:py-10">
+      {/* --- Intro Section --- */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="bg-white rounded-lg sm:rounded-xl p-6 sm:p-12 shadow-xl border border-slate-100 overflow-hidden relative"
+      >
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/50 rounded-full blur-3xl -mr-32 -mt-32" />
+
+        <div className="relative z-10">
+          <div className="mb-6">
+            <h2 className="text-3xl font-bold text-navy flex items-center gap-4">
+              {country.heroTitle || `MBBS in ${country.name}`}
+              {country.flag && (
+                <img 
+                  src={country.flag} 
+                  alt={`${country.name} Flag`} 
+                  className="w-12 h-8 object-cover rounded-md shadow-md border border-slate-100" 
+                />
+              )}
+            </h2>
+              <p className={`${theme.text} font-semibold tracking-wide uppercase text-xs mt-2`}>{country.subtitle || 'Premier Medical Destination'}</p>
+            </div>
+  
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              <div className="space-y-6">
+                {country.description && (
+                  <p className="text-slate-600 leading-relaxed text-lg italic whitespace-pre-line">
+                    "{country.description}"
+                  </p>
+                )}
+                
+                {(country.whyChooseUs?.filter(p => p.trim()) || []).length > 0 && (
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-black text-navy uppercase tracking-widest border-b border-slate-100 pb-2">Why Choose {country.name}?</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {country.whyChooseUs.filter(p => p.trim()).map((benefit, i) => (
+                        <div key={i} className={`flex items-center gap-3 p-3 ${theme.bgLight} rounded-xl border ${theme.border}`}>
+                          <div className={`w-6 h-6 rounded-full ${theme.bg} flex items-center justify-center flex-shrink-0 shadow-lg ${theme.shadow}`}>
+                            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+                              <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </div>
+                          <span className="text-slate-700 text-sm font-medium">{benefit}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+  
+              {/* Recognition Card - "First Card" in user's request context */}
+              <div className={`relative p-2 sm:p-4 rounded-2xl sm:rounded-3xl overflow-hidden group shadow-2xl transition-all duration-500 ${theme.hoverShadow}`}>
+                <div className={`absolute inset-0 bg-gradient-to-br ${theme.gradient} opacity-100 group-hover:scale-110 transition-transform duration-700`} />
+                <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '20px 20px' }} />
+  
+                <div className="relative z-10 bg-white/20 backdrop-blur-2xl rounded-xl sm:rounded-2xl p-6 sm:p-8 border border-white/30 shadow-2xl overflow-hidden group-hover:scale-[1.02] group-hover:-translate-y-2 group-hover:border-white/60 transition-all duration-500">
+                <div className="absolute inset-0 border border-white/20 rounded-xl sm:rounded-2xl pointer-events-none" />
+                <div className="absolute inset-0 pointer-events-none">
+                  <div className="absolute top-0 -left-[150%] w-[100%] h-full bg-gradient-to-r from-transparent via-white/50 to-transparent skew-x-[-25deg] group-hover:left-[150%] transition-all duration-0 group-hover:duration-[1000ms] ease-in-out" />
+                </div>
+
+                <h3 className="text-xl font-bold mb-4 text-white relative z-10">{country.recognitionTitle || 'Global Recognition'}</h3>
+                <p className="text-white/90 text-sm leading-relaxed mb-6 relative z-10 whitespace-pre-line">
+                  {country.globalRecognitionDescription || `Degrees from ${country.name} medical universities are recognized by leading medical councils around the world.`}
+                </p>
+                <div className="flex flex-wrap gap-3 relative z-10">
+                  {(country.globalRecognition?.filter(p => p.trim()) || ['NMC', 'WHO', 'WDOMS']).map((tag, idx) => (
+                    <div key={idx} className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold border border-white/30 text-white backdrop-blur-md">
+                      {tag}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* --- Services Section --- */}
+      {country.services?.some(s => s.title) && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          {country.services.filter(s => s.title).map((service, sIdx) => {
+            const serviceThemes = [
+              { bg: 'bg-amber-50', text: 'text-amber-600', icon: (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                </svg>
+              )},
+              { bg: 'bg-blue-50', text: 'text-blue-600', icon: (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                </svg>
+              )},
+              { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                </svg>
+              )}
+            ];
+            const sTheme = serviceThemes[sIdx % serviceThemes.length];
+            
+            return (
+              <motion.div
+                key={sIdx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: sIdx * 0.1 }}
+                className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col items-center text-center gap-4 relative overflow-hidden group hover:shadow-2xl hover:-translate-y-1 transition-all duration-500"
+              >
+                <div className={`w-12 h-12 rounded-xl ${sTheme.bg} ${sTheme.text} flex items-center justify-center group-hover:scale-110 transition-transform duration-500`}>
+                  {sTheme.icon}
+                </div>
+                <div>
+                  <h4 className="text-lg font-bold text-navy mb-2 tracking-tight leading-tight">{service.title}</h4>
+                  <p className="text-slate-500 text-[12px] leading-relaxed font-medium px-1">
+                    {service.description}
+                  </p>
+                </div>
+                <div className={`absolute -bottom-4 -right-4 w-20 h-20 ${sTheme.bg} opacity-[0.1] rounded-full blur-3xl group-hover:opacity-30 transition-opacity`} />
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* --- Universities Section --- */}
+      {universities.length > 0 && (
+        <div>
+          <div className="flex flex-col items-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-black text-navy text-center mb-2 tracking-tight">{country.universitiesTitle || 'Top Medical Institutions'}</h2>
+            <div className={`w-16 sm:w-20 h-1 sm:h-1.5 ${theme.accent} rounded-full`} />
+          </div>
+
+          <div className="space-y-12">
+            {universities.map((uni, idx) => (
+              <motion.div
+                key={uni.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                className="flex flex-col gap-6 transform transition-all"
+              >
+                {/* Image Top */}
+                <div className="w-full relative group">
+                  <div className="h-64 sm:h-80 md:h-96 rounded-lg sm:rounded-xl overflow-hidden shadow-xl relative">
+                    {uni.image ? (
+                      <img
+                        src={uni.image}
+                        alt={uni.name}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300">
+                        <svg className="w-20 h-20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-navy/60 via-transparent to-transparent opacity-40" />
+                    <div className="absolute bottom-6 left-6 text-white text-4xl font-black opacity-30 select-none">{String(idx + 1).padStart(2, '0')}</div>
+                  </div>
+                </div>
+
+                {/* Content Bottom */}
+                <div className="w-full">
+                  <div className={`bg-white rounded-lg sm:rounded-xl p-6 sm:p-10 shadow-lg border border-slate-50 flex flex-col h-full relative overflow-hidden group ${theme.borderFocus} transition-all`}>
+                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                      <svg className={`w-24 h-24 ${theme.text.replace('text-', 'fill-')}`} fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 14l9-5-9-5-9 5 9 5z" />
+                      </svg>
+                    </div>
+
+                    <h3 className={`text-2xl font-bold text-navy mb-4 group-hover:${theme.text} transition-colors uppercase tracking-tight`}>{idx + 1}. {uni.name}</h3>
+                    <p className="text-slate-600 text-base leading-relaxed mb-8 font-medium whitespace-pre-line">
+                      {uni.description || uni.information}
+                    </p>
+
+                    {uni.highlightText && (
+                      <div className={`p-6 ${theme.bgLight} rounded-lg border-l-4 ${theme.accentBorder} relative mb-8`}>
+                        <span className={`absolute -top-3 left-4 px-3 py-0.5 ${theme.accent} text-[10px] font-black text-white rounded-full uppercase tracking-widest shadow-lg ${theme.accentShadow}`}>University Highlight</span>
+                        <p className="text-slate-700 text-sm leading-relaxed italic whitespace-pre-line">
+                          "{uni.highlightText}"
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                      <div className="flex flex-wrap gap-3">
+                        {/* Render Point array from new admin structure */}
+                        {(uni.points || []).filter(p => p && p.trim()).map((point, pIdx) => {
+                          const colors = [
+                            { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100', dot: 'bg-emerald-500' },
+                            { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-100', dot: 'bg-blue-500' },
+                            { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100', dot: 'bg-amber-500' }
+                          ];
+                          const color = colors[pIdx % colors.length];
+                          return (
+                            <span key={pIdx} className={`px-4 py-1.5 ${color.bg} ${color.text} rounded-full text-[10px] font-bold border ${color.border} flex items-center gap-1.5 shadow-sm`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${color.dot}`} /> {point}
+                            </span>
+                          );
+                        })}
+                        {/* Fallback for point1/2/3 structure if array is empty */}
+                        {(!uni.points || uni.points.length === 0) && ['point1', 'point2', 'point3'].map((key, pIdx) => {
+                          const point = uni[key];
+                          if (!point || !point.trim()) return null;
+                          const colors = [
+                            { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100', dot: 'bg-emerald-500' },
+                            { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-100', dot: 'bg-blue-500' },
+                            { bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100', dot: 'bg-amber-500' }
+                          ];
+                          const color = colors[pIdx % colors.length];
+                          return (
+                            <span key={key} className={`px-4 py-1.5 ${color.bg} ${color.text} rounded-full text-[10px] font-bold border ${color.border} flex items-center gap-1.5 shadow-sm`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${color.dot}`} /> {point}
+                            </span>
+                          );
+                        })}
+                      </div>
+
+                      <a
+                        href={`https://wa.me/${waNumber}?text=Hi, I am interested in ${uni.name}, ${country.name}.`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba59] text-white text-[11px] font-black uppercase tracking-widest px-6 py-3 rounded-xl transition-all shadow-lg shadow-green-200 active:scale-95"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        WhatsApp Enquiry
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default DynamicCountryGuide;
