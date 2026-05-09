@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { getReviews, saveReviews, getReviewsHeader, saveReviewsHeader } from '../../firebase/firestore';
-import { uploadFile } from '../../firebase/storage';
+import { uploadFile, deleteFileByUrl, getFileNameFromUrl } from '../../firebase/storage';
 import toast from 'react-hot-toast';
 import PageTitle from '../../components/PageTitle';
 import DeleteModal from '../../components/admin/DeleteModal';
@@ -23,24 +23,21 @@ const ReviewModal = ({ isOpen, onClose, review, onSave, index, uploadFile }) => 
   const handleChange = (section, field, val) => {
     setFormData(prev => ({
       ...prev,
-      [section]: { ...prev[section], [field]: val }
+      [section]: { 
+        ...prev[section], 
+        [field]: val,
+        ...(field === 'image' ? { pendingFile: null } : {})
+      }
     }));
   };
 
-  const handleImageUpload = async (section, file) => {
+  const handleFileSelection = (section, file) => {
     if (!file) return;
-    const path = `reviews/${section}s/${Date.now()}_${file.name}`;
-    try {
-      const url = await uploadFile(file, path, (progress) => {
-        setUploadProgress(prev => ({ ...prev, [section]: progress }));
-      });
-      handleChange(section, 'image', url);
-      setUploadProgress(prev => ({ ...prev, [section]: null }));
-      toast.success(`${section === 'parent' ? 'Parent' : 'Student'} image uploaded!`);
-    } catch {
-      toast.error('Image upload failed.');
-      setUploadProgress(prev => ({ ...prev, [section]: null }));
-    }
+    const previewUrl = URL.createObjectURL(file);
+    setFormData(prev => ({
+      ...prev,
+      [section]: { ...prev[section], image: previewUrl, pendingFile: file }
+    }));
   };
 
   if (!isOpen) return null;
@@ -80,15 +77,32 @@ const ReviewModal = ({ isOpen, onClose, review, onSave, index, uploadFile }) => 
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Parent Photo</label>
                 <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 bg-slate-100 rounded-3xl overflow-hidden border-4 border-white shadow-lg flex-shrink-0">
-                    {formData.parent.image ? <img src={formData.parent.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-slate-300"><svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div>}
+                  <div className="w-20 h-20 bg-slate-100 rounded-3xl overflow-hidden border-4 border-white shadow-lg flex-shrink-0 relative group/img">
+                    {formData.parent.image ? (
+                      <div className="relative w-full h-full">
+                        <img src={formData.parent.image} className="w-full h-full object-cover" />
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm('Remove parent photo?')) {
+                              handleChange('parent', 'image', '');
+                            }
+                          }}
+                          className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-lg opacity-0 group-hover/img:opacity-100 transition-opacity z-20 shadow-lg border border-white/20"
+                          title="Remove Photo"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"/></svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-300"><svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div>
+                    )}
                   </div>
                   <div className="flex-1 space-y-2">
-                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload('parent', e.target.files[0])} className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
-                    <input value={formData.parent.image} onChange={(e) => handleChange('parent', 'image', e.target.value)} placeholder="Or paste image URL..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-[10px] font-bold focus:outline-none" />
+                    <input type="file" accept="image/*" onChange={(e) => handleFileSelection('parent', e.target.files[0])} className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
+                    <input value={formData.parent.pendingFile ? formData.parent.pendingFile.name : getFileNameFromUrl(formData.parent.image)} onChange={(e) => handleChange('parent', 'image', e.target.value)} placeholder="Or paste image URL..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-[10px] font-bold focus:outline-none" />
                   </div>
                 </div>
-                {uploadProgress.parent && <div className="h-1 bg-slate-100 rounded-full mt-2 overflow-hidden"><div className="h-full bg-blue-500 transition-all duration-300" style={{ width: `${uploadProgress.parent}%` }} /></div>}
               </div>
 
               <div className="space-y-2">
@@ -116,15 +130,32 @@ const ReviewModal = ({ isOpen, onClose, review, onSave, index, uploadFile }) => 
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Student Photo</label>
                 <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 bg-slate-100 rounded-3xl overflow-hidden border-4 border-white shadow-lg flex-shrink-0">
-                    {formData.student.image ? <img src={formData.student.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-slate-300"><svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div>}
+                  <div className="w-20 h-20 bg-slate-100 rounded-3xl overflow-hidden border-4 border-white shadow-lg flex-shrink-0 relative group/img">
+                    {formData.student.image ? (
+                      <div className="relative w-full h-full">
+                        <img src={formData.student.image} className="w-full h-full object-cover" />
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm('Remove student photo?')) {
+                              handleChange('student', 'image', '');
+                            }
+                          }}
+                          className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-lg opacity-0 group-hover/img:opacity-100 transition-opacity z-20 shadow-lg border border-white/20"
+                          title="Remove Photo"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"/></svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-300"><svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div>
+                    )}
                   </div>
                   <div className="flex-1 space-y-2">
-                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload('student', e.target.files[0])} className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer" />
-                    <input value={formData.student.image} onChange={(e) => handleChange('student', 'image', e.target.value)} placeholder="Or paste image URL..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-[10px] font-bold focus:outline-none" />
+                    <input type="file" accept="image/*" onChange={(e) => handleFileSelection('student', e.target.files[0])} className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer" />
+                    <input value={formData.student.pendingFile ? formData.student.pendingFile.name : getFileNameFromUrl(formData.student.image)} onChange={(e) => handleChange('student', 'image', e.target.value)} placeholder="Or paste image URL..." className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-[10px] font-bold focus:outline-none" />
                   </div>
                 </div>
-                {uploadProgress.student && <div className="h-1 bg-slate-100 rounded-full mt-2 overflow-hidden"><div className="h-full bg-emerald-500 transition-all duration-300" style={{ width: `${uploadProgress.student}%` }} /></div>}
               </div>
 
               <div className="space-y-2">
@@ -165,6 +196,8 @@ const AdminReviews = () => {
   const [isDirty, setIsDirty] = useState(false);
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, index: null, itemName: '' });
   const [modal, setModal] = useState({ isOpen: false, review: null, index: null });
+  const [uploadProgress, setUploadProgress] = useState({});
+  const [initialReviews, setInitialReviews] = useState([]);
   const isFirstLoad = React.useRef(true);
   
   // Pagination State
@@ -187,6 +220,7 @@ const AdminReviews = () => {
         }));
         
         setReviews(processed);
+        setInitialReviews(JSON.parse(JSON.stringify(processed)));
         if (headerData) {
           setHeader({
             badge: headerData.badge || 'Real Feedback',
@@ -240,10 +274,47 @@ const AdminReviews = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
+      // 1. Upload pending images
+      const finalReviews = await Promise.all(reviews.map(async (rev, idx) => {
+        let finalParent = rev.parent;
+        let finalStudent = rev.student;
+
+        if (rev.parent.pendingFile) {
+          const url = await uploadFile(
+            rev.parent.pendingFile, 
+            `reviews/parents/${Date.now()}_${rev.parent.pendingFile.name}`, 
+            (p) => setUploadProgress(prev => ({ ...prev, [`p_${idx}`]: p }))
+          );
+          const { pendingFile, ...rest } = rev.parent;
+          finalParent = { ...rest, image: url };
+        }
+
+        if (rev.student.pendingFile) {
+          const url = await uploadFile(
+            rev.student.pendingFile, 
+            `reviews/students/${Date.now()}_${rev.student.pendingFile.name}`, 
+            (p) => setUploadProgress(prev => ({ ...prev, [`s_${idx}`]: p }))
+          );
+          const { pendingFile, ...rest } = rev.student;
+          finalStudent = { ...rest, image: url };
+        }
+
+        return { ...rev, parent: finalParent, student: finalStudent };
+      }));
+
       await Promise.all([
-        saveReviews(reviews),
+        saveReviews(finalReviews),
         saveReviewsHeader(header)
       ]);
+      
+      // Cleanup old images from Storage
+      const oldImages = initialReviews.flatMap(r => [r.parent.image, r.student.image]).filter(url => url && typeof url === 'string' && url.includes('firebasestorage'));
+      const newImages = finalReviews.flatMap(r => [r.parent.image, r.student.image]);
+      const toDelete = oldImages.filter(url => !newImages.includes(url));
+      await Promise.all(toDelete.map(url => deleteFileByUrl(url)));
+
+      setReviews(finalReviews);
+      setInitialReviews(JSON.parse(JSON.stringify(finalReviews)));
       toast.success('Reviews and Header updated successfully!');
       setIsDirty(false);
       // Reset the gate so further changes can be detected
@@ -289,7 +360,7 @@ const AdminReviews = () => {
 
   return (
     <>
-      <AdminLayout title="Reviews Management" isDirty={isDirty} actions={saveAction}>
+      <AdminLayout title="Manage Reviews Page" isDirty={isDirty} actions={saveAction}>
         <PageTitle title="Admin | Reviews" />
         <div className="max-w-7xl mx-auto pb-20">
           

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { getTeamAllData, saveTeamAllData } from '../../firebase/firestore';
-import { uploadFile } from '../../firebase/storage';
+import { uploadFile, deleteFileByUrl, getFileNameFromUrl } from '../../firebase/storage';
 import toast from 'react-hot-toast';
 import PageTitle from '../../components/PageTitle';
 import DeleteModal from '../../components/admin/DeleteModal';
@@ -138,32 +138,81 @@ const AdminTeam = () => {
     toast.success(editIndex === -1 ? 'Expert added to list' : 'Expert updated');
   };
 
-  const handleImageUpload = async (file, onComplete, progressKey) => {
+  const handleFileSelection = (file) => {
     if (!file) return;
-    const path = `team/${Date.now()}_${file.name}`;
-    try {
-      const url = await uploadFile(file, path, (progress) => {
-        setUploadProgress((prev) => ({ ...prev, [progressKey]: progress }));
-      });
-      onComplete(url);
-      setUploadProgress((prev) => ({ ...prev, [progressKey]: null }));
-      toast.success('Image uploaded!');
-    } catch {
-      toast.error('Image upload failed.');
-      setUploadProgress((prev) => ({ ...prev, [progressKey]: null }));
-    }
+    const previewUrl = URL.createObjectURL(file);
+    setTempMember(prev => ({
+      ...prev,
+      image: previewUrl,
+      pendingFile: file
+    }));
   };
 
-    const handleFinalSave = async () => {
+  const handleFinalSave = async () => {
     setSaving(true);
     try {
+      // 1. Upload pending images for Core Members
+      const finalMembers = await Promise.all(members.map(async (m, idx) => {
+        if (m.pendingFile) {
+          const url = await uploadFile(
+            m.pendingFile, 
+            `team/${Date.now()}_${m.pendingFile.name}`, 
+            (p) => setUploadProgress(prev => ({ ...prev, [`core_${idx}`]: p }))
+          );
+          const { pendingFile, ...rest } = m;
+          return { ...rest, image: url };
+        }
+        return m;
+      }));
+
+      // 2. Upload pending images for Regional Experts
+      const finalRegional = await Promise.all(regionalExperts.map(async (m, idx) => {
+        if (m.pendingFile) {
+          const url = await uploadFile(
+            m.pendingFile, 
+            `team/${Date.now()}_${m.pendingFile.name}`, 
+            (p) => setUploadProgress(prev => ({ ...prev, [`reg_${idx}`]: p }))
+          );
+          const { pendingFile, ...rest } = m;
+          return { ...rest, image: url };
+        }
+        return m;
+      }));
+
       await saveTeamAllData({ 
-        members, 
-        regional: regionalExperts, 
+        members: finalMembers, 
+        regional: finalRegional, 
         settings 
       });
-      setInitialData(JSON.stringify({ members, regionalExperts, settings }));
+
+      // Cleanup old images from Storage
+      try {
+        const oldData = JSON.parse(initialData);
+        const oldImages = [
+          ...(oldData.members || []).map(m => m.image),
+          ...(oldData.regionalExperts || []).map(m => m.image)
+        ].filter(url => url && typeof url === 'string' && url.includes('firebasestorage'));
+
+        const newImages = [
+          ...finalMembers.map(m => m.image),
+          ...finalRegional.map(m => m.image)
+        ];
+
+        const toDelete = oldImages.filter(url => !newImages.includes(url));
+        await Promise.all(toDelete.map(url => deleteFileByUrl(url)));
+      } catch (e) {
+        console.error("Storage cleanup failed:", e);
+      }
+
+      setMembers(finalMembers);
+      setRegionalExperts(finalRegional);
+      setInitialData(JSON.stringify({ 
+        members: finalMembers, 
+        regionalExperts: finalRegional, 
+        settings 
+      }));
       setHasChanges(false);
+      setUploadProgress({});
       toast.success('All team data synced to Database!');
     } catch (err) {
       console.error(err);
@@ -206,7 +255,7 @@ const AdminTeam = () => {
 
   return (
     <>
-      <AdminLayout title="Team Management" isDirty={hasChanges} actions={saveAction}>
+      <AdminLayout title="Manage Team Page" isDirty={hasChanges} actions={saveAction}>
         <PageTitle title="Admin | Team" />
         
         <div className="space-y-8">
@@ -338,8 +387,14 @@ const AdminTeam = () => {
                     <tr key={i} onClick={() => openEditModal(i, 'core')} className="group hover:bg-purple-50/30 cursor-pointer transition-colors">
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shadow-inner group-hover:border-purple-200 transition-all">
+                          <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shadow-inner group-hover:border-purple-200 transition-all relative">
                             {m.image ? <img src={m.image} alt="" className="w-full h-full object-cover" /> : <span className="text-slate-300 font-black">#{(i + 1)}</span>}
+                            {uploadProgress[`core_${i}`] != null && (
+                              <div className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center z-10">
+                                <div className="w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
+                                <span className="text-[7px] font-black mt-1 text-purple-600">{uploadProgress[`core_${i}`]}%</span>
+                              </div>
+                            )}
                           </div>
                           <div>
                             <p className="text-slate-900 font-black text-sm">{m.name || 'Anonymous'}</p>
@@ -410,8 +465,14 @@ const AdminTeam = () => {
                     <tr key={i} onClick={() => openEditModal(i, 'regional')} className="group hover:bg-blue-50/30 cursor-pointer transition-colors">
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shadow-inner group-hover:border-blue-200 transition-all">
+                          <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shadow-inner group-hover:border-blue-200 transition-all relative">
                             {m.image ? <img src={m.image} alt="" className="w-full h-full object-cover" /> : <span className="text-slate-300 font-black">#{(i + 1)}</span>}
+                            {uploadProgress[`reg_${i}`] != null && (
+                              <div className="absolute inset-0 bg-white/90 flex flex-col items-center justify-center z-10">
+                                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                                <span className="text-[7px] font-black mt-1 text-blue-600">{uploadProgress[`reg_${i}`]}%</span>
+                              </div>
+                            )}
                           </div>
                           <div>
                             <p className="text-slate-900 font-black text-sm">{m.name || 'Anonymous'}</p>
@@ -476,14 +537,32 @@ const AdminTeam = () => {
                   {/* Left Column: Image */}
                   <div className="md:col-span-4 space-y-6">
                     <div className="w-full aspect-square rounded-[2rem] bg-slate-50 border border-slate-100 overflow-hidden relative group">
-                      {tempMember.image ? <img src={tempMember.image} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-2"><svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg><span className="text-[10px] font-black uppercase tracking-widest">No Profile Image</span></div>}
+                      {tempMember.image ? (
+                        <div className="relative w-full h-full group/member">
+                          <img src={tempMember.image} alt="" className="w-full h-full object-cover" />
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm('Remove this photo?')) {
+                                setTempMember(prev => ({ ...prev, image: '', pendingFile: null }));
+                              }
+                            }}
+                            className="absolute top-4 right-4 p-2.5 bg-red-500/90 backdrop-blur-sm text-white rounded-xl opacity-0 group-hover/member:opacity-100 transition-all z-20 shadow-xl border border-white/30 hover:bg-red-600 active:scale-90"
+                            title="Remove Photo"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"/></svg>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-2"><svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg><span className="text-[10px] font-black uppercase tracking-widest">No Profile Image</span></div>
+                      )}
                       <label className="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                         <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/></svg>
-                        <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e.target.files[0], (url) => setTempMember(p => ({ ...p, image: url })), 'member_img')} className="hidden" />
+                        <input type="file" accept="image/*" onChange={(e) => handleFileSelection(e.target.files[0])} className="hidden" />
                       </label>
                     </div>
                     {uploadProgress['member_img'] && <div className="h-1 bg-blue-100 rounded-full overflow-hidden"><div className="h-full bg-blue-600 transition-all" style={{ width: `${uploadProgress['member_img']}%` }}></div></div>}
-                    <input value={tempMember.image} onChange={(e) => setTempMember(p => ({ ...p, image: e.target.value }))} placeholder="Direct Image URL" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold outline-none" />
+                    <input value={tempMember.pendingFile ? tempMember.pendingFile.name : getFileNameFromUrl(tempMember.image)} onChange={(e) => setTempMember(p => ({ ...p, image: e.target.value, pendingFile: null }))} placeholder="Direct Image URL" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold outline-none" />
                   </div>
 
                   {/* Right Column: Fields */}

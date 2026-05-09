@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { getAdminCountries, saveAdminCountries } from '../../firebase/firestore';
-import { uploadFile } from '../../firebase/storage';
+import { uploadFile, deleteFileByUrl, getFileNameFromUrl } from '../../firebase/storage';
 import toast from 'react-hot-toast';
 import PageTitle from '../../components/PageTitle';
 import DeleteModal from '../../components/admin/DeleteModal';
@@ -48,6 +48,7 @@ const AdminCountries = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
   const [tempCountry, setTempCountry] = useState(null);
+  const [isServicesOpen, setIsServicesOpen] = useState(false);
 
   useEffect(() => {
     getAdminCountries().then((data) => {
@@ -68,23 +69,57 @@ const AdminCountries = () => {
   const openEditModal = (index) => {
     setEditIndex(index);
     setTempCountry(JSON.parse(JSON.stringify(entries[index])));
+    setIsServicesOpen(false);
     setIsModalOpen(true);
   };
 
   const openAddModal = () => {
     setEditIndex(-1);
     setTempCountry(JSON.parse(JSON.stringify(emptyCountry)));
+    setIsServicesOpen(false);
     setIsModalOpen(true);
   };
 
   const saveModalToState = async () => {
+    // 1. Validation
+    if (!tempCountry.name?.trim()) return toast.error('Country Name is mandatory');
+    if (!tempCountry.flag?.trim()) return toast.error('Country Flag is mandatory');
+    if (!tempCountry.title?.trim()) return toast.error('Hero Title is mandatory');
+    if (!tempCountry.subtitle?.trim()) return toast.error('Subtitle is mandatory');
+    if (!tempCountry.description?.trim()) return toast.error('Description is mandatory');
+    // Country Card Position is now optional (allows hiding from Countries page globe)
+    // if (!tempCountry.countryCardPosition) return toast.error('Country Card Position is mandatory');
+
+    // Universities Validation
+    if (tempCountry.universities?.length > 0) {
+      for (let i = 0; i < tempCountry.universities.length; i++) {
+        const uni = tempCountry.universities[i];
+        const num = (i + 1).toString().padStart(2, '0');
+        if (!uni.name?.trim()) return toast.error(`University ${num}: Name is mandatory`);
+        if (!uni.image?.trim()) return toast.error(`University ${num}: Image is mandatory`);
+        if (!uni.description?.trim()) return toast.error(`University ${num}: Information is mandatory`);
+        if (!uni.highlightText?.trim()) return toast.error(`University ${num}: Highlight is mandatory`);
+        if (!uni.points || uni.points.some(p => !p?.trim())) return toast.error(`University ${num}: All 3 points are mandatory`);
+      }
+    }
+
+    // Services Validation
+    if (tempCountry.services?.some(s => !s.title?.trim() || !s.description?.trim())) {
+      return toast.error('All 3 Service titles and descriptions are mandatory');
+    }
+
+    // Why Choose Us
+    if (tempCountry.whyChooseUs?.some(p => !p?.trim())) {
+      return toast.error('All 5 Why Choose Us points are mandatory');
+    }
+
     // Clean up redundant fields
-    const { 
-      countrycardpostion, 
-      countryCardPositionClasses, 
-      flagPosition, 
+    const {
+      countrycardpostion,
+      countryCardPositionClasses,
+      flagPosition,
       flagPositionClasses,
-      ...cleanedCountry 
+      ...cleanedCountry
     } = tempCountry;
 
     const updated = [...entries];
@@ -97,10 +132,73 @@ const AdminCountries = () => {
     setSaving(true);
 
     try {
+      let finalFlag = tempCountry.flag;
+      if (tempCountry.flagPendingFile) {
+        finalFlag = await uploadFile(
+          tempCountry.flagPendingFile,
+          `flags/${Date.now()}_${tempCountry.flagPendingFile.name}`,
+          (p) => setUploadProgress(prev => ({ ...prev, modal_flag: p }))
+        );
+      }
+
+      const finalUnis = await Promise.all((tempCountry.universities || []).map(async (uni, idx) => {
+        if (uni.pendingFile) {
+          const url = await uploadFile(
+            uni.pendingFile,
+            `universities/${Date.now()}_${uni.pendingFile.name}`,
+            (p) => setUploadProgress(prev => ({ ...prev, [`uni_${idx}_img`]: p }))
+          );
+          const { pendingFile, ...rest } = uni;
+          return { ...rest, image: url };
+        }
+        return uni;
+      }));
+
+      const cleanedTemp = { 
+        ...tempCountry, 
+        flag: finalFlag, 
+        universities: finalUnis 
+      };
+      delete cleanedTemp.flagPendingFile;
+
+      // Clean up redundant fields
+      const {
+        countrycardpostion,
+        countryCardPositionClasses,
+        flagPosition,
+        flagPositionClasses,
+        ...cleanedCountry
+      } = cleanedTemp;
+
+      const updated = [...entries];
+      if (editIndex === -1) {
+        updated.push(cleanedCountry);
+      } else {
+        updated[editIndex] = cleanedCountry;
+      }
+
+      // Cleanup old images from Storage
+      if (editIndex !== -1) {
+        const oldCountry = entries[editIndex];
+        const oldImages = [
+          oldCountry.flag,
+          ...(oldCountry.universities || []).map(u => u.image)
+        ].filter(url => url && typeof url === 'string' && url.includes('firebasestorage'));
+
+        const newImages = [
+          cleanedCountry.flag,
+          ...(cleanedCountry.universities || []).map(u => u.image)
+        ];
+
+        const toDelete = oldImages.filter(url => !newImages.includes(url));
+        await Promise.all(toDelete.map(url => deleteFileByUrl(url)));
+      }
+
       await saveAdminCountries(updated);
       setEntries(updated);
       setInitialEntries(JSON.parse(JSON.stringify(updated)));
       setHasChanges(false);
+      setUploadProgress({});
       setIsModalOpen(false);
       toast.success(editIndex === -1 ? 'Country created and synced!' : 'Changes synced to database!');
     } catch (err) {
@@ -112,7 +210,11 @@ const AdminCountries = () => {
   };
 
   const handleTempChange = (field, val) => {
-    setTempCountry(prev => ({ ...prev, [field]: val }));
+    setTempCountry(prev => ({ 
+      ...prev, 
+      [field]: val,
+      ...(field === 'flag' ? { flagPendingFile: null } : {})
+    }));
   };
 
   const handleTempArrayChange = (field, idx, val) => {
@@ -122,7 +224,11 @@ const AdminCountries = () => {
   };
 
   const addPointToTemp = (field) => {
-    setTempCountry(prev => ({ ...prev, [field]: [...prev[field], ''] }));
+    if (field === 'whyChooseUs' && (tempCountry.whyChooseUs?.length || 0) >= 6) {
+      toast.error('Maximum 6 "Why Choose Us" points allowed.');
+      return;
+    }
+    setTempCountry(prev => ({ ...prev, [field]: [...(prev[field] || []), ''] }));
   };
 
   const removePointFromTemp = (field, idx) => {
@@ -132,6 +238,7 @@ const AdminCountries = () => {
   const handleUniChange = (uniIdx, field, val) => {
     const unis = [...tempCountry.universities];
     unis[uniIdx][field] = val;
+    if (field === 'image') unis[uniIdx].pendingFile = null;
     setTempCountry(prev => ({ ...prev, universities: unis }));
   };
 
@@ -143,25 +250,28 @@ const AdminCountries = () => {
   };
 
   const removeUniversityLocal = (uniIdx) => {
-    setTempCountry(prev => ({
-      ...prev,
-      universities: prev.universities.filter((_, i) => i !== uniIdx)
-    }));
+    setDeleteModal({
+      isOpen: true,
+      countryIndex: null,
+      uniIndex: uniIdx,
+      itemName: tempCountry.universities[uniIdx].name || `University #${uniIdx + 1}`
+    });
   };
 
-  const handleImageUpload = async (file, pathPrefix, onComplete, progressKey) => {
+  const handleFileSelection = (file, field, uniIdx = null) => {
     if (!file) return;
-    const path = `${pathPrefix}/${Date.now()}_${file.name}`;
-    try {
-      const url = await uploadFile(file, path, (progress) => {
-        setUploadProgress((prev) => ({ ...prev, [progressKey]: progress }));
-      });
-      onComplete(url);
-      setUploadProgress((prev) => ({ ...prev, [progressKey]: null }));
-      toast.success('Image uploaded!');
-    } catch {
-      toast.error('Image upload failed.');
-      setUploadProgress((prev) => ({ ...prev, [progressKey]: null }));
+    const previewUrl = URL.createObjectURL(file);
+    if (uniIdx !== null) {
+      const unis = [...tempCountry.universities];
+      unis[uniIdx].image = previewUrl;
+      unis[uniIdx].pendingFile = file;
+      setTempCountry(prev => ({ ...prev, universities: unis }));
+    } else {
+      setTempCountry(prev => ({
+        ...prev,
+        [field]: previewUrl,
+        [`${field}PendingFile`]: file
+      }));
     }
   };
 
@@ -170,8 +280,14 @@ const AdminCountries = () => {
   };
 
   const confirmDelete = () => {
-    const { countryIndex } = deleteModal;
-    setEntries(entries.filter((_, idx) => idx !== countryIndex));
+    if (deleteModal.countryIndex !== null) {
+      setEntries(entries.filter((_, idx) => idx !== deleteModal.countryIndex));
+    } else if (deleteModal.uniIndex !== null) {
+      setTempCountry(prev => ({
+        ...prev,
+        universities: prev.universities.filter((_, i) => i !== deleteModal.uniIndex)
+      }));
+    }
     setDeleteModal({ isOpen: false, countryIndex: null, uniIndex: null, itemName: '' });
   };
 
@@ -182,9 +298,24 @@ const AdminCountries = () => {
     }
     setSaving(true);
     try {
+      // Cleanup old images from Storage (for deleted countries)
+      const oldImages = initialEntries.flatMap(c => [
+        c.flag,
+        ...(c.universities || []).map(u => u.image)
+      ]).filter(url => url && typeof url === 'string' && url.includes('firebasestorage'));
+
+      const newImages = entries.flatMap(c => [
+        c.flag,
+        ...(c.universities || []).map(u => u.image)
+      ]);
+
+      const toDelete = oldImages.filter(url => !newImages.includes(url));
+      await Promise.all(toDelete.map(url => deleteFileByUrl(url)));
+
       await saveAdminCountries(entries);
       setInitialEntries(JSON.parse(JSON.stringify(entries)));
       setHasChanges(false);
+      setUploadProgress({});
       toast.success('All data synced to Database!');
     } catch (err) {
       console.error('Final Save sync error:', err);
@@ -213,7 +344,7 @@ const AdminCountries = () => {
 
   return (
     <>
-      <AdminLayout title="Destination Management" isDirty={hasChanges} actions={saveAction}>
+      <AdminLayout title="Manage Countries Page" isDirty={hasChanges} actions={saveAction}>
         <PageTitle title="Admin | Countries" />
 
         <div className="space-y-6">
@@ -226,10 +357,14 @@ const AdminCountries = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={openAddModal}
-                className="flex items-center gap-2 bg-slate-50 hover:bg-white border border-slate-200 hover:border-blue-600 text-slate-900 hover:text-blue-600 font-bold px-6 py-3 rounded-2xl text-sm transition-all shadow-sm hover:shadow-xl active:scale-95"
+                disabled={entries.length >= 5}
+                className={`flex items-center gap-2 font-bold px-6 py-3 rounded-2xl text-sm transition-all shadow-sm active:scale-95 border ${entries.length >= 5
+                    ? 'bg-slate-50 text-slate-300 border-slate-100 cursor-not-allowed'
+                    : 'bg-slate-50 hover:bg-white border-slate-200 hover:border-blue-600 text-slate-900 hover:text-blue-600 hover:shadow-xl'
+                  }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
-                Add New Country
+                {entries.length >= 5 ? 'Country Limit Reached (5)' : 'Add New Country'}
               </button>
             </div>
           </div>
@@ -240,9 +375,11 @@ const AdminCountries = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50 border-b border-slate-100">
-                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Country Info</th>
+                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 w-20">SR NO</th>
+                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Country</th>
+                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-center">Card Position</th>
                     <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Headline</th>
-                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Unis</th>
+                    <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-center">Unis</th>
                     <th className="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -250,12 +387,12 @@ const AdminCountries = () => {
                   {loading ? (
                     [...Array(3)].map((_, i) => (
                       <tr key={i} className="animate-pulse">
-                        <td colSpan={4} className="px-8 py-10"><div className="h-12 bg-slate-100 rounded-2xl w-full" /></td>
+                        <td colSpan={6} className="px-8 py-10"><div className="h-12 bg-slate-100 rounded-2xl w-full" /></td>
                       </tr>
                     ))
                   ) : entries.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="px-8 py-20 text-center">
+                      <td colSpan={6} className="px-8 py-20 text-center">
                         <p className="text-slate-400 font-bold">No countries found. Click "Add New Country" to start.</p>
                       </td>
                     </tr>
@@ -266,22 +403,29 @@ const AdminCountries = () => {
                       className="group hover:bg-blue-50/30 cursor-pointer transition-colors"
                     >
                       <td className="px-8 py-5">
+                        <span className="text-[10px] font-black text-slate-400">{(i + 1).toString().padStart(2, '0')}</span>
+                      </td>
+                      <td className="px-8 py-5">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shadow-inner group-hover:border-blue-200 group-hover:bg-blue-50 transition-all">
                             {country.flag ? <img src={country.flag} alt="" className="w-full h-full object-cover" /> : <span className="text-slate-300 font-black">#{(i + 1)}</span>}
                           </div>
                           <div>
                             <p className="text-slate-900 font-black text-sm">{country.name || 'Untitled Country'}</p>
-                            <p className="text-blue-600 text-[10px] font-black uppercase tracking-widest mt-0.5 opacity-60">Configured</p>
                           </div>
                         </div>
+                      </td>
+                      <td className="px-8 py-5 text-center">
+                        <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest border border-slate-200/50">
+                          {country.countryCardPosition || 'Default'}
+                        </span>
                       </td>
                       <td className="px-8 py-5">
                         <p className="text-slate-600 text-xs font-bold truncate max-w-xs">{country.title || 'No title set'}</p>
                       </td>
-                      <td className="px-8 py-5">
-                        <span className="px-3 py-1 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-black uppercase group-hover:bg-blue-100 group-hover:text-blue-700 transition-colors">
-                          {country.universities?.length || 0} Universities
+                      <td className="px-8 py-5 text-center">
+                        <span className="px-3 py-1 rounded-lg bg-blue-50 text-blue-600 text-[10px] font-black uppercase border border-blue-100/50 group-hover:bg-blue-100 group-hover:text-blue-700 transition-colors">
+                          {country.universities?.length || 0}
                         </span>
                       </td>
                       <td className="px-8 py-5 text-right">
@@ -296,7 +440,7 @@ const AdminCountries = () => {
                             onClick={(e) => { e.stopPropagation(); removeEntry(i); }}
                             className="p-2.5 rounded-xl text-red-400 hover:bg-red-500 hover:text-white transition-all shadow-sm hover:shadow-lg active:scale-90"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
                           </button>
                         </div>
                       </td>
@@ -356,25 +500,39 @@ const AdminCountries = () => {
                       <div className="bg-white p-4 rounded-3xl border border-slate-100 flex flex-col items-center gap-4 shadow-sm">
                         <div className="w-20 h-20 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0 relative group">
                           {tempCountry.flag ? (
-                            <img src={tempCountry.flag} alt="" className="w-full h-full object-cover" />
+                            <div className="relative w-full h-full group/flag">
+                              <img src={tempCountry.flag} alt="" className="w-full h-full object-cover" />
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (window.confirm('Remove country flag?')) {
+                                    setTempCountry(prev => ({ ...prev, flag: '', flagPendingFile: null }));
+                                  }
+                                }}
+                                className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover/flag:opacity-100 transition-opacity z-20 shadow-lg border border-white/20"
+                                title="Remove Flag"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"/></svg>
+                              </button>
+                            </div>
                           ) : (
                             <svg className="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
                           )}
                           <label className="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
-                            <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e.target.files[0], 'flags', (url) => handleTempChange('flag', url), 'modal_flag')} className="hidden" />
+                            <input type="file" accept="image/*" onChange={(e) => handleFileSelection(e.target.files[0], 'flag')} className="hidden" />
                           </label>
                         </div>
                         <div className="w-full space-y-2">
-                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center block">Flag Image URL</label>
-                          <input value={tempCountry.flag} onChange={(e) => handleTempChange('flag', e.target.value)} placeholder="URL..." className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[10px] font-bold outline-none focus:border-blue-500" />
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center block">Flag Image URL *</label>
+                          <input value={tempCountry.flagPendingFile ? tempCountry.flagPendingFile.name : getFileNameFromUrl(tempCountry.flag)} onChange={(e) => handleTempChange('flag', e.target.value)} placeholder="URL..." className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[10px] font-bold outline-none focus:border-blue-500" />
                           {uploadProgress['modal_flag'] && <div className="h-1 bg-blue-100 rounded-full overflow-hidden"><div className="h-full bg-blue-600 transition-all" style={{ width: `${uploadProgress['modal_flag']}%` }}></div></div>}
                         </div>
-                        
+
                         <div className="w-full space-y-1.5 pt-2 border-t border-slate-100">
-                          <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest text-center block">Country Card Position</label>
-                          <select 
-                            value={tempCountry.countryCardPosition || ''} 
+                          <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest text-center block">Country Card Position *</label>
+                          <select
+                            value={tempCountry.countryCardPosition || ''}
                             onChange={(e) => {
                               const label = e.target.value;
                               setTempCountry(prev => ({
@@ -389,7 +547,7 @@ const AdminCountries = () => {
                                 .filter((_, idx) => idx !== editIndex)
                                 .map(c => (c.countryCardPosition || c.countrycardpostion || '').toLowerCase())
                                 .filter(Boolean);
-                              
+
                               return [
                                 { val: '', label: 'Select Location' },
                                 { val: 'top left', label: 'Top Left' },
@@ -398,15 +556,15 @@ const AdminCountries = () => {
                                 { val: 'bottom left', label: 'Bottom Left' },
                                 { val: 'bottom right', label: 'Bottom Right' }
                               ]
-                              .map(pos => (
-                                <option 
-                                  key={pos.val} 
-                                  value={pos.val} 
-                                  disabled={pos.val !== '' && usedPositions.includes(pos.val.toLowerCase())}
-                                >
-                                  {pos.label}
-                                </option>
-                              ));
+                                .map(pos => (
+                                  <option
+                                    key={pos.val}
+                                    value={pos.val}
+                                    disabled={pos.val !== '' && usedPositions.includes(pos.val.toLowerCase())}
+                                  >
+                                    {pos.label}
+                                  </option>
+                                ));
                             })()}
                           </select>
                         </div>
@@ -419,27 +577,33 @@ const AdminCountries = () => {
                         <input value={tempCountry.name} onChange={(e) => handleTempChange('name', e.target.value)} placeholder="e.g. Russia" className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Hero Title</label>
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Hero Title *</label>
                         <input value={tempCountry.title} onChange={(e) => handleTempChange('title', e.target.value)} placeholder="e.g. Study MBBS in Russia" className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all" />
                       </div>
                       <div className="md:col-span-2 space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Subtitle</label>
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Subtitle *</label>
                         <input value={tempCountry.subtitle} onChange={(e) => handleTempChange('subtitle', e.target.value)} placeholder="e.g. World Class Medical Education" className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all" />
                       </div>
                       <div className="md:col-span-2 space-y-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Country Description</label>
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Country Description *</label>
                         <textarea value={tempCountry.description} onChange={(e) => handleTempChange('description', e.target.value)} rows={3} placeholder="Tell about the country's education..." className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all resize-none" />
                       </div>
                     </div>
                   </div>
 
                   <hr className="border-slate-100" />
-                  
+
                   {/* Why Choose Us within first card */}
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Why Choose Us Section</label>
-                      <button onClick={() => addPointToTemp('whyChooseUs')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:bg-blue-50 px-4 py-2 rounded-lg transition-all">+ Add Point</button>
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Why Choose Us Section *</label>
+                      <button 
+                        onClick={() => addPointToTemp('whyChooseUs')} 
+                        className={`text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-lg transition-all ${tempCountry.whyChooseUs?.length >= 6 ? 'text-slate-300 cursor-not-allowed' : 'text-blue-600 hover:bg-blue-50'}`}
+                        disabled={tempCountry.whyChooseUs?.length >= 6}
+                      >
+                        + Add Point
+                      </button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {tempCountry.whyChooseUs?.map((point, pIdx) => (
@@ -455,68 +619,87 @@ const AdminCountries = () => {
                 </div>
 
                 {/* 2. Services Registry Card */}
-                <div className="bg-slate-50/50 rounded-[2rem] p-8 border border-slate-100 space-y-6">
-                  <div>
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Our Services</h3>
-                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-0.5">Define your destination-specific support</p>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-                    {[0, 1, 2].map((idx) => (
-                      <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-100 space-y-4 shadow-sm hover:shadow-md transition-all group">
-                        <div className="border-b border-slate-50 pb-3">
-                          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Service {idx + 1}</span>
+                <div className="bg-slate-50/50 rounded-[2rem] border border-slate-100 overflow-hidden transition-all duration-300">
+                  <button
+                    onClick={() => setIsServicesOpen(!isServicesOpen)}
+                    className="w-full p-8 flex items-center justify-between hover:bg-slate-100/50 transition-colors"
+                  >
+                    <div>
+                      <h3 className="text-xl font-black text-slate-900 tracking-tight text-left">Our Services</h3>
+                      <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-0.5 text-left">Define your destination-specific support</p>
+                    </div>
+                    <div className={`p-3 rounded-2xl bg-white border border-slate-100 text-slate-400 transition-transform duration-300 ${isServicesOpen ? 'rotate-180' : ''}`}>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" /></svg>
+                    </div>
+                  </button>
+
+                  <AnimatePresence>
+                    {isServicesOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="px-8 pb-8"
+                      >
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                          {[0, 1, 2].map((idx) => (
+                            <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-100 space-y-4 shadow-sm hover:shadow-md transition-all group">
+                              <div className="border-b border-slate-50 pb-3">
+                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Service {idx + 1}</span>
+                              </div>
+                              <div className="space-y-4">
+                                <div className="space-y-1.5">
+                                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Service Title *</label>
+                                  <input
+                                    value={tempCountry.services?.[idx]?.title || ''}
+                                    onChange={(e) => {
+                                      const srvs = [...(tempCountry.services || [{ title: '', description: '' }, { title: '', description: '' }, { title: '', description: '' }])];
+                                      srvs[idx] = { ...srvs[idx], title: e.target.value };
+                                      handleTempChange('services', srvs);
+                                    }}
+                                    placeholder="e.g. Visa Support"
+                                    className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:bg-white focus:border-blue-500 transition-all"
+                                  />
+                                </div>
+                                <div className="space-y-1.5">
+                                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Description *</label>
+                                  <textarea
+                                    value={tempCountry.services?.[idx]?.description || ''}
+                                    onChange={(e) => {
+                                      const srvs = [...(tempCountry.services || [{ title: '', description: '' }, { title: '', description: '' }, { title: '', description: '' }])];
+                                      srvs[idx] = { ...srvs[idx], description: e.target.value };
+                                      handleTempChange('services', srvs);
+                                    }}
+                                    rows={3}
+                                    placeholder="Explain the service..."
+                                    className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-[11px] font-medium outline-none focus:bg-white focus:border-blue-500 transition-all resize-none leading-relaxed"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                        <div className="space-y-4">
-                          <div className="space-y-1.5">
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Service Title</label>
-                            <input 
-                              value={tempCountry.services?.[idx]?.title || ''} 
-                              onChange={(e) => {
-                                const srvs = [...(tempCountry.services || [{title:'',description:''},{title:'',description:''},{title:'',description:''}])];
-                                srvs[idx] = { ...srvs[idx], title: e.target.value };
-                                handleTempChange('services', srvs);
-                              }}
-                              placeholder="e.g. Visa Support" 
-                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:bg-white focus:border-blue-500 transition-all" 
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Description</label>
-                            <textarea 
-                              value={tempCountry.services?.[idx]?.description || ''} 
-                              onChange={(e) => {
-                                const srvs = [...(tempCountry.services || [{title:'',description:''},{title:'',description:''},{title:'',description:''}])];
-                                srvs[idx] = { ...srvs[idx], description: e.target.value };
-                                handleTempChange('services', srvs);
-                              }}
-                              rows={3}
-                              placeholder="Explain the service..." 
-                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-[11px] font-medium outline-none focus:bg-white focus:border-blue-500 transition-all resize-none leading-relaxed" 
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 {/* 3. Secondary Information Card */}
                 <div className="bg-slate-50/50 rounded-[2rem] p-8 border border-slate-100 space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Section Title</label>
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Section Title *</label>
                       <input value={tempCountry.recognitionTitle || ''} onChange={(e) => handleTempChange('recognitionTitle', e.target.value)} placeholder="e.g. Global Recognition" className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all" />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Section Description</label>
+                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Section Description *</label>
                       <textarea value={tempCountry.globalRecognitionDescription} onChange={(e) => handleTempChange('globalRecognitionDescription', e.target.value)} rows={1} placeholder="Intro text for this section..." className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold focus:ring-4 focus:ring-blue-500/10 outline-none transition-all resize-none" />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {[0, 1, 2].map((idx) => (
                       <div key={idx} className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Point {idx + 1}</label>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Point {idx + 1} *</label>
                         <input value={tempCountry.globalRecognition?.[idx] || ''} onChange={(e) => handleTempArrayChange('globalRecognition', idx, e.target.value)} placeholder="..." className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold outline-none focus:border-blue-500 transition-all" />
                       </div>
                     ))}
@@ -525,20 +708,22 @@ const AdminCountries = () => {
 
                 {/* 3. Universities Registry Card */}
                 <div className="bg-white rounded-[2rem] p-8 border-2 border-slate-100 space-y-8 shadow-sm">
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-slate-50">
-                    <div className="flex-1 w-full space-y-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Registry Heading</label>
-                      <input 
-                        value={tempCountry.universitiesTitle || ''} 
-                        onChange={(e) => handleTempChange('universitiesTitle', e.target.value)} 
-                        placeholder="e.g. Universities Registry" 
-                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 text-lg font-black tracking-tight focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all" 
-                      />
+                  <div className="flex flex-col gap-4 pb-6 border-b border-slate-50">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">University Section Title *</label>
+                    <div className="flex flex-col md:flex-row items-center gap-4">
+                      <div className="flex-1 w-full">
+                        <input
+                          value={tempCountry.universitiesTitle || ''}
+                          onChange={(e) => handleTempChange('universitiesTitle', e.target.value)}
+                          placeholder="e.g. Universities Registry"
+                          className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-lg font-black tracking-tight focus:bg-white focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
+                        />
+                      </div>
+                      <button onClick={addUniversity} className="whitespace-nowrap bg-blue-600 text-white text-[10px] font-black uppercase tracking-[0.1em] px-8 py-5 rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 active:scale-95 flex items-center gap-3">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" /></svg>
+                        Add University
+                      </button>
                     </div>
-                    <button onClick={addUniversity} className="bg-blue-600 text-white text-[10px] font-black uppercase tracking-[0.1em] px-8 py-5 rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-100 active:scale-95 flex items-center gap-3 self-end md:self-center">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" /></svg>
-                      Add University
-                    </button>
                   </div>
 
                   <div className="grid grid-cols-1 gap-12">
@@ -546,54 +731,86 @@ const AdminCountries = () => {
                       <div key={uIdx} className="bg-slate-50 rounded-[2.5rem] p-8 sm:p-10 border border-slate-200 relative group/uni shadow-sm hover:shadow-md transition-shadow">
                         <button
                           onClick={() => removeUniversityLocal(uIdx)}
-                          className="absolute top-6 right-6 p-3 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-2xl opacity-0 group-hover/uni:opacity-100 transition-all"
+                          className="absolute -top-4 -right-4 z-20 p-3 bg-white border border-slate-100 text-red-500 hover:bg-red-500 hover:text-white rounded-2xl shadow-xl transition-all active:scale-90"
+                          title="Delete University"
                         >
-                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" /></svg>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
                         </button>
 
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
-                          {/* Uni Left: Meta */}
-                          <div className="md:col-span-4 lg:col-span-3 space-y-4">
-                            <div className="w-full h-48 rounded-3xl bg-white border-2 border-dashed border-slate-200 overflow-hidden relative group/img">
-                              {uni.image ? (
-                                <img src={uni.image} alt="" className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-2">
-                                  <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
-                                  <span className="text-[10px] font-black uppercase tracking-widest">Upload Image</span>
-                                </div>
-                              )}
-                              <label className="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity cursor-pointer">
-                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
-                                <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e.target.files[0], 'universities', (url) => handleUniChange(uIdx, 'image', url), `uni_${uIdx}_img`)} className="hidden" />
-                              </label>
+                        <div className="flex flex-col gap-8">
+                          {/* Top: Full Width Image Section */}
+                          <div className="relative w-full h-64 bg-white rounded-3xl border-2 border-dashed border-slate-200 overflow-hidden group/img">
+                            {uni.image ? (
+                              <div className="relative w-full h-full group/img">
+                                <img src={uni.image} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-105" />
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (window.confirm('Remove university cover image?')) {
+                                      handleUniChange(uIdx, 'image', '');
+                                    }
+                                  }}
+                                  className="absolute top-4 right-4 p-2.5 bg-red-500/90 backdrop-blur-sm text-white rounded-xl opacity-0 group-hover/img:opacity-100 transition-all z-20 shadow-xl border border-white/30 hover:bg-red-600 active:scale-90"
+                                  title="Remove University Image"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"/></svg>
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-2 bg-slate-50/50">
+                                <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2-2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">Upload University Cover</span>
+                              </div>
+                            )}
+
+                            {/* Numbering - Top Left */}
+                            <div className="absolute top-6 left-8 pointer-events-none">
+                              <span className="text-3xl font-black text-white/80 tracking-tighter drop-shadow-md">
+                                {(uIdx + 1).toString().padStart(2, '0')}
+                              </span>
                             </div>
-                            {uploadProgress[`uni_${uIdx}_img`] && <div className="h-1 bg-blue-100 rounded-full overflow-hidden"><div className="h-full bg-blue-600 transition-all" style={{ width: `${uploadProgress[`uni_${uIdx}_img`]}%` }}></div></div>}
-                            <div className="space-y-1.5">
-                              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">University Image URL</label>
-                              <input value={uni.image} onChange={(e) => handleUniChange(uIdx, 'image', e.target.value)} placeholder="Direct URL..." className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[10px] font-bold outline-none focus:border-blue-500" />
+
+                            {/* URL Overlay - Top Right */}
+                            <div className="absolute top-4 right-4 w-72 bg-white/90 backdrop-blur-md p-3 rounded-2xl border border-slate-200 shadow-xl opacity-0 group-hover/img:opacity-100 transition-all z-10">
+                              <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest block mb-1.5 ml-1">University Image URL</label>
+                              <div className="flex gap-2">
+                                <input
+                                  value={uni.pendingFile ? uni.pendingFile.name : getFileNameFromUrl(uni.image)}
+                                  onChange={(e) => handleUniChange(uIdx, 'image', e.target.value)}
+                                  placeholder="Paste URL..."
+                                  className="flex-1 bg-white border border-slate-100 rounded-lg px-3 py-2 text-[10px] font-bold outline-none focus:border-blue-500 shadow-inner"
+                                />
+                                <label className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center cursor-pointer hover:bg-blue-700 transition-colors">
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /><path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" /></svg>
+                                  <input type="file" accept="image/*" onChange={(e) => handleFileSelection(e.target.files[0], 'image', uIdx)} className="hidden" />
+                                </label>
+                              </div>
+                              {uploadProgress[`uni_${uIdx}_img`] && <div className="mt-2 h-1 bg-blue-100 rounded-full overflow-hidden"><div className="h-full bg-blue-600 transition-all" style={{ width: `${uploadProgress[`uni_${uIdx}_img`]}%` }}></div></div>}
                             </div>
                           </div>
 
-                          {/* Uni Right: Info */}
-                          <div className="md:col-span-8 lg:col-span-9 grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Below: Fields Stacking */}
+                            <div className="space-y-6">
                             <div className="space-y-2">
-                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Name of University</label>
-                              <input value={uni.name} onChange={(e) => handleUniChange(uIdx, 'name', e.target.value)} placeholder="e.g. Kazan Federal University" className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-blue-500 transition-all" />
-                            </div>
-                            <div className="space-y-2">
-                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">University Highlight</label>
-                              <textarea value={uni.highlightText} onChange={(e) => handleUniChange(uIdx, 'highlightText', e.target.value)} rows={2} placeholder="e.g. 150+ Years Old medical tradition..." className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-blue-500 transition-all resize-none" />
-                            </div>
-                            <div className="md:col-span-2 space-y-2">
-                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Information</label>
-                              <textarea value={uni.description} onChange={(e) => handleUniChange(uIdx, 'description', e.target.value)} rows={4} placeholder="Detailed intro about campus life, academics..." className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-blue-500 transition-all resize-none" />
+                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Name of University *</label>
+                              <input value={uni.name} onChange={(e) => handleUniChange(uIdx, 'name', e.target.value)} placeholder="e.g. Kazan Federal University" className="w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-blue-500 transition-all shadow-sm" />
                             </div>
 
-                            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="space-y-2">
+                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Information *</label>
+                              <textarea value={uni.description} onChange={(e) => handleUniChange(uIdx, 'description', e.target.value)} rows={4} placeholder="Detailed intro about campus life, academics..." className="w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-blue-500 transition-all resize-none shadow-sm" />
+                            </div>
+
+                            <div className="space-y-2">
+                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">University Highlight *</label>
+                              <textarea value={uni.highlightText} onChange={(e) => handleUniChange(uIdx, 'highlightText', e.target.value)} rows={2} placeholder="e.g. 150+ Years Old medical tradition..." className="w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:border-blue-500 transition-all resize-none shadow-sm" />
+                            </div>
+
+                            {/* Points in one row */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                               {[0, 1, 2].map((pIdx) => (
                                 <div key={pIdx} className="space-y-2">
-                                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Point {pIdx + 1}</label>
+                                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Point {pIdx + 1} *</label>
                                   <input
                                     value={uni.points?.[pIdx] || ''}
                                     onChange={(e) => {
@@ -602,7 +819,7 @@ const AdminCountries = () => {
                                       handleUniChange(uIdx, 'points', ps);
                                     }}
                                     placeholder="Key benefit..."
-                                    className="w-full bg-white border border-slate-200 rounded-xl px-5 py-3 text-xs font-bold outline-none focus:border-blue-500 transition-all"
+                                    className="w-full bg-white border border-slate-200 rounded-xl px-5 py-4 text-xs font-bold outline-none focus:border-blue-500 transition-all shadow-sm"
                                   />
                                 </div>
                               ))}
@@ -631,7 +848,7 @@ const AdminCountries = () => {
                 </button>
                 <button
                   onClick={saveModalToState}
-                  disabled={saving || !tempCountry.name}
+                  disabled={saving}
                   className="disabled:opacity-50 disabled:cursor-not-allowed text-white font-black px-10 py-4 rounded-2xl text-[11px] uppercase tracking-[0.2em] transition-all shadow-xl shadow-blue-100 hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
                   style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)' }}
                 >

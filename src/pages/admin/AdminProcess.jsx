@@ -89,7 +89,7 @@ const AdminProcess = () => {
   );
 
   return (
-    <AdminLayout title="Manage Admission Process" actions={saveAction}>
+    <AdminLayout title="Manage Process Page" actions={saveAction}>
       <PageTitle title="Admin | Process" />
       <form onSubmit={handleSave} className="space-y-8 max-w-4xl pb-20">
         {/* Top action bar */}

@@ -80,6 +80,10 @@ const navItems = [
         <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
+    subItems: [
+      { id: 'page', label: 'Contact Page', to: '/admin/contact' },
+      { id: 'messages', label: 'Messages', to: '/admin/messages' },
+    ]
   },
 ];
 
@@ -147,7 +151,7 @@ const AdminSidebar = ({ isMobileOpen, setMobileOpen, collapsed, setCollapsed, is
       {/* Nav */}
       <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto custom-scrollbar">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.to;
+          const isActive = location.pathname.startsWith(item.to);
           const hasSubItems = item.subItems && item.subItems.length > 0;
 
           return (
@@ -182,8 +186,8 @@ const AdminSidebar = ({ isMobileOpen, setMobileOpen, collapsed, setCollapsed, is
               {hasSubItems && isActive && !collapsed && (
                 <div className="pl-12 pr-2 space-y-1 animate-in slide-in-from-top-2 duration-300">
                   {item.subItems.map(sub => {
-                    const isSubActive = activeSection === sub.id;
-                    const subTo = `${item.to}?section=${sub.id}`;
+                    const isSubActive = sub.to ? location.pathname === sub.to : activeSection === sub.id;
+                    const subTo = sub.to || `${item.to}?section=${sub.id}`;
                     return (
                       <NavLink
                         key={sub.id}

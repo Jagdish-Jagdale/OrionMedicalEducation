@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import { getHomeContent, saveHomeContent, getReviews, saveReviews } from '../../firebase/firestore';
-import { uploadFile } from '../../firebase/storage';
+import { uploadFile, deleteFileByUrl, getFileNameFromUrl } from '../../firebase/storage';
 import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import PageTitle from '../../components/PageTitle';
@@ -156,17 +156,41 @@ const AdminHome = () => {
 
     setSaving(true);
     try {
+      // Upload pending testimonial images
+      const finalReviews = await Promise.all(reviews.map(async (rev, idx) => {
+        if (rev.pendingFile) {
+          const extension = rev.pendingFile.name.split('.').pop();
+          const fileName = `${rev.studentName.replace(/\s+/g, '_')}_${Date.now()}.${extension}`;
+          const path = `testimonial/${fileName}`;
+          const url = await uploadFile(rev.pendingFile, path, (progress) => {
+            setUploadProgress((prev) => ({ ...prev, [idx]: progress }));
+          });
+          const { pendingFile, ...rest } = rev;
+          return { ...rest, image: url };
+        }
+        return rev;
+      }));
+
       await saveHomeContent({
         ...form,
-        testimonialsItems: reviews
+        testimonialsItems: finalReviews
       });
+
+      // Cleanup old images from Storage
+      const oldImageUrls = initialData.reviews?.map(r => r.image).filter(url => url && typeof url === 'string' && url.includes('firebasestorage')) || [];
+      const newImageUrls = finalReviews.map(r => r.image);
+      const imagesToDelete = oldImageUrls.filter(url => !newImageUrls.includes(url));
+      await Promise.all(imagesToDelete.map(url => deleteFileByUrl(url)));
+
+      setUploadProgress({});
+      setReviews(finalReviews);
       
       toast.success('Home content and testimonials saved!');
       
       // Update initial data after successful save
       setInitialData({
         form: JSON.parse(JSON.stringify(form)),
-        reviews: JSON.parse(JSON.stringify(reviews))
+        reviews: JSON.parse(JSON.stringify(finalReviews))
       });
       setHasUnsavedChanges(false);
       setDirtySections([]);
@@ -202,34 +226,19 @@ const AdminHome = () => {
   const handleReviewChange = (index, field, value) => {
     const newReviews = [...reviews];
     newReviews[index][field] = value;
+    if (field === 'image') {
+      newReviews[index].pendingFile = null;
+    }
     setReviews(newReviews);
   };
 
-  const handleImageUpload = async (index, file) => {
+  const handleFileSelection = (index, file) => {
     if (!file) return;
-    
-    const studentName = reviews[index].studentName?.trim();
-    if (!studentName) {
-      toast.error('Please enter student name first before uploading image.');
-      return;
-    }
-
-    const extension = file.name.split('.').pop();
-    const fileName = `${studentName.replace(/\s+/g, '_')}.${extension}`;
-    const path = `testimonial/${fileName}`;
-
-    try {
-      const url = await uploadFile(file, path, (progress) => {
-        setUploadProgress((prev) => ({ ...prev, [index]: progress }));
-      });
-      handleReviewChange(index, 'image', url);
-      setUploadProgress((prev) => ({ ...prev, [index]: null }));
-      toast.success('Image uploaded successfully!');
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast.error('Image upload failed.');
-      setUploadProgress((prev) => ({ ...prev, [index]: null }));
-    }
+    const previewUrl = URL.createObjectURL(file);
+    const newReviews = [...reviews];
+    newReviews[index].image = previewUrl;
+    newReviews[index].pendingFile = file;
+    setReviews(newReviews);
   };
 
   const saveAction = (
@@ -252,7 +261,7 @@ const AdminHome = () => {
   return (
     <>
       <AdminLayout 
-        title={`Home / ${activeSection.charAt(0).toUpperCase() + activeSection.slice(1).replace('-', ' ')}`} 
+        title="Manage Home Page" 
         isDirty={hasUnsavedChanges}
         dirtySections={dirtySections}
         actions={saveAction}
@@ -444,7 +453,24 @@ const AdminHome = () => {
                             <div className="lg:col-span-1 flex flex-col items-center gap-3">
                               <div className="w-16 h-16 bg-white rounded-2xl border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden relative shadow-inner group/img">
                                 {rev.image ? (
-                                  <img src={rev.image} alt="Profile" className="w-full h-full object-cover" />
+                                  <div className="relative w-full h-full group/img">
+                                    <img src={rev.image} alt="Profile" className="w-full h-full object-cover" />
+                                    <button 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (window.confirm('Remove this image?')) {
+                                          const newReviews = [...reviews];
+                                          newReviews[index].image = '';
+                                          newReviews[index].pendingFile = null;
+                                          setReviews(newReviews);
+                                        }
+                                      }}
+                                      className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-lg opacity-0 group-hover/img:opacity-100 transition-opacity z-20 shadow-lg border border-white/20"
+                                      title="Remove Image"
+                                    >
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"/></svg>
+                                    </button>
+                                  </div>
                                 ) : (
                                   <svg className="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round" /></svg>
                                 )}
@@ -455,7 +481,7 @@ const AdminHome = () => {
                                     type="file"
                                     className="hidden"
                                     accept="image/*"
-                                    onChange={(e) => handleImageUpload(index, e.target.files[0])}
+                                    onChange={(e) => handleFileSelection(index, e.target.files[0])}
                                   />
                                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" /></svg>
                                 </label>
@@ -471,7 +497,7 @@ const AdminHome = () => {
                               <div className="w-full">
                                 <label className="block text-slate-400 text-[8px] font-bold uppercase tracking-widest mb-1 text-center">Or Paste Link</label>
                                 <input
-                                  value={rev.image}
+                                  value={rev.pendingFile ? rev.pendingFile.name : getFileNameFromUrl(rev.image)}
                                   onChange={(e) => handleReviewChange(index, 'image', e.target.value)}
                                   placeholder="Image Link"
                                   className="w-full text-[9px] bg-white border border-slate-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500/30 text-center truncate"

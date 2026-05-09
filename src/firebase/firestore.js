@@ -453,3 +453,12 @@ export async function saveContactSubmission(data) {
   }
 }
 
+export async function deleteContactSubmission(id) {
+  try {
+    await deleteDoc(doc(db, 'messages', id));
+  } catch (err) {
+    console.error('deleteContactSubmission error:', err);
+    throw err;
+  }
+}
+

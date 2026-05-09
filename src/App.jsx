@@ -28,6 +28,7 @@ const AdminProcess = lazy(() => import('./pages/admin/AdminProcess'));
 const AdminReviews = lazy(() => import('./pages/admin/AdminReviews'));
 const AdminObservership = lazy(() => import('./pages/admin/AdminObservership'));
 const AdminContact = lazy(() => import('./pages/admin/AdminContact'));
+const AdminMessages = lazy(() => import('./pages/admin/AdminMessages'));
 
 // Full-page loading fallback
 import PageLoader from './components/PageLoader';
@@ -83,10 +84,10 @@ const AppContent = () => {
 
           {/* Admin routes (minimal layout – sidebar built into each page) */}
           <Route path="/admin/login" element={<PublicRoute><MinimalLayout><AdminLogin /></MinimalLayout></PublicRoute>} />
-          
+
           {/* Redirect /admin to /admin/home for security and navigation consistency */}
           <Route path="/admin" element={<Navigate to="/admin/home" replace />} />
-          
+
           <Route path="/admin/home" element={<ProtectedRoute><MinimalLayout><AdminHome /></MinimalLayout></ProtectedRoute>} />
           <Route path="/admin/countries" element={<ProtectedRoute><MinimalLayout><AdminCountries /></MinimalLayout></ProtectedRoute>} />
           <Route path="/admin/team" element={<ProtectedRoute><MinimalLayout><AdminTeam /></MinimalLayout></ProtectedRoute>} />
@@ -94,6 +95,7 @@ const AppContent = () => {
           <Route path="/admin/reviews" element={<ProtectedRoute><MinimalLayout><AdminReviews /></MinimalLayout></ProtectedRoute>} />
           <Route path="/admin/observership" element={<ProtectedRoute><MinimalLayout><AdminObservership /></MinimalLayout></ProtectedRoute>} />
           <Route path="/admin/contact" element={<ProtectedRoute><MinimalLayout><AdminContact /></MinimalLayout></ProtectedRoute>} />
+          <Route path="/admin/messages" element={<ProtectedRoute><MinimalLayout><AdminMessages /></MinimalLayout></ProtectedRoute>} />
 
           {/* 404 fallback */}
           <Route path="*" element={
@@ -119,7 +121,13 @@ const AppContent = () => {
 const App = () => {
   return (
     <>
-      <Toaster position="top-right" reverseOrder={false} />
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+        toastOptions={{
+          duration: 2000,
+        }}
+      />
       <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AppContent />
       </Router>

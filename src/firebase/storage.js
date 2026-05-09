@@ -44,14 +44,50 @@ export async function getFileUrl(path) {
 }
 
 /**
- * Delete a file from Firebase Storage.
+ * Delete a file from Firebase Storage using its download URL.
  */
-export async function deleteFile(path) {
+export async function deleteFileByUrl(url) {
+  if (!url || typeof url !== 'string') return;
+  
+  // Skip blob URLs (local previews) and non-Firebase URLs
+  if (url.startsWith('blob:') || !url.includes('firebasestorage.googleapis.com')) {
+    return;
+  }
+
   try {
-    const storageRef = ref(storage, path);
+    const storageRef = ref(storage, url);
     await deleteObject(storageRef);
+    console.log('Successfully deleted old file from Storage:', url);
   } catch (err) {
-    console.error('deleteFile error:', err);
-    throw err;
+    // If it's already deleted, 404 is fine.
+    // If it's a permission error, we log it but don't stop the save.
+    console.warn('deleteFileByUrl warning:', err.message);
+  }
+}
+
+/**
+ * Extract a human-readable filename from a Firebase Storage URL or a Blob URL.
+ */
+export function getFileNameFromUrl(url) {
+  if (!url || typeof url !== 'string') return '';
+  
+  // Handle local blob URLs
+  if (url.startsWith('blob:')) return 'Local File Selected';
+
+  try {
+    // Handle Firebase Storage URLs
+    if (url.includes('firebasestorage.googleapis.com')) {
+      const baseUrl = url.split('?')[0];
+      const parts = baseUrl.split('/o/');
+      if (parts.length > 1) {
+        return decodeURIComponent(parts[1]).split('/').pop();
+      }
+    }
+    
+    // Handle standard URLs
+    const filename = url.split('/').pop().split('#')[0].split('?')[0];
+    return filename || url;
+  } catch (e) {
+    return url;
   }
 }

@@ -46,7 +46,8 @@ const AdminContact = () => {
     whatsappPhone: '',
     // Phone CTA
     ctaTitle: '',
-    ctaButtonLabel: ''
+    ctaButtonLabel: '',
+    ctaPhone: ''
   });
 
   const fetchData = async () => {
@@ -87,7 +88,7 @@ const AdminContact = () => {
 
   if (loading) {
     return (
-      <AdminLayout title="Contact Page Editor">
+      <AdminLayout title="Manage Contact Page">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
         </div>
@@ -113,7 +114,7 @@ const AdminContact = () => {
   );
 
   return (
-    <AdminLayout title="Contact Page Editor" actions={saveAction}>
+    <AdminLayout title="Manage Contact Page" actions={saveAction}>
       <PageTitle title="Admin | Contact Editor" />
 
       <div className="space-y-8 pb-32">
@@ -390,7 +391,7 @@ const AdminContact = () => {
         {/* Bottom Call Section */}
         <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-6">
           <h3 className="text-xl font-black text-slate-900 border-b pb-4 text-blue-600">Bottom Call Section</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Title</label>
               <input
@@ -407,6 +408,17 @@ const AdminContact = () => {
                 value={settings.ctaButtonLabel}
                 onChange={e => setSettings({ ...settings, ctaButtonLabel: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm"
+                placeholder="e.g. Call Us Now"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Mobile Number</label>
+              <input
+                type="text"
+                value={settings.ctaPhone}
+                onChange={e => setSettings({ ...settings, ctaPhone: e.target.value })}
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3 text-sm font-bold"
+                placeholder="e.g. +91 98765 43210"
               />
             </div>
           </div>
