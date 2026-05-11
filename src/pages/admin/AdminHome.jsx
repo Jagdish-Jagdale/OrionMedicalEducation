@@ -78,17 +78,29 @@ const AdminHome = () => {
   useEffect(() => {
     getHomeContent().then((homeData) => {
       if (homeData) {
-        setForm((prev) => ({ ...prev, ...homeData }));
-        if (homeData.testimonialsItems) {
-          setReviews(homeData.testimonialsItems);
-        }
+        const { testimonialsItems, ...otherData } = homeData;
+        const normalizedReviews = (testimonialsItems || []).map(rev => ({
+          studentName: rev.studentName || '',
+          university: rev.university || '',
+          rating: rev.rating || '',
+          reviewText: rev.reviewText || '',
+          image: rev.image || ''
+        }));
+
+        setForm((prev) => ({ ...prev, ...otherData }));
+        setReviews(normalizedReviews);
+        
+        // Store initial state for comparison
+        setInitialData({
+          form: otherData || {},
+          reviews: JSON.parse(JSON.stringify(normalizedReviews))
+        });
+      } else {
+        setInitialData({
+          form: {},
+          reviews: []
+        });
       }
-      
-      // Store initial state for comparison
-      setInitialData({
-        form: homeData || {},
-        reviews: homeData?.testimonialsItems ? JSON.parse(JSON.stringify(homeData.testimonialsItems)) : []
-      });
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
@@ -102,10 +114,10 @@ const AdminHome = () => {
       const isPrefixDirty = (prefix) => {
         return Object.keys(form)
           .filter(key => key.startsWith(prefix))
-          .some(key => form[key] !== (initialData.form ? initialData.form[key] : ''));
+          .some(key => (form[key] ?? '') !== (initialData.form?.[key] ?? ''));
       };
 
-      if (isPrefixDirty('hero') || form.whatsappNumber !== (initialData.form ? initialData.form.whatsappNumber : '')) dirty.push('Hero Section');
+      if (isPrefixDirty('hero') || (form.whatsappNumber ?? '') !== (initialData.form?.whatsappNumber ?? '')) dirty.push('Hero Section');
       if (isPrefixDirty('about')) dirty.push('About Us');
       if (isPrefixDirty('clinical') || isPrefixDirty('video')) dirty.push('Clinical Training');
       if (isPrefixDirty('cta')) dirty.push('CTA Banner');
