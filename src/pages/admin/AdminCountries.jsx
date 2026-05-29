@@ -202,7 +202,7 @@ const AdminCountries = () => {
       setIsModalOpen(false);
       toast.success(editIndex === -1 ? 'Country created and synced!' : 'Changes synced to database!');
     } catch (err) {
-      console.error('Immediate Sync Error:', err);
+
       toast.error('Failed to sync changes to database. Please try again.');
     } finally {
       setSaving(false);
@@ -318,7 +318,7 @@ const AdminCountries = () => {
       setUploadProgress({});
       toast.success('All data synced to Database!');
     } catch (err) {
-      console.error('Final Save sync error:', err);
+
       toast.error('Failed to sync. Please try again.');
     } finally {
       setSaving(false);

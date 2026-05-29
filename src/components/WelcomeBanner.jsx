@@ -55,7 +55,7 @@ const WelcomeBanner = () => {
             const playPromise = audio.play();
             if (playPromise !== undefined) {
                 playPromise.catch(() => {
-                    console.log("Autoplay blocked. Sound will start on first click.");
+
                     document.addEventListener('click', startAudio);
                 });
             }

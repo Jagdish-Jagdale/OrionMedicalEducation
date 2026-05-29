@@ -144,7 +144,14 @@ const AdminHome = () => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    let value = e.target.value;
+    if (e.target.name === 'whatsappNumber') {
+      // Remove non-digits and limit to 10
+      value = value.replace(/\D/g, '').slice(0, 10);
+    }
+    setForm({ ...form, [e.target.name]: value });
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -207,7 +214,7 @@ const AdminHome = () => {
       setHasUnsavedChanges(false);
       setDirtySections([]);
     } catch (error) {
-      console.error('Save error:', error);
+
       toast.error('Failed to save. Please try again.');
     } finally {
       setSaving(false);
@@ -321,8 +328,18 @@ const AdminHome = () => {
                       <input name="heroBtn2" value={form.heroBtn2} onChange={handleChange} placeholder="Contact Us Now" className="w-full bg-slate-50 text-slate-900 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm font-medium" />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-widest">WhatsApp Number (Global)</label>
-                      <input name="whatsappNumber" value={form.whatsappNumber} onChange={handleChange} placeholder="e.g. 917738230335" className="w-full bg-blue-50/50 text-blue-900 border border-blue-100 rounded-2xl px-5 py-3.5 text-sm font-bold" />
+                      <label className="block text-slate-700 text-xs font-bold mb-2 uppercase tracking-widest">WhatsApp Number (10 Digits - +91 Added Automatically)</label>
+                      <div className="relative">
+                        <span className="absolute left-5 top-1/2 -translate-y-1/2 text-blue-900 font-bold text-sm">+91</span>
+                        <input 
+                          name="whatsappNumber" 
+                          value={form.whatsappNumber} 
+                          onChange={handleChange} 
+                          placeholder="77382 30335" 
+                          maxLength="10"
+                          className="w-full bg-blue-50/50 text-blue-900 border border-blue-100 rounded-2xl px-5 py-3.5 pl-14 text-sm font-bold" 
+                        />
+                      </div>
                     </div>
                   </div>
                 </section>

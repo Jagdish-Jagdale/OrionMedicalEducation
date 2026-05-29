@@ -3,6 +3,8 @@ import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { PerspectiveCamera, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 
+import earthImg from '../assets/earth.jpg';
+
 // Silence the internal Three.js Clock deprecation warning from @react-three/fiber
 if (typeof window !== 'undefined') {
   const originalWarn = console.warn;
@@ -16,7 +18,7 @@ const Earth = () => {
   const earthRef = useRef();
 
   // High-density natural Earth texture
-  const texture = useLoader(THREE.TextureLoader, 'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg');
+  const texture = useLoader(THREE.TextureLoader, earthImg);
 
   useFrame((state, delta) => {
     if (earthRef.current) {

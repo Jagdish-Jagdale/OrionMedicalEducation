@@ -17,7 +17,7 @@ const BackgroundMusic = () => {
         window.removeEventListener('click', startAudio);
         window.removeEventListener('touchstart', startAudio);
       }).catch((err) => {
-        console.log("Autoplay prevented. Waiting for user interaction.");
+
       });
     };
 

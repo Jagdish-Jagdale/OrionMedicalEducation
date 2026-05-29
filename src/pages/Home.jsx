@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import airplaneImg from '../assets/splash/airoplane.png';
 import orionLogo from '../assets/orionfullrmbg.png';
-import aboutBg from '../assets/aboutbg.webp';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
@@ -146,13 +145,13 @@ const ensureAbsoluteUrl = (url) => {
 
 // ─── Precomputed 60-point sine-curve keyframes for buttery smooth plane arc ───
 const PLANE_N = 60;
-const PLANE_TIMES    = Array.from({ length: PLANE_N + 1 }, (_, i) => i / PLANE_N);
-const PLANE_LEFT     = Array.from({ length: PLANE_N + 1 }, (_, i) => `${2 + (i / PLANE_N) * 89}%`);
-const PLANE_Y        = Array.from({ length: PLANE_N + 1 }, (_, i) => {
+const PLANE_TIMES = Array.from({ length: PLANE_N + 1 }, (_, i) => i / PLANE_N);
+const PLANE_LEFT = Array.from({ length: PLANE_N + 1 }, (_, i) => `${2 + (i / PLANE_N) * 89}%`);
+const PLANE_Y = Array.from({ length: PLANE_N + 1 }, (_, i) => {
   const t = i / PLANE_N;
   return -120 * Math.sin(t * Math.PI); // single arc height for all screen sizes
 });
-const PLANE_ROTATE   = Array.from({ length: PLANE_N + 1 }, (_, i) => {
+const PLANE_ROTATE = Array.from({ length: PLANE_N + 1 }, (_, i) => {
   const t = i / PLANE_N;
   return -28 * Math.sin(2 * t * Math.PI);
 });
@@ -339,8 +338,8 @@ const Home = () => {
                     alt="airplane"
                     initial={{ left: "0%", y: 0, rotate: 0 }}
                     animate={{
-                      left:   PLANE_LEFT,
-                      y:      PLANE_Y,
+                      left: PLANE_LEFT,
+                      y: PLANE_Y,
                       rotate: PLANE_ROTATE,
                     }}
                     transition={{

@@ -12,7 +12,8 @@ const Observership = () => {
      import('../firebase/firestore').then(({ getHomeContent }) => {
        getHomeContent().then((data) => {
          if (data && data.whatsappNumber) {
-           setWaNumber(data.whatsappNumber.replace(/\s+/g, ''));
+           const cleanNum = data.whatsappNumber.replace(/\D/g, '');
+           setWaNumber(cleanNum.length === 10 ? `91${cleanNum}` : cleanNum);
          }
        });
      });

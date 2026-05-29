@@ -23,7 +23,6 @@ export async function getCountries() {
     const snapshot = await getDocs(q);
     return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (err) {
-    console.error('getCountries error:', err);
     throw err;
   }
 }
@@ -43,7 +42,6 @@ export async function getUniversitiesByCountry(countryId) {
       .map((d) => ({ id: d.id, ...d.data() }))
       .sort((a, b) => (a.order || 0) - (b.order || 0));
   } catch (err) {
-    console.error('getUniversitiesByCountry error:', err);
     throw err;
   }
 }
@@ -56,7 +54,6 @@ export async function getUniversityBySlug(slug) {
     const d = snapshot.docs[0];
     return { id: d.id, ...d.data() };
   } catch (err) {
-    console.error('getUniversityBySlug error:', err);
     throw err;
   }
 }
@@ -67,7 +64,6 @@ export async function getAllUniversities() {
     const snapshot = await getDocs(q);
     return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (err) {
-    console.error('getAllUniversities error:', err);
     throw err;
   }
 }
@@ -99,7 +95,6 @@ export async function getTeamAllData() {
       regional: regionalS.docs.map(d => ({ id: d.id, ...d.data() }))
     };
   } catch (err) {
-    console.error('getTeamAllData error:', err);
     throw err;
   }
 }
@@ -152,7 +147,6 @@ export async function saveTeamAllData({ members, regional, settings }) {
 
     await batch.commit();
   } catch (err) {
-    console.error('saveTeamAllData error:', err);
     throw err;
   }
 }
@@ -166,7 +160,6 @@ export async function getReviews() {
       .filter(d => d.id !== 'header')
       .map((d) => ({ id: d.id, ...d.data() }));
   } catch (err) {
-    console.error('getReviews error:', err);
     throw err;
   }
 }
@@ -187,7 +180,6 @@ export async function saveReviews(reviews) {
       )
     );
   } catch (err) {
-    console.error('saveReviews error:', err);
     throw err;
   }
 }
@@ -197,7 +189,6 @@ export async function getReviewsHeader() {
     const d = await getDoc(doc(db, 'reviews', 'header'));
     return d.exists() ? d.data() : { badge: 'Real Feedback', title: 'Parent & Student Reviews' };
   } catch (err) {
-    console.error('getReviewsHeader error:', err);
     return { badge: 'Real Feedback', title: 'Parent & Student Reviews' };
   }
 }
@@ -209,7 +200,6 @@ export async function saveReviewsHeader(data) {
       updatedAt: serverTimestamp()
     });
   } catch (err) {
-    console.error('saveReviewsHeader error:', err);
     throw err;
   }
 }
@@ -220,7 +210,7 @@ export function subscribeToReviews(callback) {
     const reviews = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
     callback(reviews);
   }, (err) => {
-    console.error('subscribeToReviews error:', err);
+    // console.error error removed
   });
 }
 
@@ -230,7 +220,6 @@ export async function getObservership() {
     const d = await getDoc(doc(db, 'observership', 'main'));
     return d.exists() ? d.data() : null;
   } catch (err) {
-    console.error('getObservership error:', err);
     throw err;
   }
 }
@@ -242,7 +231,6 @@ export async function saveObservership(data) {
       updatedAt: serverTimestamp()
     });
   } catch (err) {
-    console.error('saveObservership error:', err);
     throw err;
   }
 }
@@ -258,7 +246,6 @@ export async function getHomeContent() {
     });
     return Object.keys(data).length > 0 ? data : null;
   } catch (err) {
-    console.error('getHomeContent error:', err);
     throw err;
   }
 }
@@ -302,7 +289,6 @@ export async function saveHomeContent(data) {
     
     await Promise.all(promises);
   } catch (err) {
-    console.error('saveHomeContent error:', err);
     throw err;
   }
 }
@@ -316,7 +302,7 @@ export function subscribeToHomeContent(callback) {
     });
     callback(Object.keys(data).length > 0 ? data : null);
   }, (err) => {
-    console.error('subscribeToHomeContent error:', err);
+    // console.error error removed
   });
 }
 
@@ -335,7 +321,6 @@ export async function getProcessAllData() {
 
     return { steps, settings };
   } catch (err) {
-    console.error('getProcessAllData error:', err);
     throw err;
   }
 }
@@ -362,7 +347,6 @@ export async function saveProcessAllData(steps, settings) {
 
     await batch.commit();
   } catch (err) {
-    console.error('saveProcessAllData error:', err);
     throw err;
   }
 }
@@ -400,7 +384,6 @@ export async function saveAdminCountries(entries) {
 
     await batch.commit();
   } catch (err) {
-    console.error('saveAdminCountries error:', err);
     throw err;
   }
 }
@@ -411,7 +394,6 @@ export async function getContactPageData() {
     const d = await getDoc(doc(db, 'contactus', 'main'));
     return d.exists() ? d.data() : null;
   } catch (err) {
-    console.error('getContactPageData error:', err);
     throw err;
   }
 }
@@ -423,7 +405,6 @@ export async function saveContactPageData(data) {
       updatedAt: serverTimestamp()
     });
   } catch (err) {
-    console.error('saveContactPageData error:', err);
     throw err;
   }
 }
@@ -435,7 +416,6 @@ export async function getContactSubmissions() {
     const snapshot = await getDocs(q);
     return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
   } catch (err) {
-    console.error('getContactSubmissions error:', err);
     throw err;
   }
 }
@@ -448,7 +428,6 @@ export async function saveContactSubmission(data) {
       createdAt: serverTimestamp()
     });
   } catch (err) {
-    console.error('saveContactSubmission error:', err);
     throw err;
   }
 }
@@ -457,8 +436,6 @@ export async function deleteContactSubmission(id) {
   try {
     await deleteDoc(doc(db, 'messages', id));
   } catch (err) {
-    console.error('deleteContactSubmission error:', err);
     throw err;
   }
 }
-

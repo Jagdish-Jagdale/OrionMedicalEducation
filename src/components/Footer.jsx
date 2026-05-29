@@ -51,7 +51,8 @@ const Footer = () => {
 
     getHomeContent().then((data) => {
       if (data && data.whatsappNumber) {
-        setWaNumber(data.whatsappNumber.replace(/\s+/g, ''));
+        const cleanNum = data.whatsappNumber.replace(/\D/g, '');
+        setWaNumber(cleanNum.length === 10 ? `91${cleanNum}` : cleanNum);
       }
       if (data && data.aboutStat3Count) {
         setCountryCount(data.aboutStat3Count);
@@ -186,13 +187,13 @@ const Footer = () => {
               {contactData?.phone1 && (
                 <li className="flex items-center gap-2 text-slate-400 text-sm">
                   <svg className="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  <a href={`tel:${contactData.phone1.replace(/\s+/g, '')}`} className="hover:text-amber-400 transition-colors">{contactData.phone1}</a>
+                  <a href={`tel:${contactData.phone1.replace(/[^0-9+]/g, '')}`} className="hover:text-amber-400 transition-colors">{contactData.phone1}</a>
                 </li>
               )}
               {contactData?.phone2 && (
                 <li className="flex items-center gap-2 text-slate-400 text-sm">
                   <svg className="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  <a href={`tel:${contactData.phone2.replace(/\s+/g, '')}`} className="hover:text-amber-400 transition-colors">{contactData.phone2}</a>
+                  <a href={`tel:${contactData.phone2.replace(/[^0-9+]/g, '')}`} className="hover:text-amber-400 transition-colors">{contactData.phone2}</a>
                 </li>
               )}
               {contactData?.email1 && (

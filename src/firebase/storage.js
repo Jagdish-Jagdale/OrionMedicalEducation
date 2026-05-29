@@ -19,7 +19,6 @@ export async function uploadFile(file, path, onProgress) {
         if (onProgress) onProgress(Math.round(progress));
       },
       (error) => {
-        console.error('Upload error:', error);
         reject(error);
       },
       async () => {
@@ -38,7 +37,6 @@ export async function getFileUrl(path) {
     const storageRef = ref(storage, path);
     return await getDownloadURL(storageRef);
   } catch (err) {
-    console.error('getFileUrl error:', err);
     throw err;
   }
 }
@@ -57,11 +55,10 @@ export async function deleteFileByUrl(url) {
   try {
     const storageRef = ref(storage, url);
     await deleteObject(storageRef);
-    console.log('Successfully deleted old file from Storage:', url);
+
   } catch (err) {
     // If it's already deleted, 404 is fine.
-    // If it's a permission error, we log it but don't stop the save.
-    console.warn('deleteFileByUrl warning:', err.message);
+    // If it's a permission error, we don't stop the save.
   }
 }
 

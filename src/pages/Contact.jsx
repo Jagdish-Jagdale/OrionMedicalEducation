@@ -17,14 +17,15 @@ const Contact = () => {
 
             const homeData = await getHomeContent();
             if (homeData && homeData.whatsappNumber) {
-               setGlobalWa(homeData.whatsappNumber.replace(/\s+/g, ''));
+               const cleanNum = homeData.whatsappNumber.replace(/\D/g, '');
+               setGlobalWa(cleanNum.length === 10 ? `91${cleanNum}` : cleanNum);
             }
 
             const data = await getCountries();
             const filtered = data.filter(c => c.countryCardPosition || c.countrycardpostion);
             setCountries(filtered);
          } catch (err) {
-            console.error('Error fetching contact data:', err);
+
          }
       };
       fetchData();
@@ -53,8 +54,8 @@ const Contact = () => {
          value: data?.phone1,
          value2: data?.phone2,
          sub: data?.phoneTagline,
-         href: data?.phone1 ? `tel:${data.phone1.replace(/\s+/g, '')}` : '',
-         href2: data?.phone2 ? `tel:${data.phone2.replace(/\s+/g, '')}` : '',
+         href: data?.phone1 ? `tel:${data.phone1.replace(/[^0-9+]/g, '')}` : '',
+         href2: data?.phone2 ? `tel:${data.phone2.replace(/[^0-9+]/g, '')}` : '',
          color: 'bg-green-100 text-green-600',
       },
       {
@@ -126,10 +127,17 @@ const Contact = () => {
    const handleInputChange = (e) => {
       const { name, value } = e.target;
 
-      // Phone number sanitization: only allow digits, +, -, (, ), and spaces
-      if (name === 'phoneNumber') {
+      if (name === 'fullName') {
+         // Only alphabetic characters and spaces
+         const sanitizedValue = value.replace(/[^a-zA-Z\s]/g, '');
+         setFormData(prev => ({ ...prev, [name]: sanitizedValue }));
+      } else if (name === 'phoneNumber') {
+         // Phone number sanitization: only allow digits, +, -, (, ), and spaces
          const sanitizedValue = value.replace(/[^0-9+()-\s]/g, '').slice(0, 15);
          setFormData(prev => ({ ...prev, [name]: sanitizedValue }));
+      } else if (name === 'message') {
+         // Limit to 200 characters
+         setFormData(prev => ({ ...prev, [name]: value.slice(0, 200) }));
       } else {
          setFormData(prev => ({ ...prev, [name]: value }));
       }
@@ -173,7 +181,7 @@ const Contact = () => {
             message: ''
          });
       } catch (err) {
-         console.error('Error submitting form:', err);
+
          toast.error('Failed to send message. Please try again.', {
             position: 'top-right',
          });
@@ -358,7 +366,12 @@ const Contact = () => {
                      </div>
 
                      <div className="space-y-3">
-                        <label className="text-[10px] font-black text-navy uppercase tracking-[0.15em] ml-1">Your Message</label>
+                        <div className="flex justify-between items-center ml-1">
+                           <label className="text-[10px] font-black text-navy uppercase tracking-[0.15em]">Your Message</label>
+                           <span className={`text-[10px] font-bold ${formData.message.length >= 200 ? 'text-red-500' : 'text-slate-400'}`}>
+                              {formData.message.length}/200
+                           </span>
+                        </div>
                         <textarea
                            name="message"
                            value={formData.message}
@@ -366,6 +379,7 @@ const Contact = () => {
                            rows="4"
                            placeholder="Type your message or queries here..."
                            required
+                           maxLength="200"
                            className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-[13px] focus:outline-none focus:border-blue-500 focus:bg-white transition-all resize-none font-medium text-slate-700"
                         ></textarea>
                      </div>
@@ -471,7 +485,7 @@ const Contact = () => {
                <h2 className="text-2xl font-bold text-navy mb-2 tracking-tight">{data?.ctaTitle || "So future doctors! What are you waiting for?"}</h2>
                <div className="flex justify-center mt-6">
                   <a
-                     href={`tel:${data?.ctaPhone ? data.ctaPhone.replace(/\s+/g, '') : globalWa}`}
+                     href={`tel:${data?.ctaPhone ? data.ctaPhone.replace(/\D/g, '') : globalWa}`}
                      className="bg-[#1e3a5f] text-white font-bold px-10 py-4 rounded-full hover:bg-navy transition-all flex items-center gap-3 shadow-xl shadow-slate-200"
                   >
                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

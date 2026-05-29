@@ -7,7 +7,8 @@ const FloatingWhatsApp = () => {
   useEffect(() => {
     getHomeContent().then((data) => {
       if (data && data.whatsappNumber) {
-        setWaNumber(data.whatsappNumber);
+        const cleanNum = data.whatsappNumber.replace(/\D/g, '');
+        setWaNumber(cleanNum.length === 10 ? `91${cleanNum}` : cleanNum);
       }
     });
   }, []);

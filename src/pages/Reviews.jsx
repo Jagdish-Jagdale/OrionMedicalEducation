@@ -129,7 +129,8 @@ const Reviews = () => {
         ]);
 
         if (homeData && homeData.whatsappNumber) {
-          setWaNumber(homeData.whatsappNumber.replace(/\s+/g, ''));
+          const cleanNum = homeData.whatsappNumber.replace(/\D/g, '');
+          setWaNumber(cleanNum.length === 10 ? `91${cleanNum}` : cleanNum);
         }
 
         const flattened = [];
