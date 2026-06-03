@@ -50,7 +50,7 @@ const Observership = () => {
 
       <PageTitle title="Observership" />
 
-      {/* Header Banner - Standardized to Team Stylejk */}
+      {/* Header Banner - Standardized to Team Style */}
       <div className="relative py-16 sm:py-24 px-6 text-center overflow-hidden">
         {/* Background Layer */}
         <div className="absolute inset-0 z-0">
