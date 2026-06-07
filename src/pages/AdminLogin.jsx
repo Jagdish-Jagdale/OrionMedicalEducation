@@ -15,7 +15,7 @@ const AdminLogin = () => {
   const { login, user, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect to dashboard automatically if already logged inll
+  // Redirect to dashboard automatically if already logged in
   React.useEffect(() => {
     if (user) {
       navigate('/admin/home');
