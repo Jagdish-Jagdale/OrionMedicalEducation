@@ -8,7 +8,7 @@ import Globe3D from '../components/Globe3D';
 import DynamicCountryGuide from '../components/DynamicCountryGuide';
 import PageTitle from '../components/PageTitle';
 
-// Dynamic background dots
+// Dynamic background dotsll
 
 const POSITION_MAP = {
   'top left': { top: '24%', left: '30%', dtTop: '18%', dtLeft: '18%' },
