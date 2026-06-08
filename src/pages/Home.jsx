@@ -143,7 +143,7 @@ const ensureAbsoluteUrl = (url) => {
   return `https://${url}`;
 };
 
-// ─── Precomputed 60-point sine-curve keyframes for buttery smooth plane arc ───
+// ─── Precomputed 60-point sine-curve keyframes for buttery smooth plane arccc ───
 const PLANE_N = 60;
 const PLANE_TIMES = Array.from({ length: PLANE_N + 1 }, (_, i) => i / PLANE_N);
 const PLANE_LEFT = Array.from({ length: PLANE_N + 1 }, (_, i) => `${2 + (i / PLANE_N) * 89}%`);
