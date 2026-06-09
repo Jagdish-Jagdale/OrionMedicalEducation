@@ -11,7 +11,7 @@ import CursorPlane from './components/CursorPlane';
 import BackgroundMusic from './components/BackgroundMusic';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 
-// Lazy-loaded pages
+// Lazy-loaded pagescc
 const Home = lazy(() => import('./pages/Home'));
 const Countries = lazy(() => import('./pages/Countries'));
 const UniversityDetails = lazy(() => import('./pages/UniversityDetails'));
