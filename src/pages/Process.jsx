@@ -25,7 +25,7 @@ const organImages = [
   { img: kidneyImg, title: 'Nephrology', baseScale: 0.8 }
 ];
 
-// Stethoscope tube coloryy
+// Stethoscope tube color
 const TUBE_COLOR = '#7e2726';
 
 const Process = () => {
