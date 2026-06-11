@@ -21,10 +21,10 @@ const NeuralNerve = ({ d, index, isMobile, cardRef, isScrollingDown }) => {
     visible: {
       pathLength: 1,
       opacity: 1,
-      transition: { 
-        duration: isScrollingDown ? 1.0 : 0, 
+      transition: {
+        duration: isScrollingDown ? 1.0 : 0,
         ease: [0.4, 0, 0.2, 1],
-        delay: 0 
+        delay: 0
       }
     }
   };
@@ -68,8 +68,8 @@ const AnimatedCardWrapper = ({ rev, index, total, isMobile, cardRef, isScrolling
       scale: 1,
       x: 0,
       y: 0,
-      transition: { 
-        duration: isScrollingDown ? 0.8 : 0, 
+      transition: {
+        duration: isScrollingDown ? 0.8 : 0,
         ease: "easeOut",
         delay: 0
       }
@@ -169,7 +169,7 @@ const Reviews = () => {
   const svgRef = useRef(null);
   const brainRef = useRef(null);
 
-  // Create a stable list of refs for each review
+  // Create a stable list of refs for each reviewuu
   const cardRefs = React.useMemo(() => reviews.map(() => React.createRef()), [reviews]);
 
   const { scrollY } = useScroll();
@@ -298,61 +298,61 @@ const Reviews = () => {
           {header.title && <div className="w-16 md:w-20 h-1 bg-amber-500 mx-auto mt-4 md:mt-6 rounded-full shadow-lg" />}
         </div>
 
-          <div
-            className="relative mt-4 md:mt-12 transition-all duration-500"
-            style={{
-              minHeight: isMobile
-                ? `${Math.max(600, 250 + (reviews.length * 110))}px`
-                : `${Math.max(900, 600 + (Math.ceil(reviews.length / 2) * 320))}px`,
-              opacity: isImageLoaded ? 1 : 0
-            }}
-          >
-            <div className={`absolute top-[20px] md:top-[0px] ${isMobile ? 'left-[-50px] translate-x-0 w-[300px]' : 'left-1/2 -translate-x-1/2 w-full'} flex items-start justify-center pointer-events-none z-20`}>
-              <div className={`relative ${isMobile ? 'w-full' : 'w-[320px] md:w-[600px] lg:w-[900px]'}`}>
-                <motion.img 
-                  ref={brainRef} 
-                  src={isMobile ? brainMobileImg : brainImg} 
-                  alt="Anatomical Hub" 
-                  className="w-full h-auto object-contain relative z-20" 
-                  onLoad={() => {
-                    measurePaths();
-                    setIsImageLoaded(true);
-                  }} 
-                />
-              </div>
+        <div
+          className="relative mt-4 md:mt-12 transition-all duration-500"
+          style={{
+            minHeight: isMobile
+              ? `${Math.max(600, 250 + (reviews.length * 110))}px`
+              : `${Math.max(900, 600 + (Math.ceil(reviews.length / 2) * 320))}px`,
+            opacity: isImageLoaded ? 1 : 0
+          }}
+        >
+          <div className={`absolute top-[20px] md:top-[0px] ${isMobile ? 'left-[-50px] translate-x-0 w-[300px]' : 'left-1/2 -translate-x-1/2 w-full'} flex items-start justify-center pointer-events-none z-20`}>
+            <div className={`relative ${isMobile ? 'w-full' : 'w-[320px] md:w-[600px] lg:w-[900px]'}`}>
+              <motion.img
+                ref={brainRef}
+                src={isMobile ? brainMobileImg : brainImg}
+                alt="Anatomical Hub"
+                className="w-full h-auto object-contain relative z-20"
+                onLoad={() => {
+                  measurePaths();
+                  setIsImageLoaded(true);
+                }}
+              />
             </div>
-
-            {isImageLoaded && (
-              <>
-                <svg ref={svgRef} className="absolute inset-0 w-full h-full pointer-events-none z-10" fill="none">
-                  {pathDefs.map((d, i) => (
-                    <NeuralNerve
-                      key={i}
-                      d={d}
-                      index={i}
-                      isMobile={isMobile}
-                      cardRef={cardRefs[i]}
-                      isScrollingDown={isScrollingDown}
-                    />
-                  ))}
-                </svg>
-
-                <div className="relative z-30 w-full px-4">
-                  {reviews.map((rev, i) => (
-                    <AnimatedCardWrapper
-                      key={rev.id}
-                      rev={rev}
-                      index={i}
-                      total={reviews.length}
-                      isMobile={isMobile}
-                      cardRef={cardRefs[i]}
-                      isScrollingDown={isScrollingDown}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
           </div>
+
+          {isImageLoaded && (
+            <>
+              <svg ref={svgRef} className="absolute inset-0 w-full h-full pointer-events-none z-10" fill="none">
+                {pathDefs.map((d, i) => (
+                  <NeuralNerve
+                    key={i}
+                    d={d}
+                    index={i}
+                    isMobile={isMobile}
+                    cardRef={cardRefs[i]}
+                    isScrollingDown={isScrollingDown}
+                  />
+                ))}
+              </svg>
+
+              <div className="relative z-30 w-full px-4">
+                {reviews.map((rev, i) => (
+                  <AnimatedCardWrapper
+                    key={rev.id}
+                    rev={rev}
+                    index={i}
+                    total={reviews.length}
+                    isMobile={isMobile}
+                    cardRef={cardRefs[i]}
+                    isScrollingDown={isScrollingDown}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
 
         <div className="mt-[-40px] text-center relative z-40 pb-20">
           {header.footerText && (
