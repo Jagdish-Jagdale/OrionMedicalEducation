@@ -128,7 +128,7 @@ const Contact = () => {
       const { name, value } = e.target;
 
       if (name === 'fullName') {
-         // Only alphabetic characters and spaces
+         // Only alphabetic characters and spaceskk
          const sanitizedValue = value.replace(/[^a-zA-Z\s]/g, '');
          setFormData(prev => ({ ...prev, [name]: sanitizedValue }));
       } else if (name === 'phoneNumber') {
