@@ -20,7 +20,7 @@ const CursorPlane = () => {
     const { scrollY } = useScroll();
     const scrollVel = useVelocity(scrollY);
 
-    // Instantaneous trackinguu
+    // Instantaneous tracking
     const cursorX = mouseX;
     const cursorY = mouseY;
 
