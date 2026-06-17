@@ -12,23 +12,23 @@ const CursorPlane = () => {
     const [isMovingLeft, setIsMovingLeft] = useState(false);
     const [isDarkTheme, setIsDarkTheme] = useState(true); // Default to dark (white cursor)
     const [navbarScrolled, setNavbarScrolled] = useState(false);
-    
+
     const mouseX = useMotionValue(-100);
     const mouseY = useMotionValue(-100);
-    
+
     // Scroll velocity tracking
     const { scrollY } = useScroll();
     const scrollVel = useVelocity(scrollY);
-    
-    // Instantaneous tracking
+
+    // Instantaneous trackinguu
     const cursorX = mouseX;
     const cursorY = mouseY;
-    
+
     const rotation = useSpring(0, { damping: 20, stiffness: 150 });
     const scale = useSpring(1, { damping: 15, stiffness: 200 });
-    
+
     const correctedRotation = useTransform(rotation, r => isMovingLeft ? r - 180 : r);
-    
+
     const lastPos = useRef({ x: 0, y: 0 });
     const lastAngle = useRef(0);
     const angleOffset = useRef(0);
@@ -66,7 +66,7 @@ const CursorPlane = () => {
         let node = el;
         while (node && node !== document.body) {
             const style = window.getComputedStyle(node);
-            const bg  = style.backgroundColor;
+            const bg = style.backgroundColor;
             const bgi = style.backgroundImage;
 
             if (bgi && bgi.includes('gradient')) {
@@ -110,15 +110,15 @@ const CursorPlane = () => {
 
         const updateRotation = (x, y, dx, dy) => {
             const sVel = scrollVel.get() * 0.2;
-            
+
             if (Math.abs(dx) > 0.1 || Math.abs(dy + sVel) > 0.5) {
                 const effectiveDx = (Math.abs(dx) < 0.1) ? (isMovingLeft ? -0.1 : 0.1) : dx;
                 const targetAngle = Math.atan2(dy + sVel, effectiveDx) * (180 / Math.PI);
-                
+
                 let diff = targetAngle - lastAngle.current;
                 if (diff > 180) angleOffset.current -= 360;
                 else if (diff < -180) angleOffset.current += 360;
-                
+
                 lastAngle.current = targetAngle;
                 rotation.set(targetAngle + angleOffset.current);
             }
@@ -126,19 +126,19 @@ const CursorPlane = () => {
 
         const handleMouseMove = (e) => {
             if (!isVisible) setIsVisible(true);
-            
+
             const x = e.clientX;
             const y = e.clientY;
-            
+
             const dx = x - lastPos.current.x;
             const dy = y - lastPos.current.y;
-            
+
             if (dx < -1) setIsMovingLeft(true);
             else if (dx > 1) setIsMovingLeft(false);
-            
+
             updateTheme(x, y);
             updateRotation(x, y, dx, dy);
-            
+
             mouseX.set(x);
             mouseY.set(y);
             lastPos.current = { x, y };
@@ -187,7 +187,7 @@ const CursorPlane = () => {
     }
 
     // Determine current image assets
-    const currentImg = isDarkTheme 
+    const currentImg = isDarkTheme
         ? (isMovingLeft ? airplaneLeftImg : airplaneImg)
         : (isMovingLeft ? airplaneBlackLeftImg : airplaneBlackImg);
 
@@ -210,24 +210,24 @@ const CursorPlane = () => {
             >
                 <div className="relative">
                     {/* Shadow - Adaptive color */}
-                    <div 
-                        className={`absolute inset-0 blur-md ${isDarkTheme ? 'bg-black/10' : 'bg-black/5'} translate-y-3 translate-x-1 rounded-full scale-110`} 
+                    <div
+                        className={`absolute inset-0 blur-md ${isDarkTheme ? 'bg-black/10' : 'bg-black/5'} translate-y-3 translate-x-1 rounded-full scale-110`}
                     />
-                    
-                    <img 
-                        src={currentImg} 
-                        alt="cursor-plane" 
+
+                    <img
+                        src={currentImg}
+                        alt="cursor-plane"
                         className={`w-12 h-12 object-contain transition-all duration-300 ${isHovering ? 'brightness-125' : 'brightness-100'}`}
-                        style={{ 
-                            filter: isDarkTheme 
+                        style={{
+                            filter: isDarkTheme
                                 ? 'drop-shadow(0 0 10px rgba(255,255,255,0.4))'
                                 : 'drop-shadow(0 0 4px rgba(0,0,0,0.1))',
                         }}
                     />
-                    
+
                     {/* Professional Trail - Reversed for left movement */}
                     {!isHovering && (
-                        <div 
+                        <div
                             className={`absolute top-1/2 -translate-y-1/2 flex gap-1.5 ${isMovingLeft ? '-right-3' : '-left-3'}`}
                             style={{ flexDirection: isMovingLeft ? 'row-reverse' : 'row' }}
                         >
@@ -271,7 +271,7 @@ const CursorPlane = () => {
                     width: 70,
                     height: 70,
                     borderRadius: '50%',
-                    background: isDarkTheme 
+                    background: isDarkTheme
                         ? 'radial-gradient(circle, #3b82f6 0%, transparent 75%)'
                         : 'radial-gradient(circle, #1e40af 0%, transparent 75%)',
                     zIndex: -1,
