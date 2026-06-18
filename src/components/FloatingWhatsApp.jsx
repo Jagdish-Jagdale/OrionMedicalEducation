@@ -25,7 +25,7 @@ const FloatingWhatsApp = () => {
     >
       <span className="absolute right-[110%] bg-white text-[#0f172a] text-[11px] font-bold px-5 py-2.5 rounded-full shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap border border-slate-100 flex items-center gap-2 translate-x-4 group-hover:translate-x-0">
         <span className="w-2 h-2 rounded-full bg-[#22c55e] shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-        CHAT WITH USii
+        CHAT WITH US
         {/* Tooltip Arrow */}
         <div className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 bg-white rotate-45 border-r border-t border-slate-100" />
       </span>
