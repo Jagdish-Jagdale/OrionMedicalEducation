@@ -14,7 +14,7 @@ const Team = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-         const data = await getTeamAllData();
+        const data = await getTeamAllData();
         setTeam(data.core || []);
         setRegionalExperts(data.regional || []);
         setSettings(data);
@@ -40,7 +40,7 @@ const Team = () => {
     quote2: settings?.quotes?.quote2 || ""
   };
 
-  // Randomized background dots
+  // Randomized background dotsoo
   const backgroundDots = React.useMemo(() => {
     return [...Array(50)].map((_, i) => ({
       id: i,
@@ -103,7 +103,7 @@ const Team = () => {
 
       {/* Team Content */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
-        
+
         {/* Leadership Section - Reverted to Amber Underline style */}
         <div className="mb-20">
           <div className="text-center mb-10">
