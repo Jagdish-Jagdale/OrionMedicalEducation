@@ -40,7 +40,7 @@ const Team = () => {
     quote2: settings?.quotes?.quote2 || ""
   };
 
-  // Randomized background dotsoo
+  // Randomized background dots
   const backgroundDots = React.useMemo(() => {
     return [...Array(50)].map((_, i) => ({
       id: i,
