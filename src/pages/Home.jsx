@@ -162,7 +162,7 @@ const Home = () => {
   const [showRest, setShowRest] = useState(false);
 
   useEffect(() => {
-    // 1. Try to load from cache immediately for fast Hero displayaf
+    // 1. Try to load from cache immediately for fast Hero display
     getHomeContentFromCache().then(cachedData => {
       if (cachedData) {
         setContent(cachedData);
