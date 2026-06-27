@@ -19,7 +19,7 @@ const TeamCard = ({ member, index = 0 }) => {
       className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-slate-100 p-6 sm:p-8"
     >
       <div className="flex flex-col sm:flex-row gap-8 items-start">
-        {/* Left Side: Photo + Name + Position */}
+        {/* Left Side: Photo + Name + Positionak */}
         <div className="w-full sm:w-1/3 flex flex-col items-center sm:items-start">
           <div className="relative w-40 h-52 mb-6">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-navy rounded-2xl opacity-10 group-hover:opacity-20 transition-opacity" />
