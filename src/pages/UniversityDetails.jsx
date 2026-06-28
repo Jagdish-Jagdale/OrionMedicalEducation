@@ -20,7 +20,7 @@ const UniversityDetails = () => {
     () => getUniversityBySlug(slug),
     [slug]
   );
-   const [waNumber, setWaNumber] = useState('');
+  const [waNumber, setWaNumber] = useState('');
 
   useEffect(() => {
     import('../firebase/firestore').then(({ getHomeContent }) => {
@@ -55,7 +55,7 @@ const UniversityDetails = () => {
     return (
       <div className="min-h-screen bg-slate-50 pt-24 flex flex-col items-center justify-center gap-4 text-center px-4">
         <svg className="w-16 h-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
-          <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
         <h2 className="text-2xl font-bold text-navy">University Not Found</h2>
         <p className="text-slate-500 text-sm">{error || "The university you're looking for doesn't exist."}</p>
@@ -74,14 +74,14 @@ const UniversityDetails = () => {
   return (
     <div className="min-h-screen bg-slate-50 pt-20 pb-20">
       <PageTitle title={university?.name || "University Details"} />
-      {/* Back button */}
+      {/* Back buttonal */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 mb-6">
         <button
           onClick={() => navigate(`/countries#${countryAnchor}`)}
           className="flex items-center gap-2 text-slate-500 hover:text-blue-600 text-sm font-medium transition-colors group"
         >
           <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-            <path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           Back to {university.countryName}
         </button>
@@ -160,7 +160,7 @@ const UniversityDetails = () => {
               {university.features.map((feature, i) => (
                 <div key={i} className="flex items-start gap-3 p-3 bg-blue-50 rounded-xl">
                   <svg className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   <span className="text-slate-700 text-sm">{feature}</span>
                 </div>
@@ -187,7 +187,7 @@ const UniversityDetails = () => {
             ].map((req, i) => (
               <li key={i} className="flex items-start gap-3 text-sm text-blue-100">
                 <svg className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
                 {req}
               </li>
