@@ -74,7 +74,7 @@ const UniversityDetails = () => {
   return (
     <div className="min-h-screen bg-slate-50 pt-20 pb-20">
       <PageTitle title={university?.name || "University Details"} />
-      {/* Back buttonal */}
+      {/* Back button */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-8 mb-6">
         <button
           onClick={() => navigate(`/countries#${countryAnchor}`)}
