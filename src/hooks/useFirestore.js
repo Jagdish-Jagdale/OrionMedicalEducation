@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 /**
- * Custom hook for fetching Firestore data.
+ * Custom hook for fetching Firestore dataac.
  * @param {function} fetchFn - Async function that returns data from Firestore.
  * @param {Array} deps - Dependency array that, when changed, triggers a re-fetch.
  */
