@@ -169,7 +169,7 @@ const Reviews = () => {
   const svgRef = useRef(null);
   const brainRef = useRef(null);
 
-  // Create a stable list of refs for each reviewab
+  // Create a stable list of refs for each review
   const cardRefs = React.useMemo(() => reviews.map(() => React.createRef()), [reviews]);
 
   const { scrollY } = useScroll();
